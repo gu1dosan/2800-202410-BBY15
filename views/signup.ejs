@@ -1,0 +1,18 @@
+<%- include("templates/header") %> 
+    <form id="loginForm" action='/signup' method='post'>
+        <h2>Sign up</h2><br/>
+        <input class="form-control" name='name' type='text' placeholder='name'>
+        <input class="form-control" name='email' type='text' placeholder='email'>
+        <input class="form-control" name='password' type='password' placeholder='password'><br/>
+        <button class="btn btn-primary">Submit</button>
+        <% if(missing.name){ %>
+            <br> Please provide a name
+        <% } %>
+        <% if(missing.email){ %>
+            <br> Please provide a email
+        <% } %>
+        <% if(missing.password){ %>
+            <br> Please provide a password
+        <% } %>
+    </form>
+<%- include("templates/footer") %> 
