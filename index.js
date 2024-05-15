@@ -13,7 +13,7 @@ const port = process.env.PORT || 3000;
 const Joi = require("joi");
 const {ObjectId} = require("mongodb");
 
-const expireTime = 60 * 60 * 1000; //expires after 1 hour (minutes * seconds * millis)
+const expireTime = 15 * 24 * 60 * 60 * 1000; //expires after 15 days
 
 const mongodb_host = process.env.MONGODB_HOST;
 const mongodb_user = process.env.MONGODB_USER;
@@ -54,10 +54,9 @@ function isValidSession(req) {
 }
 
 function sessionValidation(req,res,next) {
-    if (isValidSession(req)) {
-        next();
-    }
-    else {
+    if (isValidSession(req)){
+        return next();
+    } else {
         res.redirect('/login');
     }
 }
@@ -74,8 +73,7 @@ function adminAuthorization(req, res, next) {
         res.status(403);
         res.render("errorMessage", {error: "403 - Not Authorized"});
         return;
-    }
-    else {
+    } else {
         next();
     }
 }
@@ -84,7 +82,8 @@ app.use((req,res,next) => {
     res.locals.session = req.session;
     next();
 });
-app.get('/', (req, res) => {
+
+app.get('/', sessionValidation, (req, res) => {
     res.render('index',{session:req.session});
 });
 
@@ -165,13 +164,51 @@ app.post('/login', async (req,res) => {
         req.session.user_type = result[0].user_type;
         req.session.cookie.maxAge = expireTime;
 
-		res.redirect('/members');
+		res.redirect('/');
 		return;
 	} else {
 		// console.log("incorrect password");
 		res.send("Invalid email/password combination<br/> <a href='/login'>Try again</a>");
 		return;
 	}
+});
+
+app.get('/recoverPassword', (req, res) => {
+    if(req.session.authenticated) {
+        res.redirect('/');
+    } else {
+        res.render('recoverPassword');
+    }
+});
+app.post('/recoverPassword', async (req,res) => {
+    var name = req.body.name;
+    var email = req.body.email;
+    var password = req.body.password;
+    if (!name || !email || !password) {
+        res.redirect(`/signup?${!name && '&missingName=1'}${!email && '&missingEmail=1'}${!password && '&missingPassword=1'}`);
+    } else {
+        const schema = Joi.object({
+            name: Joi.string().alphanum().max(20).required(),
+            email: Joi.string().email().required(),
+            password: Joi.string().max(20).required()
+        });
+        
+        const validationResult = schema.validate({name, email, password});
+        if (validationResult.error != null) {
+           console.log(validationResult.error);
+           res.send(`${validationResult.error.message}<br/> <a href='/signup'>Try again</a>`);
+           return;
+       }
+    
+        var hashedPassword = await bcrypt.hash(password, saltRounds);
+        
+        await userCollection.insertOne({name: name, email:email, user_type: 'user', password: hashedPassword});
+        req.session.authenticated = true;
+        req.session.email = email;
+        req.session.name = name;
+        req.session.cookie.maxAge = expireTime;
+        res.redirect('/members');
+    }
 });
 
 app.get('/members', sessionValidation, (req, res) => {
@@ -196,7 +233,7 @@ app.post('/demoteToUser', sessionValidation, adminAuthorization, jsonParser, asy
     res.send({success: true});
 });
 
-app.get('/logout', (req, res) => {
+app.get('/logout', sessionValidation, (req, res) => {
     if(req.session.authenticated) {
         req.session.destroy();
         res.redirect("/");
