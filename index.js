@@ -88,6 +88,49 @@ app.get('/', (req, res) => {
     res.render('index',{session:req.session});
 });
 
+app.get('/test', (req, res) => {
+    res.render('event_submission');
+});
+
+// app.use('/test', sessionValidation);
+// app.get('/test', (req, res) => {
+//     if(!req.session.authenticated) {
+//         res.redirect('/login');
+//         return;
+//     }
+//     res.render('event_submission');
+// });
+
+// app.post('/test', async (req,res) => {
+//     var title = req.body.eventTitle;
+//     var description = req.body.description;
+//     var location = req.body.location;
+//     var info = req.body.contactInfo;
+//     var category = req.body.category;
+
+//     if (!title || !category) {
+//         res.send("You must provide a title and category<br/> <a href='/test'>Try again</a>");
+//         return
+//     }
+
+//     const schema = Joi.object(
+//         {
+//             title: Joi.string().max(50).required(),
+//             description: Joi.string().max(500),
+//             location: Joi.string().max(50),
+//             info: Joi.string().max(50),
+//         });
+    
+//     const validationResult = schema.validate({title, description, location, info});
+
+//     if (validationResult.error != null) {
+//         console.log(validationResult.error);
+//         res.send("/test");
+//         return;
+//     }
+
+
+
 app.get('/signup', (req, res) => {
     if(req.session.authenticated) {
         res.redirect('/');
