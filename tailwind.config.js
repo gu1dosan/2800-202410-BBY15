@@ -2,8 +2,9 @@
 module.exports = {
   content: [
     './*.html',
-    './src/**/*.html',
-    './src/**/*.js' // Include any JS files if you are using Tailwind in JS
+    './src/**/*.{html,js}',
+    './public/**/*.{html,js}',
+    './views/**/*.ejs',
   ],
   theme: {
     extend: {
