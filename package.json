@@ -7,9 +7,11 @@
     "ejs": "^3.1.10",
     "express": "^4.19.2",
     "express-session": "^1.18.0",
+    "googleapis": "^137.1.0",
     "joi": "^17.13.1",
     "mongodb": "^6.6.1",
     "node": "^20.13.1",
+    "nodemailer": "^6.9.13",
     "secrets": "^1.1.5",
     "sessions": "^0.0.2-7"
   },
@@ -19,8 +21,7 @@
     "tailwindcss": "^3.4.3"
   },
   "scripts": {
-    "build:css": "tailwindcss -i ./public/styles/tailwind.css -o ./public/output.css --watch",
-    "start:css": "npm run build:css",
-    "start:dev": "concurrently \"npm run start:css\" \"nodemon index.js\""
+    "build:css": "tailwindcss -i ./public/styles/tailwind.css -o ./public/styles/output.css --watch",
+    "start:dev": "concurrently \"npm run build:css\" \"nodemon index.js\""
   }
 }
