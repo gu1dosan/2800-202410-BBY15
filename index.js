@@ -86,7 +86,7 @@ app.use((req,res,next) => {
 });
 
 app.get('/', sessionValidation, (req, res) => {
-    res.render('index',{session:req.session});
+    res.redirect('/groups');
 });
 
 app.get('/signup', (req, res) => {
