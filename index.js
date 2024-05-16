@@ -95,11 +95,7 @@ app.get('/signup', (req, res) => {
     if(req.session.authenticated) {
         res.redirect('/');
     } else {
-        var missing={};
-        missing.name = req.query.missingName;
-        missing.email = req.query.missingEmail;
-        missing.password = req.query.missingPassword;
-        res.render('signup',{missing:missing});
+        res.render('signup');
     }
 });
 app.post('/signup', async (req,res) => {
@@ -107,7 +103,7 @@ app.post('/signup', async (req,res) => {
     var email = req.body.email;
     var password = req.body.password;
     if (!name || !email || !password) {
-        res.redirect(`/signup?${!name && '&missingName=1'}${!email && '&missingEmail=1'}${!password && '&missingPassword=1'}`);
+        res.render('signup',{missing:{name: !name, email: !email, password: !password},formData:{name: name, email: email, password: password}});
     } else {
         const schema = Joi.object({
             name: Joi.string().alphanum().max(20).required(),
@@ -118,8 +114,9 @@ app.post('/signup', async (req,res) => {
         const validationResult = schema.validate({name, email, password});
         if (validationResult.error != null) {
            console.log(validationResult.error);
-           res.send(`${validationResult.error.message}<br/> <a href='/signup'>Try again</a>`);
-           return;
+           let error = validationResult.error.message;
+           if(error==="\"email\" must be a valid email") error = "Email is not valid";
+            return res.render('signup',{error: error,formData:{name: name, email: email, password: password}}) 
        }
     
         var hashedPassword = await bcrypt.hash(password, Number(process.env.SALTROUNDS));
@@ -129,27 +126,36 @@ app.post('/signup', async (req,res) => {
         req.session.email = email;
         req.session.name = name;
         req.session.cookie.maxAge = expireTime;
-        res.redirect('/');
+        return res.redirect('/');
     }
 });
 
 app.get('/login', (req, res) => {
     if(req.session.authenticated) {
-        res.redirect('/');
+        return res.redirect('/');
     } else {
+        // if(req.query.error == 'noemailorpw') {
+        //     return res.render('login',{error: 'You must enter an email and password'});
+        // }
+        // if(req.query.error == 'invaliddetails') {
+        //     return res.render('login',{error: 'Invalid email or password'});
+        // }
         res.render('login');
     }
 });
 app.post('/login', async (req,res) => {
     var email = req.body.email;
     var password = req.body.password;
+    if (!email || !password) {
+        return res.render('login',{error: 'You must enter an email and password',formData:{email: email, password: password}});
+    }
 
     const schema = Joi.string().email().required();
 	const validationResult = schema.validate(email);
 	if (validationResult.error != null) {
-	   console.log(validationResult.error);
-	   res.send("You must provide a username and password<br/> <a href='/login'>Try again</a>");
-	   return;
+	//    console.log(validationResult.error);
+	//    return res.redirect('/login?error=noemailorpw');
+        return res.render('login',{error: 'Invalid email or password',formData:{email: email, password: password}});
 	}
 
 	const result = await userCollection.find({email: email}).project({email: 1, name:1, user_type:1, password: 1, _id: 1}).toArray();
@@ -157,8 +163,8 @@ app.post('/login', async (req,res) => {
 	// console.log(result);
 	if (result.length != 1) {
 		// console.log("user not found");
-		res.send("Invalid email/password combination<br/> <a href='/login'>Try again</a>");
-		return;
+        // return res.redirect('/login?error=invaliddetails');
+        return res.render('login',{error: 'Invalid email or password'});
 	}
 	if (await bcrypt.compare(password, result[0].password)) {
 		// console.log("correct password");
@@ -168,12 +174,10 @@ app.post('/login', async (req,res) => {
         req.session.user_type = result[0].user_type;
         req.session.cookie.maxAge = expireTime;
 
-		res.redirect('/');
-		return;
+		return res.redirect('/');
 	} else {
 		// console.log("incorrect password");
-		res.send("Invalid email/password combination<br/> <a href='/login'>Try again</a>");
-		return;
+		return res.render('login',{error: 'Invalid email or password'});
 	}
 });
 
@@ -188,53 +192,59 @@ app.post("/password-reset", async (req, res) => {
     try {
         const schema = Joi.object({ email: Joi.string().email().required() });
         const { error } = schema.validate(req.body);
-        if (error) return res.status(400).send(error.details[0].message);
+        if (error) return res.render('passwordReset',{error: 'Email is not valid',formData:{email: req.body.email}});
 
         const user = await userCollection.findOne({ email: req.body.email });
         if (!user)
-            return;
+            return res.render("passwordReset",{success:true, email: req.body.email});
 
         let token = await pwRecoveryTokensCollection.findOne({ userId: user._id });
-        if(token){
-            await pwRecoveryTokensCollection.deleteOne({userId: user._id});
-        } 
-        const newToken = crypto.randomBytes(32).toString("hex")
-        await pwRecoveryTokensCollection.insertOne({userId:user._id, token: newToken,createdAt: Date.now()});
-        
-        const link = `${process.env.BASE_URL}/password-reset/${user._id}/${newToken}`;
-        await sendEmail(user.email, "NextUp Password Link", link);
+        // if(token){
+        //     await pwRecoveryTokensCollection.deleteOne({userId: user._id});
+        // } 
+        if(!token) {
+            let newToken = crypto.randomBytes(32).toString("hex")
+            await pwRecoveryTokensCollection.insertOne({userId:user._id, token: newToken,createdAt: Date.now()});
+            const link = `${process.env.BASE_URL}/password-reset/${user._id}/${newToken}`;
+            let emailContent = `Hi ${user.name}, Click this link to reset your NextUp password:\n\n${link}\n\nIf you didn't request this, you can safely ignore this email.`
+            await sendEmail(user.email, "NextUp Password Link", emailContent);
+        }
         return res.render("passwordReset",{success:true, email: user.email});
     } catch (error) {
         console.log(error);
-        return res.render('passwordReset',{success:false});
+        return res.render('passwordReset',{success:false, error:error});
     }
 });
 
 app.get("/password-reset/:userId/:token", async (req, res) => {
-    // Check if the token exists and is still valid
-    const user = await userCollection.findOne({_id: new ObjectId(req.params.userId)});
-    if (!user) return res.status(400).send("invalid link or expired");
-    const token = await pwRecoveryTokensCollection.findOne({
-        userId: user._id,
-        token: req.params.token,
-    });
-    if (!token) return res.status(400).send("Invalid link or expired");
-    res.render('passwordResetForm',{userId: req.params.userId, token: req.params.token, success:false});
+    if(req.session.authenticated) {
+        res.redirect('/');
+    } else {
+        // Check if the token exists and is still valid
+        const user = await userCollection.findOne({_id: new ObjectId(req.params.userId)});
+        if (!user) return res.render('passwordResetForm',{error:'Invalid link or expired', userId: req.params.userId, token: req.params.token});
+        const token = await pwRecoveryTokensCollection.findOne({
+            userId: user._id,
+            token: req.params.token,
+        });
+        if (!token) return res.render('passwordResetForm',{error:'Invalid link or expired', userId: req.params.userId, token: req.params.token});
+        return res.render('passwordResetForm',{userId: req.params.userId, token: req.params.token});
+    }
 });
 app.post("/password-reset/:userId/:token", async (req, res) => {
     try {
         const schema = Joi.object({ password: Joi.string().required() });
         const { error } = schema.validate(req.body);
-        if (error) return res.status(400).send(error.details[0].message);
+        if (error) return res.render('passwordResetForm',{error:'Invalid password', userId: req.params.userId, token: req.params.token});
 
         const user = await userCollection.findOne({_id: new ObjectId(req.params.userId)});
-        if (!user) return res.status(400).send("invalid link or expired");
+        if (!user) return res.render('passwordResetForm',{error:'Invalid link or expired', userId: req.params.userId, token: req.params.token});
 
         const token = await pwRecoveryTokensCollection.findOne({
             userId: user._id,
             token: req.params.token,
         });
-        if (!token) return res.status(400).send("Invalid link or expired");
+        if (!token) return res.render('passwordResetForm',{error:'Invalid link or expired', userId: req.params.userId, token: req.params.token});
 
         var hashedPassword = await bcrypt.hash(req.body.password, Number(process.env.SALTROUNDS));
         await userCollection.updateOne({_id: new ObjectId(req.params.userId)}, {$set: {password: hashedPassword}});
@@ -246,7 +256,7 @@ app.post("/password-reset/:userId/:token", async (req, res) => {
         return res.render('passwordResetForm',{success:true});
     } catch (error) {
         console.log(error);
-        return res.send("An error occured");
+        return res.render('passwordResetForm',{error:error, userId: req.params.userId, token: req.params.token});
     }
 });
 
