@@ -21,7 +21,9 @@ body.signupBody {
 }
 .logoSpace{
   flex:1;
-  align-content: center;
+  display:flex;
+  justify-content: center;
+  align-items: center;
   width:100%;
   text-align: -webkit-center;
 }

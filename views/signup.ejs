@@ -20,16 +20,16 @@
     <h1 class="signupTitle">Create a new NextUp account</h1>
     <form class="loginForm" action='/signup' method='post'>
         <div class="relative">
-            <input name="name" type="text" id="name" class="mb-4 block rounded-xl px-2.5 pb-2.5 pt-5 w-full text-sm text-white bg-darkPurple dark:bg-gray-700 border-2 focus:border-2 border-purple appearance-none dark:text-white dark:border-purple dark:focus:border-violet-950 focus:outline-none focus:ring-0 focus:border-violet-600 peer" placeholder=" " />
-            <label for="floating_filled" class="absolute text-sm text-gray-50 dark:text-gray-400 duration-300 transform -translate-y-4 scale-75 top-4 z-10 origin-[0] start-2.5 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto">Name</label>
+            <input name="name" type="text" id="name" class="mb-4 block rounded-xl px-2.5 pb-2.5 pt-5 w-full text-sm text-white bg-darkPurple border-2 focus:border-2 border-purple appearance-none focus:outline-none focus:ring-0 focus:border-violet-600 peer" placeholder=" " />
+            <label for="floating_filled" class="absolute text-sm text-gray-50 duration-300 transform -translate-y-4 scale-75 top-4 z-10 origin-[0] start-2.5 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto">Name</label>
         </div>
         <div class="relative">
-            <input name="email" type="text" id="email" class="mb-4 block rounded-xl px-2.5 pb-2.5 pt-5 w-full text-sm text-white bg-darkPurple dark:bg-gray-700 border-2 focus:border-2 border-purple appearance-none dark:text-white dark:border-purple dark:focus:border-violet-950 focus:outline-none focus:ring-0 focus:border-violet-600 peer" placeholder=" " />
-            <label for="floating_filled" class="absolute text-sm text-gray-50 dark:text-gray-400 duration-300 transform -translate-y-4 scale-75 top-4 z-10 origin-[0] start-2.5 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto">Email</label>
+            <input name="email" type="text" id="email" class="mb-4 block rounded-xl px-2.5 pb-2.5 pt-5 w-full text-sm text-white bg-darkPurple border-2 focus:border-2 border-purple appearance-none focus:outline-none focus:ring-0 focus:border-violet-600 peer" placeholder=" " />
+            <label for="floating_filled" class="absolute text-sm text-gray-50 duration-300 transform -translate-y-4 scale-75 top-4 z-10 origin-[0] start-2.5 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto">Email</label>
         </div>
         <div class="relative">
-            <input name="password" type="password" id="password" class="block rounded-xl px-2.5 pb-2.5 pt-5 w-full text-sm text-white bg-darkPurple dark:bg-gray-700 border-2 focus:border-2 border-purple appearance-none dark:text-white dark:border-purple dark:focus:border-violet-950 focus:outline-none focus:ring-0 focus:border-violet-600 peer" placeholder=" " />
-            <label for="floating_filled" class="absolute text-sm text-gray-50 dark:text-gray-400 duration-300 transform -translate-y-4 scale-75 top-4 z-10 origin-[0] start-2.5 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto">Password</label>
+            <input name="password" type="password" id="password" class="block rounded-xl px-2.5 pb-2.5 pt-5 w-full text-sm text-white bg-darkPurple border-2 focus:border-2 border-purple appearance-none focus:outline-none focus:ring-0 focus:border-violet-600 peer" placeholder=" " />
+            <label for="floating_filled" class="absolute text-sm text-gray-50 duration-300 transform -translate-y-4 scale-75 top-4 z-10 origin-[0] start-2.5 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto">Password</label>
         </div>
         <button class="loginButton">Sign up</button>
         <% if(missing.name){ %>
