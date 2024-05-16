@@ -1,0 +1,27 @@
+<%- include("templates/header") %>
+
+<div class="container">
+    <% if (inviteMessage.success) { %>
+        <div class="alert alert-success text-center"><%= inviteMessage.success %></div>
+    <% } %>
+    <% if (inviteMessage.existingMembers && inviteMessage.existingMembers.length > 0) { %>
+        <div class="alert alert-info text-center">
+            <% inviteMessage.existingMembers.forEach(member => { %>
+                <p><%= member %></p>
+            <% }); %>
+        </div>
+    <% } %>
+    <% if (inviteMessage.invalidEmails && inviteMessage.invalidEmails.length > 0) { %>
+        <div class="alert alert-danger text-center">
+            <% inviteMessage.invalidEmails.forEach(email => { %>
+                <p><%= email %></p>
+            <% }); %>
+        </div>
+    <% } %>
+</div>
+
+<div class="container text-center mt-3">
+    <a href="/group?id=<%= inviteMessage.groupID %>" class="mt-8 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Back to Group</a>
+</div>
+
+<%- include("templates/footer") %>
