@@ -120,14 +120,14 @@ app.post('/signup', async (req,res) => {
            return;
        }
     
-        var hashedPassword = await bcrypt.hash(password, process.env.SALTROUNDS);
+        var hashedPassword = await bcrypt.hash(password, Number(process.env.SALTROUNDS));
         
         await userCollection.insertOne({name: name, email:email, user_type: 'user', password: hashedPassword});
         req.session.authenticated = true;
         req.session.email = email;
         req.session.name = name;
         req.session.cookie.maxAge = expireTime;
-        res.redirect('/members');
+        res.redirect('/');
     }
 });
 
