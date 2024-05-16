@@ -91,9 +91,11 @@ app.get('/', (req, res) => {
     res.render('index', { session: req.session });
 });
 
-app.get('/test', (req, res) => {
+app.get('/test', async (req, res) => {
+    const groupId = req.query.groupId; 
+    const group = await groupCollection.findOne({ _id: new ObjectId(groupId) });
     const successMessage = req.query.success === 'true' ? 'Event added successfully' : null;
-    res.render('event_submission');
+    res.render('event_submission', { group });
 });
 
 // app.use('/test', sessionValidation);
@@ -106,6 +108,10 @@ app.get('/test', (req, res) => {
 // });
 
 app.post('/test', async (req, res) => {
+    const groupId = req.query.groupId;
+    console.log('groupId:', new ObjectId(groupId))
+    var userId = req.session.user_ID;
+
     var title = req.body.eventTitle;
     var description = req.body.description;
     var location = req.body.location;
@@ -138,17 +144,17 @@ app.post('/test', async (req, res) => {
         description: description,
         location: location,
         info: info,
-        category: category,
-        submittedBy: req.session.user_ID
+        category: category
     }
 
-    await database.db(mongodb_database).collection('groups').updateOne(
-        { _id: ObjectId(groupId) }, // need some way to get the group id
-        { $push: { events: newEvent } }
+    await groupCollection.updateOne(
+        { _id: new ObjectId(groupId)}, // need some way to get the group id
+        { $push: { events: newEvent } },
+        console.log('groupId:', new ObjectId(groupId))
     );
 
     console.log("Event added");
-    res.redirect('/test?success=true');
+    res.redirect('/group?id=' + groupId);
 });
 
 
@@ -287,7 +293,8 @@ app.post('/createGroup', sessionValidation, async (req, res) => {
         // Create a new group object using only the valid emails
         const newGroup = {
             name: name,
-            members: [creatorEmail, ...validEmails] // Include the creator's email in the members array
+            members: [creatorEmail, ...validEmails], // Include the creator's email in the members array
+            events: []
         };
 
         // Insert the new group document into the groups collection
