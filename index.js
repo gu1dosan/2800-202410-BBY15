@@ -88,6 +88,26 @@ app.get('/', (req, res) => {
     res.render('index',{session:req.session});
 });
 
+app.get('/profile', (req, res) => {
+
+        const name = "victor"; 
+        res.render(`profile`, { name });
+});
+
+const activities = [
+    "Go to the movies",
+    "Picnic in the park",
+    "Visit a museum",
+    "Bowling night",
+    "Hiking adventure"
+];
+
+app.get('/activityRandomizer', (req, res) => {
+    // Randomly select an activity
+    const randomActivity = activities[Math.floor(Math.random() * activities.length)];
+    res.json({ activity: randomActivity });
+});
+
 app.get('/signup', (req, res) => {
     if(req.session.authenticated) {
         res.redirect('/');

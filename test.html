@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Activity Randomizer</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(3600deg); } /* 10 full rotations */
+        }
+        .spinning {
+            animation: spin 5s linear;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+    <div class="text-center">
+        <div id="wheel" class="w-64 h-64 bg-white rounded-full shadow-lg border-4 border-gray-300 flex items-center justify-center text-2xl">
+            Press Spin!
+        </div>
+        <button id="spinButton" class="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+            Spin the Wheel
+        </button>
+    </div>
+
+    <script>
+        document.getElementById('spinButton').addEventListener('click', () => {
+            const wheel = document.getElementById('wheel');
+            wheel.classList.add('spinning');
+
+            setTimeout(() => {
+                wheel.classList.remove('spinning');
+                // This is where you would normally handle the selected activity result
+                wheel.textContent = 'Activity Selected!';
+            }, 5000); // New duration: 5 seconds
+        });
+    </script>
+</body>
+</html>
