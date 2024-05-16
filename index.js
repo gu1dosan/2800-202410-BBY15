@@ -30,6 +30,8 @@ var {database} = include('databaseConnection');
 
 const userCollection = database.db(mongodb_database).collection('users');
 const pwRecoveryTokensCollection = database.db(mongodb_database).collection('pwRecoveryTokens');
+const groupCollection = database.db(mongodb_database).collection('groups');
+
 
 var mongoStore = MongoStore.create({
 	mongoUrl: `mongodb+srv://${mongodb_user}:${mongodb_password}@${mongodb_host}/${mongodb_database}`,
@@ -252,11 +254,154 @@ app.get('/members', sessionValidation, (req, res) => {
         res.render('members',{session:req.session});
 });
 
+app.get('/groups', sessionValidation, async (req, res) => {
+    try {
+        // Get the email of the current user
+        const currentUserEmail = req.session.email;
+
+        // Find all groups where the current user is a member
+        const groups = await groupCollection.find({ members: currentUserEmail }).toArray();
+
+        // Render groups page and pass the groups data to the template
+        res.render('groups', { session: req.session, groups: groups });
+        
+    } catch (error) {
+        console.error('Error fetching groups:', error);
+        res.status(500).send('Error fetching groups.');
+    }
+});
+
+
+app.post('/createGroup', sessionValidation, async (req, res) => {
+    try {
+        // Extract group name and user emails from the request body
+        const { name, emails } = req.body;
+
+        // Split the emails string into an array of email addresses
+        const emailArray = emails.split(/[;,]+/).map(email => email.trim());
+
+        // Get the email of the user who is creating the group
+        const creatorEmail = req.session.email;
+
+        // Check if all entered emails are associated with users in the database
+        const invalidEmails = [];
+        const validEmails = [];
+        for (const email of emailArray) {
+            const user = await userCollection.findOne({ email });
+            if (!user) {
+                invalidEmails.push(email);
+            } else {
+                validEmails.push(email);
+            }
+        }
+
+        // Create a new group object using only the valid emails
+        const newGroup = {
+            name: name,
+            members: [creatorEmail, ...validEmails] // Include the creator's email in the members array
+        };
+
+        // Insert the new group document into the groups collection
+        const result = await groupCollection.insertOne(newGroup);
+
+        console.log('New group created:', result.insertedId);
+
+        // Redirect to the confirmation page and pass necessary data
+        res.redirect('/groupConfirmation?error=false&invalidEmails=' + encodeURIComponent(JSON.stringify(invalidEmails)));
+    } catch (error) {
+        console.error('Error creating group:', error);
+        res.redirect('/groupConfirmation?error=true&message=' + encodeURIComponent('Error creating group.'));
+    }
+});
+
+app.get('/groupConfirmation', sessionValidation, (req, res) => {
+    const error = req.query.error === 'true';
+    const message = req.query.message;
+    const invalidEmails = req.query.invalidEmails ? JSON.parse(req.query.invalidEmails) : [];
+
+    res.render('GroupCreationConfirmation', { error, message, invalidEmails });
+});
+
+
+app.get('/group',sessionValidation ,async (req, res) => {
+    try {
+        const groupId = req.query.id; // Assuming the query parameter is named "id"
+        const group = await groupCollection.findOne({ _id: new ObjectId(groupId) });
+
+        if (!group) {
+            // Group not found
+            res.status(404).send('Group not found.');
+            return;
+        }
+
+        // Render the group details page with the retrieved group
+        res.render('groupDetails', { group });
+    } catch (error) {
+        console.error('Error fetching group details:', error);
+        res.status(500).send('Error fetching group details.');
+    }
+});
+
+app.post('/invite', sessionValidation, async (req, res) => {
+    try {
+        const groupId = req.query.groupId; // Get the group ID from the query parameter
+        const { emails } = req.body; // Get the emails from the request body
+
+        // Split the emails string into an array of email addresses
+        const emailArray = emails.split(/[;,]+/).map(email => email.trim());
+
+        // Check each email individually
+        const invalidEmails = [];
+        const existingMembers = [];
+        const validEmails = [];
+        for (const email of emailArray) {
+            // Check if the email exists in the userCollection
+            const user = await userCollection.findOne({ email });
+            if (!user) {
+                // If the user doesn't exist, add the email to the list of invalid emails
+                invalidEmails.push(email);
+            } else {
+                // Check if the user is already a member of the group
+                const group = await groupCollection.findOne({ _id: new ObjectId(groupId), members: email });
+                if (group) {
+                    // If the user is already a member, add the email to the list of existing members
+                    existingMembers.push(email);
+                } else {
+                    // If the user exists and is not already a member, add the email to the list of valid emails
+                    validEmails.push(email);
+                }
+            }
+        }
+
+        // Update the group document to add the new members
+        const result = await groupCollection.updateOne(
+            { _id: new ObjectId(groupId) },
+            { $addToSet: { members: { $each: validEmails } } }
+        );
+
+        // Prepare the message to be passed to the InviteConfirmation page
+        const inviteMessage = {
+            success: validEmails.length > 0 ? 'Users were successfully added.' : '',
+            existingMembers: existingMembers.map(email => `${email} is already a member.`),
+            invalidEmails: invalidEmails.map(email => `${email} is not associated with any user.`),
+            groupID: groupId
+        };
+
+        // Render the InviteConfirmation page with the appropriate message
+        res.render('InviteConfirmation', { inviteMessage });
+    } catch (error) {
+        console.error('Error inviting users to group:', error);
+        res.status(500).json({ success: false, message: 'Internal server error.' });
+    }
+});
+
+
 app.get('/admin', sessionValidation, adminAuthorization , async (req,res) => {
     const result = await userCollection.find().toArray();
     // console.log(result)
     res.render("admin", {users: result});
 });
+
 
 app.post('/promoteToAdmin', sessionValidation, adminAuthorization, jsonParser, async (req,res) => {
     // console.log(req.body)
