@@ -8,6 +8,7 @@ body.loginBody {
   max-width: 600px;
   height: 100vh;
   padding: 16px;
+  /* background: linear-gradient(200deg, #6A0DAD 30%, #DBB9F3 30%);; */
 }
 body.signupBody {
   margin:auto;
@@ -27,6 +28,7 @@ body.signupBody {
 img.logo{
   max-width: 40vh;
   max-height: 30vh;
+  min-height: 25vh;
 }
 .loginForm{
   display:flex;
@@ -54,15 +56,15 @@ button{
 
 button.loginButton{
   margin-top:16px;
-  background-color: black;
-  color: white;
+  background-color: white;
+  color: #6A0DAD;
   font-size: 16px;
   font-weight:500;
 }
 
 button.forgotPwButton{
   margin-top:8px;
-  color: white;
+  color: #6A0DAD;
   font-size: 16px;
   font-weight:500;
 }
@@ -90,7 +92,7 @@ button.backButton {
   align-self: flex-start;
 }
 
-h1.recoverPasswordTitle{
+h1.passwordResetTitle{
   margin-bottom: 0px;
 }
 p.text{
