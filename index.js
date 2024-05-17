@@ -106,211 +106,6 @@ app.get('/', sessionValidation, (req, res) => {
     res.redirect('/groups');
 });
 
-app.get('/profile', (req, res) => {
-
-        var name = req.session.name;
-        var biography = req.session.biography;
-
-        res.render(`profile`, { name, biography });
-});
-
-// GET handler for displaying the form
-app.get('/editProfile', (req, res) => {
-    if (!req.session.name) {
-        return res.redirect('/login');  // Redirect if the user is not logged in
-    }
-    res.render('editProfile', { name: req.session.name});
-});
-
-// POST handler for processing the form submission
-app.post('/updateProfile', async (req, res) => {
-    const { name, biography } = req.body;
-
-    // Validation schema
-    const schema = Joi.object({
-        name: Joi.string().alphanum().max(20).required(),
-        biography: Joi.string().max(100).required()
-    });
-
-    // Validate the data
-    const validationResult = schema.validate({ name, biography });
-    if (validationResult.error != null) {
-        console.log(validationResult.error);
-        res.send(`${validationResult.error.message}<br/> <a href='/editProfile'>Try again</a>`);
-        return;
-    }
-
-    // Insert or update the document in the database
-    await userCollection.updateOne(
-        { email: req.session.email },
-        { $set: { name: name, biography: biography } },
-        { upsert: true }
-    );
-
-    // Update session details after successful update
-    req.session.authenticated = true;
-    req.session.biography = biography;
-    req.session.name = name;
-    req.session.cookie.maxAge = expireTime;
-
-    res.redirect('/profile');
-});
-
-const activities = [
-    "Go to the movies",
-    "Picnic in the park",
-    "Visit a museum",
-    "Bowling night",
-    "Hiking adventure"
-];
-
-app.get('/activityRandomizer', (req, res) => {
-    // Randomly select an activity
-    const randomActivity = activities[Math.floor(Math.random() * activities.length)];
-    res.json({ activity: randomActivity });
-});
-
-app.get('/event_submission', async (req, res) => {
-    const groupId = req.query.groupId;
-    const group = await groupCollection.findOne({ _id: new ObjectId(groupId) });
-    const successMessage = req.query.success === 'true' ? 'Event added successfully' : null;
-    res.render('event_submission', { group });
-});
-
-app.get('/submitted_event', async (req, res) => {
-    const groupId = req.query.groupId;
-    const group = await groupCollection.findOne({ _id: new ObjectId(groupId) });
-    console.log('groupId:', new ObjectId(groupId));
-    const events = group.events;
-    res.render('submitted_event', { group, session: req.session, events });
-
-});
-
-app.get('/editEvent', async (req, res) => {
-    const groupId = req.query.groupId;
-    const eventId = req.query.eventId;
-    const group = await groupCollection.findOne(
-        { _id: new ObjectId(groupId), "events._id": new ObjectId(eventId) },
-        { projection: { "events.$": 1 } }
-    );
-    const event = group.events[0];
-    
-
-    res.render('editEvent', { group, session: req.session, event });
-
-});
-
-app.post('/editEvent', async (req, res) => {
-    const groupId = req.query.groupId;
-    const eventId = req.query.eventId;
-    const title = req.body.eventTitle;
-    const description = req.body.description;
-    const location = req.body.location;
-    const info = req.body.contactInfo;
-    const category = req.body.category;
-
-    if (!title || !category) {
-        res.send("You must provide a title and category<br/> <a href='/editEvent'>Try again</a>");
-        return
-    }
-
-    const schema = Joi.object(
-        {
-            title: Joi.string().max(50).required(),
-            description: Joi.string().max(500),
-            location: Joi.string().max(50),
-            info: Joi.string().max(50),
-        });
-
-    const validationResult = schema.validate({ title, description, location, info });
-
-    if (validationResult.error != null) {
-        console.log(validationResult.error);
-        res.send("/editEvent");
-        return;
-    }
-
-    const updatedEvent = {
-        _id: new ObjectId(eventId),
-        title: title,
-        description: description,
-        location: location,
-        info: info,
-        category: category
-    }
-
-    await groupCollection.updateOne(
-        { _id: new ObjectId(groupId), "events._id": new ObjectId(eventId) },
-        { $set: { "events.$": updatedEvent } }
-    );
-    console.log('event in edit:', new ObjectId(eventId));
-
-    console.log("Event updated");
-    res.redirect('/group?id=' + groupId);
-});
-
-// app.use('/test', sessionValidation);
-// app.get('/test', (req, res) => {
-//     if(!req.session.authenticated) {
-//         res.redirect('/login');
-//         return;
-//     }
-//     res.render('event_submission');
-// });
-
-app.post('/event_submission', async (req, res) => {
-    const groupId = req.query.groupId;
-    console.log('groupId:', new ObjectId(groupId))
-    var userId = req.session.user_ID;
-
-    var title = req.body.eventTitle;
-    var description = req.body.description;
-    var location = req.body.location;
-    var info = req.body.contactInfo;
-    var category = req.body.category;
-
-    if (!title || !category) {
-        res.send("You must provide a title and category<br/> <a href='/event_submission'>Try again</a>");
-        return
-    }
-
-    const schema = Joi.object(
-        {
-            title: Joi.string().max(50).required(),
-            description: Joi.string().max(500),
-            location: Joi.string().max(50),
-            info: Joi.string().max(50),
-        });
-
-    const validationResult = schema.validate({ title, description, location, info });
-
-    if (validationResult.error != null) {
-        console.log(validationResult.error);
-        res.send("/event_submission");
-        return;
-    }
-
-    const newEvent = {
-        _id : new ObjectId(),
-        title: title,
-        description: description,
-        location: location,
-        info: info,
-        category: category
-    }
-
-    await groupCollection.updateOne(
-        { _id: new ObjectId(groupId) }, // need some way to get the group id
-        { $push: { events: newEvent } },
-        console.log('groupId:', new ObjectId(groupId))
-    );
-
-    console.log("Event added");
-    res.redirect('/group?id=' + groupId);
-});
-
-
-
 app.get('/signup', (req, res) => {
     if (req.session.authenticated) {
         res.redirect('/');
@@ -486,6 +281,209 @@ app.post("/password-reset/:userId/:token", async (req, res) => {
         console.log(error);
         return res.render('passwordResetForm',{error:error, userId: req.params.userId, token: req.params.token,formData:{password: req.body.password, confirmPassword: req.body.confirmPassword}});
     }
+});
+
+app.get('/profile', sessionValidation, (req, res) => {
+
+        var name = req.session.name;
+        var biography = req.session.biography;
+
+        res.render(`profile`, { name, biography });
+});
+
+// GET handler for displaying the form
+app.get('/editProfile', sessionValidation, (req, res) => {
+    if (!req.session.name) {
+        return res.redirect('/login');  // Redirect if the user is not logged in
+    }
+    res.render('editProfile', { name: req.session.name});
+});
+
+// POST handler for processing the form submission
+app.post('/updateProfile', sessionValidation, async (req, res) => {
+    const { name, biography } = req.body;
+
+    // Validation schema
+    const schema = Joi.object({
+        name: Joi.string().alphanum().max(20).required(),
+        biography: Joi.string().max(100).required()
+    });
+
+    // Validate the data
+    const validationResult = schema.validate({ name, biography });
+    if (validationResult.error != null) {
+        console.log(validationResult.error);
+        res.send(`${validationResult.error.message}<br/> <a href='/editProfile'>Try again</a>`);
+        return;
+    }
+
+    // Insert or update the document in the database
+    await userCollection.updateOne(
+        { email: req.session.email },
+        { $set: { name: name, biography: biography } },
+        { upsert: true }
+    );
+
+    // Update session details after successful update
+    req.session.authenticated = true;
+    req.session.biography = biography;
+    req.session.name = name;
+    req.session.cookie.maxAge = expireTime;
+
+    res.redirect('/profile');
+});
+
+const activities = [
+    "Go to the movies",
+    "Picnic in the park",
+    "Visit a museum",
+    "Bowling night",
+    "Hiking adventure"
+];
+
+app.get('/activityRandomizer', sessionValidation, (req, res) => {
+    // Randomly select an activity
+    const randomActivity = activities[Math.floor(Math.random() * activities.length)];
+    res.json({ activity: randomActivity });
+});
+
+app.get('/event_submission', sessionValidation, async (req, res) => {
+    const groupId = req.query.groupId;
+    const group = await groupCollection.findOne({ _id: new ObjectId(groupId) });
+    const successMessage = req.query.success === 'true' ? 'Event added successfully' : null;
+    res.render('event_submission', { group });
+});
+
+app.get('/submitted_event', sessionValidation, async (req, res) => {
+    const groupId = req.query.groupId;
+    const group = await groupCollection.findOne({ _id: new ObjectId(groupId) });
+    console.log('groupId:', new ObjectId(groupId));
+    const events = group.events;
+    res.render('submitted_event', { group, session: req.session, events });
+
+});
+
+app.get('/editEvent', sessionValidation, async (req, res) => {
+    const groupId = req.query.groupId;
+    const eventId = req.query.eventId;
+    const group = await groupCollection.findOne(
+        { _id: new ObjectId(groupId), "events._id": new ObjectId(eventId) },
+        { projection: { "events.$": 1 } }
+    );
+    const event = group.events[0];
+    
+
+    res.render('editEvent', { group, session: req.session, event });
+
+});
+
+app.post('/editEvent', sessionValidation, async (req, res) => {
+    const groupId = req.query.groupId;
+    const eventId = req.query.eventId;
+    const title = req.body.eventTitle;
+    const description = req.body.description;
+    const location = req.body.location;
+    const info = req.body.contactInfo;
+    const category = req.body.category;
+
+    if (!title || !category) {
+        res.send("You must provide a title and category<br/> <a href='/editEvent'>Try again</a>");
+        return
+    }
+
+    const schema = Joi.object(
+        {
+            title: Joi.string().max(50).required(),
+            description: Joi.string().max(500),
+            location: Joi.string().max(50),
+            info: Joi.string().max(50),
+        });
+
+    const validationResult = schema.validate({ title, description, location, info });
+
+    if (validationResult.error != null) {
+        console.log(validationResult.error);
+        res.send("/editEvent");
+        return;
+    }
+
+    const updatedEvent = {
+        _id: new ObjectId(eventId),
+        title: title,
+        description: description,
+        location: location,
+        info: info,
+        category: category
+    }
+
+    await groupCollection.updateOne(
+        { _id: new ObjectId(groupId), "events._id": new ObjectId(eventId) },
+        { $set: { "events.$": updatedEvent } }
+    );
+    console.log('event in edit:', new ObjectId(eventId));
+
+    console.log("Event updated");
+    res.redirect('/group?id=' + groupId);
+});
+
+// app.use('/test', sessionValidation);
+// app.get('/test', (req, res) => {
+//     if(!req.session.authenticated) {
+//         res.redirect('/login');
+//         return;
+//     }
+//     res.render('event_submission');
+// });
+
+app.post('/event_submission', sessionValidation, async (req, res) => {
+    const groupId = req.query.groupId;
+    console.log('groupId:', new ObjectId(groupId))
+    var userId = req.session.user_ID;
+
+    var title = req.body.eventTitle;
+    var description = req.body.description;
+    var location = req.body.location;
+    var info = req.body.contactInfo;
+    var category = req.body.category;
+
+    if (!title || !category) {
+        res.send("You must provide a title and category<br/> <a href='/event_submission'>Try again</a>");
+        return
+    }
+
+    const schema = Joi.object(
+        {
+            title: Joi.string().max(50).required(),
+            description: Joi.string().max(500),
+            location: Joi.string().max(50),
+            info: Joi.string().max(50),
+        });
+
+    const validationResult = schema.validate({ title, description, location, info });
+
+    if (validationResult.error != null) {
+        console.log(validationResult.error);
+        res.send("/event_submission");
+        return;
+    }
+
+    const newEvent = {
+        _id : new ObjectId(),
+        title: title,
+        description: description,
+        location: location,
+        info: info,
+        category: category
+    }
+
+    await groupCollection.updateOne(
+        { _id: new ObjectId(groupId) }, // need some way to get the group id
+        { $push: { events: newEvent } },
+        console.log('groupId:', new ObjectId(groupId))
+    );
+
+    console.log("Event added");
+    res.redirect('/group?id=' + groupId);
 });
 
 app.get('/groups', sessionValidation, async (req, res) => {
