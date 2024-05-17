@@ -33,10 +33,10 @@ const mongodb_session_secret = process.env.MONGODB_SESSION_SECRET;
 const mongodb_database = process.env.MONGODB_DATABASE;
 const node_session_secret = process.env.NODE_SESSION_SECRET;
 
-app.use(express.urlencoded({extended: false}));
+app.use(express.urlencoded({ extended: false }));
 var jsonParser = bodyParser.json()
 
-var {database} = include('databaseConnection');
+var { database } = include('databaseConnection');
 
 const userCollection = database.db(mongodb_database).collection('users');
 const pwRecoveryTokensCollection = database.db(mongodb_database).collection('pwRecoveryTokens');
@@ -44,11 +44,11 @@ const groupCollection = database.db(mongodb_database).collection('groups');
 
 
 var mongoStore = MongoStore.create({
-	mongoUrl: `mongodb+srv://${mongodb_user}:${mongodb_password}@${mongodb_host}/${mongodb_database}`,
+    mongoUrl: `mongodb+srv://${mongodb_user}:${mongodb_password}@${mongodb_host}/${mongodb_database}`,
     collectionName: 'sessions',
     crypto: {
-		secret: mongodb_session_secret
-	}
+        secret: mongodb_session_secret
+    }
 })
 
 app.set('view engine', 'ejs');
@@ -56,9 +56,9 @@ app.set('view engine', 'ejs');
 
 app.use(session({ 
     secret: node_session_secret,
-	store: mongoStore, //default is memory store 
-	saveUninitialized: false, 
-	resave: true
+    store: mongoStore, //default is memory store 
+    saveUninitialized: false,
+    resave: true
 }));
 
 function isValidSession(req) {
@@ -86,7 +86,7 @@ function isAdmin(req) {
 function adminAuthorization(req, res, next) {
     if (!isAdmin(req)) {
         res.status(403);
-        res.render("errorMessage", {error: "403 - Not Authorized"});
+        res.render("errorMessage", { error: "403 - Not Authorized" });
         return;
     } else {
         next();
@@ -170,14 +170,155 @@ app.get('/activityRandomizer', (req, res) => {
     res.json({ activity: randomActivity });
 });
 
+app.get('/event_submission', async (req, res) => {
+    const groupId = req.query.groupId;
+    const group = await groupCollection.findOne({ _id: new ObjectId(groupId) });
+    const successMessage = req.query.success === 'true' ? 'Event added successfully' : null;
+    res.render('event_submission', { group });
+});
+
+app.get('/submitted_event', async (req, res) => {
+    const groupId = req.query.groupId;
+    const group = await groupCollection.findOne({ _id: new ObjectId(groupId) });
+    console.log('groupId:', new ObjectId(groupId));
+    const events = group.events;
+    res.render('submitted_event', { group, session: req.session, events });
+
+});
+
+app.get('/editEvent', async (req, res) => {
+    const groupId = req.query.groupId;
+    const eventId = req.query.eventId;
+    const group = await groupCollection.findOne(
+        { _id: new ObjectId(groupId), "events._id": new ObjectId(eventId) },
+        { projection: { "events.$": 1 } }
+    );
+    const event = group.events[0];
+    
+
+    res.render('editEvent', { group, session: req.session, event });
+
+});
+
+app.post('/editEvent', async (req, res) => {
+    const groupId = req.query.groupId;
+    const eventId = req.query.eventId;
+    const title = req.body.eventTitle;
+    const description = req.body.description;
+    const location = req.body.location;
+    const info = req.body.contactInfo;
+    const category = req.body.category;
+
+    if (!title || !category) {
+        res.send("You must provide a title and category<br/> <a href='/editEvent'>Try again</a>");
+        return
+    }
+
+    const schema = Joi.object(
+        {
+            title: Joi.string().max(50).required(),
+            description: Joi.string().max(500),
+            location: Joi.string().max(50),
+            info: Joi.string().max(50),
+        });
+
+    const validationResult = schema.validate({ title, description, location, info });
+
+    if (validationResult.error != null) {
+        console.log(validationResult.error);
+        res.send("/editEvent");
+        return;
+    }
+
+    const updatedEvent = {
+        _id: new ObjectId(eventId),
+        title: title,
+        description: description,
+        location: location,
+        info: info,
+        category: category
+    }
+
+    await groupCollection.updateOne(
+        { _id: new ObjectId(groupId), "events._id": new ObjectId(eventId) },
+        { $set: { "events.$": updatedEvent } }
+    );
+    console.log('event in edit:', new ObjectId(eventId));
+
+    console.log("Event updated");
+    res.redirect('/group?id=' + groupId);
+});
+
+// app.use('/test', sessionValidation);
+// app.get('/test', (req, res) => {
+//     if(!req.session.authenticated) {
+//         res.redirect('/login');
+//         return;
+//     }
+//     res.render('event_submission');
+// });
+
+app.post('/event_submission', async (req, res) => {
+    const groupId = req.query.groupId;
+    console.log('groupId:', new ObjectId(groupId))
+    var userId = req.session.user_ID;
+
+    var title = req.body.eventTitle;
+    var description = req.body.description;
+    var location = req.body.location;
+    var info = req.body.contactInfo;
+    var category = req.body.category;
+
+    if (!title || !category) {
+        res.send("You must provide a title and category<br/> <a href='/event_submission'>Try again</a>");
+        return
+    }
+
+    const schema = Joi.object(
+        {
+            title: Joi.string().max(50).required(),
+            description: Joi.string().max(500),
+            location: Joi.string().max(50),
+            info: Joi.string().max(50),
+        });
+
+    const validationResult = schema.validate({ title, description, location, info });
+
+    if (validationResult.error != null) {
+        console.log(validationResult.error);
+        res.send("/event_submission");
+        return;
+    }
+
+    const newEvent = {
+        _id : new ObjectId(),
+        title: title,
+        description: description,
+        location: location,
+        info: info,
+        category: category
+    }
+
+    await groupCollection.updateOne(
+        { _id: new ObjectId(groupId) }, // need some way to get the group id
+        { $push: { events: newEvent } },
+        console.log('groupId:', new ObjectId(groupId))
+    );
+
+    console.log("Event added");
+    res.redirect('/group?id=' + groupId);
+});
+
+
+
 app.get('/signup', (req, res) => {
-    if(req.session.authenticated) {
+    if (req.session.authenticated) {
         res.redirect('/');
     } else {
         res.render('signup');
     }
 });
-app.post('/signup', async (req,res) => {
+app.post('/signup', async (req, res) => {
     var name = req.body.name;
     var email = req.body.email;
     var password = req.body.password;
@@ -189,8 +330,8 @@ app.post('/signup', async (req,res) => {
             email: Joi.string().email().required(),
             password: Joi.string().max(20).required()
         });
-        
-        const validationResult = schema.validate({name, email, password});
+
+        const validationResult = schema.validate({ name, email, password });
         if (validationResult.error != null) {
            console.log(validationResult.error);
            let error = validationResult.error.message;
@@ -222,7 +363,7 @@ app.get('/login', (req, res) => {
         res.render('login');
     }
 });
-app.post('/login', async (req,res) => {
+app.post('/login', async (req, res) => {
     var email = req.body.email;
     var password = req.body.password;
     if (!email || !password) {
@@ -237,7 +378,7 @@ app.post('/login', async (req,res) => {
         return res.render('login',{error: 'Invalid email or password',formData:{email: email, password: password}});
 	}
 
-	const result = await userCollection.find({email: email}).project({email: 1, name:1, user_type:1, password: 1, _id: 1}).toArray();
+    const result = await userCollection.find({ email: email }).project({ email: 1, name: 1, user_type: 1, password: 1, _id: 1 }).toArray();
 
 	// console.log(result);
 	if (result.length != 1) {
@@ -340,7 +481,7 @@ app.post("/password-reset/:userId/:token", async (req, res) => {
 });
 
 app.get('/members', sessionValidation, (req, res) => {
-        res.render('members',{session:req.session});
+    res.render('members', { session: req.session });
 });
 
 app.get('/groups', sessionValidation, async (req, res) => {
@@ -353,7 +494,7 @@ app.get('/groups', sessionValidation, async (req, res) => {
 
         // Render groups page and pass the groups data to the template
         res.render('groups', { session: req.session, groups: groups });
-        
+
     } catch (error) {
         console.error('Error fetching groups:', error);
         res.status(500).send('Error fetching groups.');
@@ -387,7 +528,8 @@ app.post('/createGroup', sessionValidation, async (req, res) => {
         // Create a new group object using only the valid emails
         const newGroup = {
             name: name,
-            members: [creatorEmail, ...validEmails] // Include the creator's email in the members array
+            members: [creatorEmail, ...validEmails], // Include the creator's email in the members array
+            events: []
         };
 
         // Insert the new group document into the groups collection
@@ -412,7 +554,7 @@ app.get('/groupConfirmation', sessionValidation, (req, res) => {
 });
 
 
-app.get('/group',sessionValidation ,async (req, res) => {
+app.get('/group', sessionValidation, async (req, res) => {
     try {
         const groupId = req.query.id; // Assuming the query parameter is named "id"
         const group = await groupCollection.findOne({ _id: new ObjectId(groupId) });
@@ -485,23 +627,23 @@ app.post('/invite', sessionValidation, async (req, res) => {
 });
 
 
-app.get('/admin', sessionValidation, adminAuthorization , async (req,res) => {
+app.get('/admin', sessionValidation, adminAuthorization, async (req, res) => {
     const result = await userCollection.find().toArray();
     // console.log(result)
-    res.render("admin", {users: result});
+    res.render("admin", { users: result });
 });
 
 
-app.post('/promoteToAdmin', sessionValidation, adminAuthorization, jsonParser, async (req,res) => {
+app.post('/promoteToAdmin', sessionValidation, adminAuthorization, jsonParser, async (req, res) => {
     // console.log(req.body)
     // console.log("promoting " + req.body.id + " to admin")
-    const result = await userCollection.updateOne({_id: new ObjectId(req.body.id)}, {$set: {user_type: 'admin'}});
+    const result = await userCollection.updateOne({ _id: new ObjectId(req.body.id) }, { $set: { user_type: 'admin' } });
     // console.log(result)
-    res.send({success: true});
+    res.send({ success: true });
 });
-app.post('/demoteToUser', sessionValidation, adminAuthorization, jsonParser, async (req,res) => {
-    await userCollection.updateOne({_id: new ObjectId(req.body.id)}, {$set: {user_type: 'user'}});
-    res.send({success: true});
+app.post('/demoteToUser', sessionValidation, adminAuthorization, jsonParser, async (req, res) => {
+    await userCollection.updateOne({ _id: new ObjectId(req.body.id) }, { $set: { user_type: 'user' } });
+    res.send({ success: true });
 });
 
 app.get('/logout', sessionValidation, (req, res) => {
@@ -514,9 +656,9 @@ app.get('/logout', sessionValidation, (req, res) => {
 
 app.use(express.static(__dirname + "/public"));
 
-app.get("*", (req,res) => {
-	res.status(404);
-	res.render("404");
+app.get("*", (req, res) => {
+    res.status(404);
+    res.render("404");
 })
 
 app.listen(port, () => {
