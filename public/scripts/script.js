@@ -5,7 +5,7 @@ toggleShowPassword = () => {
     var b = document.getElementsByClassName("hide-password-svg");
     if (x.type === "password") {
         x.type = "text";
-        y.type = "text";
+        if(y) y.type = "text";
         for(let i=0; i<a.length; i++) {
             a[i].style.display = "block";
         }
@@ -14,7 +14,7 @@ toggleShowPassword = () => {
         }
     } else {
         x.type = "password";
-        y.type = "password";
+        if(y) y.type = "password";
         for(let i=0; i<a.length; i++) {
             a[i].style.display = "none";
         }

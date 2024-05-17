@@ -30,12 +30,12 @@
             <label for="password" class="absolute text-sm text-gray-50 duration-300 transform -translate-y-4 scale-75 top-4 z-10 origin-[0] start-2.5 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto">Password</label>
             <button type="button" onclick="toggleShowPassword()" class="absolute top-[6px] end-1 p-3.5 rounded-e-md w-auto">
               <svg class="flex-shrink-0 size-3.5 text-gray-50" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path class="hs-password-active:hidden" d="M9.88 9.88a3 3 0 1 0 4.24 4.24"></path>
-                <path class="hs-password-active:hidden" d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"></path>
-                <path class="hs-password-active:hidden" d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"></path>
-                <line class="hs-password-active:hidden" x1="2" x2="22" y1="2" y2="22"></line>
-                <path class="hidden hs-password-active:block" d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path>
-                <circle class="hidden hs-password-active:block" cx="12" cy="12" r="3"></circle>
+                <path class="hide-password-svg" d="M9.88 9.88a3 3 0 1 0 4.24 4.24"></path>
+                <path class="hide-password-svg" d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"></path>
+                <path class="hide-password-svg" d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"></path>
+                <line class="hide-password-svg" x1="2" x2="22" y1="2" y2="22"></line>
+                <path style="display:none" class="show-password-svg" d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path>
+                <circle style="display:none" class="show-password-svg" cx="12" cy="12" r="3"></circle>
               </svg>
             </button>
         </div>
