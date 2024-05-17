@@ -73,7 +73,7 @@
         // Placeholder function for submitting activity
         console.log('Submit Activity button clicked');
         // You can add functionality for submitting activity here
-        window.location.href = '/test?groupId=<%= group._id %>';
+        window.location.href = '/event_submission?groupId=<%= group._id %>';
     }
 
     function editGroup() {
@@ -86,6 +86,7 @@
         // Placeholder function for viewing submitted activities
         console.log('View Submitted Activities button clicked');
         // You can add functionality for viewing submitted activities here
+        window.location.href = '/submitted_event?groupId=<%= group._id %>';
     }
 
     function openInvitePopup() {

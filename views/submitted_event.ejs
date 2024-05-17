@@ -1,0 +1,28 @@
+<%- include("templates/header") %>
+<% for(let event of events) { %>
+
+<a href="/editEvent?groupId=<%= group._id %>&eventId=<%= event._id %>" class="bg-gray-200 flex mt-5 items-center justify-center">
+    
+    <div class="bg-light-purple text-white p-6 rounded-lg shadow-lg w-96">
+        <div class="flex items-center mb-4">
+            <img src="path/to/image.jpg" alt="Event Image" class="w-16 h-16 rounded-full mr-4">
+            <div>
+                <div class="text-sm">2024</div>
+                <div class="text-2xl font-bold">17</div>
+                <div class="text-sm">MAY</div>
+            </div>
+        </div>
+        <div class="mb-4">
+            <span class="bg-green-200 text-green-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded">MOVED ONLINE</span>
+            <span class="bg-red-200 text-red-800 text-xs font-semibold px-2.5 py-0.5 rounded">VIRTUAL EVENT</span>
+        </div>
+        <div class="text-3xl font-bold mb-2"><%= event.title %></div>
+        <div class="flex items-center mb-4">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-6 8h6m-6 4h6m-6 4h6M12 3c4.418 0 8 3.582 8 8s-3.582 8-8 8-8-3.582-8-8 3.582-8 8-8z"></path></svg>
+            <div>1:00 pm – 2:00 pm</div>
+        </div>
+        <div <span class="text-white font-bold"><%= event.category %></span></div>
+    </div>
+</a>
+<% } %>
+<%- include("templates/footer") %>

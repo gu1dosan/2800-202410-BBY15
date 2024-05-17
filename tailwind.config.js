@@ -10,7 +10,7 @@ module.exports = {
     extend: {
       colors: {
         'purple': '#6a0dad',
-        'lavender': '#e6e6fa',
+        'lavender': '#D6BAEF',
         'light-purple': '#9370DB'
       },
     },
