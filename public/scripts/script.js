@@ -1,32 +1,44 @@
-promoteToAdmin = (id) => {
-    fetch("/promoteToAdmin", {
-        method: "POST",
-        body: JSON.stringify({id: id}),
-        headers: {
-            "Content-Type": "application/json"
-        }
-    })
-    .then((response) => response.json())
-    .then((response) => {
-        // console.log(response)
-        if(response.success)location.reload()
-    });
+toggleShowPassword = () => {
+    var x = document.getElementById("password");
+    var y = document.getElementById("confirmPassword");
+    if (x.type === "password") {
+        x.type = "text";
+        y.type = "text";
+    } else {
+        x.type = "password";
+        y.type = "password";
+    }
 }
 
-demoteToUser = (id) => {
-    fetch("/demoteToUser", {
-        method: "POST",
-        body: JSON.stringify({id: id}),
-        headers: {
-            "Content-Type": "application/json"
-        }
-    })
-    .then((response) => response.json())
-    .then((response) => {
-        // console.log(response)
-        if(response.success)location.reload()
-    });
-}
+// promoteToAdmin = (id) => {
+//     fetch("/promoteToAdmin", {
+//         method: "POST",
+//         body: JSON.stringify({id: id}),
+//         headers: {
+//             "Content-Type": "application/json"
+//         }
+//     })
+//     .then((response) => response.json())
+//     .then((response) => {
+//         // console.log(response)
+//         if(response.success)location.reload()
+//     });
+// }
+
+// demoteToUser = (id) => {
+//     fetch("/demoteToUser", {
+//         method: "POST",
+//         body: JSON.stringify({id: id}),
+//         headers: {
+//             "Content-Type": "application/json"
+//         }
+//     })
+//     .then((response) => response.json())
+//     .then((response) => {
+//         // console.log(response)
+//         if(response.success)location.reload()
+//     });
+// }
 
 if(document.getElementById("loginButton")) {
     document.getElementById("loginButton").onclick = () => {
