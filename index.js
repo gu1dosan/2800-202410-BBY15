@@ -76,22 +76,22 @@ function sessionValidation(req,res,next) {
     }
 }
 
-function isAdmin(req) {
-    if (req.session.user_type == 'admin') {
-        return true;
-    }
-    return false;
-}
+// function isAdmin(req) {
+//     if (req.session.user_type == 'admin') {
+//         return true;
+//     }
+//     return false;
+// }
 
-function adminAuthorization(req, res, next) {
-    if (!isAdmin(req)) {
-        res.status(403);
-        res.render("errorMessage", { error: "403 - Not Authorized" });
-        return;
-    } else {
-        next();
-    }
-}
+// function adminAuthorization(req, res, next) {
+//     if (!isAdmin(req)) {
+//         res.status(403);
+//         res.render("errorMessage", { error: "403 - Not Authorized" });
+//         return;
+//     } else {
+//         next();
+//     }
+// }
 
 app.get('/test', (req, res) => {
     res.render("test");
@@ -488,10 +488,6 @@ app.post("/password-reset/:userId/:token", async (req, res) => {
     }
 });
 
-app.get('/members', sessionValidation, (req, res) => {
-    res.render('members', { session: req.session });
-});
-
 app.get('/groups', sessionValidation, async (req, res) => {
     try {
         // Get the email of the current user
@@ -635,24 +631,24 @@ app.post('/invite', sessionValidation, async (req, res) => {
 });
 
 
-app.get('/admin', sessionValidation, adminAuthorization, async (req, res) => {
-    const result = await userCollection.find().toArray();
-    // console.log(result)
-    res.render("admin", { users: result });
-});
+// app.get('/admin', sessionValidation, adminAuthorization, async (req, res) => {
+//     const result = await userCollection.find().toArray();
+//     // console.log(result)
+//     res.render("admin", { users: result });
+// });
 
 
-app.post('/promoteToAdmin', sessionValidation, adminAuthorization, jsonParser, async (req, res) => {
-    // console.log(req.body)
-    // console.log("promoting " + req.body.id + " to admin")
-    const result = await userCollection.updateOne({ _id: new ObjectId(req.body.id) }, { $set: { user_type: 'admin' } });
-    // console.log(result)
-    res.send({ success: true });
-});
-app.post('/demoteToUser', sessionValidation, adminAuthorization, jsonParser, async (req, res) => {
-    await userCollection.updateOne({ _id: new ObjectId(req.body.id) }, { $set: { user_type: 'user' } });
-    res.send({ success: true });
-});
+// app.post('/promoteToAdmin', sessionValidation, adminAuthorization, jsonParser, async (req, res) => {
+//     // console.log(req.body)
+//     // console.log("promoting " + req.body.id + " to admin")
+//     const result = await userCollection.updateOne({ _id: new ObjectId(req.body.id) }, { $set: { user_type: 'admin' } });
+//     // console.log(result)
+//     res.send({ success: true });
+// });
+// app.post('/demoteToUser', sessionValidation, adminAuthorization, jsonParser, async (req, res) => {
+//     await userCollection.updateOne({ _id: new ObjectId(req.body.id) }, { $set: { user_type: 'user' } });
+//     res.send({ success: true });
+// });
 
 app.get('/logout', sessionValidation, (req, res) => {
     if(req.session.authenticated) {
