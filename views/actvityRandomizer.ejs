@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Random Activity Generator</title>
+</head>
+<body>
+    <h1>Click the button to randomize an activity!</h1>
+    <button onclick="getRandomActivity()">Randomize Activity</button>
+    <script>
+        function getRandomActivity() {
+            fetch('/activityRandomizer')
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.activity);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        }
+    </script>
+</body>
+</html>
