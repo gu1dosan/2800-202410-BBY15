@@ -12,6 +12,8 @@ module.exports = {
         'purple': '#6a0dad',
         'lightPurple': '#DBB9F3',
         'darkPurple': '#500A82',
+        'lavender': '#D6BAEF',
+        'light-purple': '#9370DB'
       },
     },
   },
