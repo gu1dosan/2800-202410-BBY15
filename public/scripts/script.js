@@ -1,12 +1,26 @@
 toggleShowPassword = () => {
     var x = document.getElementById("password");
     var y = document.getElementById("confirmPassword");
+    var a = document.getElementsByClassName("show-password-svg");
+    var b = document.getElementsByClassName("hide-password-svg");
     if (x.type === "password") {
         x.type = "text";
         y.type = "text";
+        for(let i=0; i<a.length; i++) {
+            a[i].style.display = "block";
+        }
+        for(let i=0; i<b.length; i++) {
+            b[i].style.display = "none";
+        }
     } else {
         x.type = "password";
         y.type = "password";
+        for(let i=0; i<a.length; i++) {
+            a[i].style.display = "none";
+        }
+        for(let i=0; i<b.length; i++) {
+            b[i].style.display = "block";
+        }
     }
 }
 
