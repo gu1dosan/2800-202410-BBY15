@@ -1,7 +1,7 @@
 <%- include("templates/headerV2") %> 
 </div>
     <div class="flex flex-col justify-center items-center min-h-[50vh]">
-        <img src="./images/404.png" alt="Error">
+        <img src="./images/404.png" alt="Error" class="max-h-[45vh]">
         <div class="col-md-12 text-center" style="margin:24px 0px">
             <h1>404</h1>
             <p>
@@ -9,9 +9,11 @@
             </p>
             <p>
             Let's go back to the 
-            <a href="/groups" class="underline text-purple"> Home Page</a>.
-            </p>
-            
+            <a href="/groups" class="font-medium text-blue-600 dark:text-blue-500 underline">
+                 Home Page</a>.
+        </p>
         </div>
     </div>
-<%- include("templates/footer") %> 
+    <script src="./scripts/script.js"></script>
+</body>
+</html>

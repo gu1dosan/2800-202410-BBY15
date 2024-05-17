@@ -1,4 +1,12 @@
-<%- include("templates/header") %> 
+<%- include("templates/headerV2") %> 
+<div class="flex flex-col justify-center items-center min-h-[65vh]">
+    <img src="./images/403.png" alt="Error" class="max-h-[45vh]">
+    <div class="col-md-12 text-center" style="margin:24px 0px">
     <h1 style='color:red'>Error!</h1>
     <div><%= error %> </div>
+    <a href="#" onclick="window.history.back()" class="font-medium text-blue-600 dark:text-blue-500 underline">
+        Click here to go back
+    </a>
+    </div>
+</div>
 <%- include("templates/footer") %> 
