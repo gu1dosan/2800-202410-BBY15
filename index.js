@@ -43,6 +43,7 @@ var mongoStore = MongoStore.create({
 
 app.set('view engine', 'ejs');
 
+
 app.use(session({ 
     secret: node_session_secret,
 	store: mongoStore, //default is memory store 
@@ -81,6 +82,10 @@ function adminAuthorization(req, res, next) {
         next();
     }
 }
+
+app.get('/test', (req, res) => {
+    res.render("test");
+});
 
 app.use((req,res,next) => {
     res.locals.session = req.session;
