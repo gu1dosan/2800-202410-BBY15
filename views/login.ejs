@@ -1,24 +1,7 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <link rel="icon" type="image" href="./images/logo.png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NextUp</title>
-    <link href="./styles/output.css" rel="stylesheet">
-    <link href="./styles/styles.css" rel="stylesheet">
-    <link href="./styles/loginStyles.css" rel="stylesheet">
-    <script type="text/javascript">
-        $('html').addClass('hidden');
-        $(window).on('load', function() {
-          $('html').removeClass('hidden'); 
-         });  
-    </script>
-</head>
+<%- include("templates/headerV2") %>
 <body class="bg-purple loginBody">
     <div class="logoSpace">
-        <img class="logo" src="./images/logo.png" alt="Logo" class="logo">
+        <img class="logo" src="./images/favicon.png" alt="Logo" class="logo">
     </div>
     <form class="loginForm" action='/login' method='post'>
         <div class="relative">
