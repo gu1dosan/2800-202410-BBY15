@@ -15,6 +15,16 @@ const {ObjectId} = require("mongodb");
 
 const expireTime = 60 * 60 * 1000; //expires after 1 hour (minutes * seconds * millis)
 
+const cloud_name = process.env.CLOUDINARY_CLOUD_NAME;
+
+const cloudinary = require('cloudinary');
+cloudinary.config({ 
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME, 
+  api_key: process.env.CLOUDINARY_CLOUD_KEY,
+  api_secret: process.env.CLOUDINARY_CLOUD_SECRET
+});
+
+
 const mongodb_host = process.env.MONGODB_HOST;
 const mongodb_user = process.env.MONGODB_USER;
 const mongodb_password = process.env.MONGODB_PASSWORD;
@@ -84,14 +94,59 @@ app.use((req,res,next) => {
     res.locals.session = req.session;
     next();
 });
+
 app.get('/', (req, res) => {
     res.render('index',{session:req.session});
 });
 
 app.get('/profile', (req, res) => {
 
-        const name = "victor"; 
-        res.render(`profile`, { name });
+        var name = req.session.name;
+        var biography = req.session.biography;
+
+        res.render(`profile`, { name, biography });
+});
+
+// GET handler for displaying the form
+app.get('/editProfile', (req, res) => {
+    if (!req.session.name) {
+        return res.redirect('/login');  // Redirect if the user is not logged in
+    }
+    res.render('editProfile', { name: req.session.name});
+});
+
+// POST handler for processing the form submission
+app.post('/updateProfile', async (req, res) => {
+    const { name, biography } = req.body;
+
+    // Validation schema
+    const schema = Joi.object({
+        name: Joi.string().alphanum().max(20).required(),
+        biography: Joi.string().max(100).required()
+    });
+
+    // Validate the data
+    const validationResult = schema.validate({ name, biography });
+    if (validationResult.error != null) {
+        console.log(validationResult.error);
+        res.send(`${validationResult.error.message}<br/> <a href='/editProfile'>Try again</a>`);
+        return;
+    }
+
+    // Insert or update the document in the database
+    await userCollection.updateOne(
+        { email: req.session.email },
+        { $set: { name: name, biography: biography } },
+        { upsert: true }
+    );
+
+    // Update session details after successful update
+    req.session.authenticated = true;
+    req.session.biography = biography;
+    req.session.name = name;
+    req.session.cookie.maxAge = expireTime;
+
+    res.redirect('/profile');
 });
 
 const activities = [
