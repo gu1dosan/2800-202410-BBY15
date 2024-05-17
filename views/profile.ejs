@@ -1,0 +1,39 @@
+<%- include('templates/headerV2') %> 
+
+<!-- Main Content Wrapper with Padding to Accommodate Button Section -->
+<div class="container mx-auto pt-5 pb-20 overflow-y-auto"> <!-- Increased bottom padding to pb-20 -->
+    <h1 class="mb-3 text-center text-2xl">Profile Page for <%= name %>!</h1>
+    
+    <!-- Profile Picture Section -->
+    <div class="flex flex-col items-center mb-5">
+        <img src="./images/dog.jpeg" alt="Profile Picture" class="w-32 h-32 md:w-48 md:h-48 lg:w-64 lg:h-64 rounded-full shadow-lg mb-4">
+        <p class="text-center text-sm md:text-md lg:text-lg">Welcome to your profile, <%= name %>!</p>
+    </div>
+    
+    <!-- Biography Section -->
+    <div class="flex flex-col items-center mb-5">
+        <p class="text-center text-xl md:text-xl lg:text-2xl max-w-prose">
+            <%= biography %>!
+        </p>
+    </div>
+
+    <!-- Button Section at the Bottom -->
+    <div class="w-full bg-white z-10 shadow-md">
+        <div class="container mx-auto py-4">
+            <div class="grid gap-2 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 mx-auto">
+                <form action="/editProfile" method="get" class="w-full">
+                    <button type="submit" class="w-full text-white bg-purple hover:bg-blue-700 font-bold py-2 px-4 rounded-lg border-2 border-purple-500">
+                        Edit Profile
+                    </button>
+                </form>
+                <form action="/logout" method="get" class="w-full">
+                    <button type="submit" class="w-full text-white bg-purple hover:bg-gray-700 font-bold py-2 px-4 rounded-lg border-2 border-purple-500">
+                        Logout
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include('templates/footer') %>
