@@ -95,6 +95,7 @@ function sessionValidation(req, res, next) {
 
 app.use((req, res, next) => {
     res.locals.session = req.session;
+    res.locals.pathname = req.url;
     next();
   });
 

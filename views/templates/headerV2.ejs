@@ -9,24 +9,22 @@
     <link href="./styles/output.css" rel="stylesheet">
     <link href="./styles/styles.css" rel="stylesheet">
     <script type="text/javascript">
-        $('html').addClass('hidden');
-        $(window).on('load', function() {
-          $('html').removeClass('hidden'); 
-         });  
+        document.querySelector('html').classList.add("hidden");
+        window.addEventListener('load', (e) => {
+          document.querySelector('html').classList.remove("hidden"); 
+         });
     </script>
 </head>
 <body class="overflow-auto">
-    <header class="flex flex-row bg-purple sticky top-0 w-full h-[10vh] ">
-        <nav class="flex flex-row items-center">
-            <div class="flex flex-row items-center">
-                <a href="#" onclick="window.history.back()">
-                    <img src="./images/backButton.png" alt="BackButton" class="max-w-16 max-h-16 h-[10vh]">
-                </a>
-                <!-- add onclick for logo -->
-                <a href="#" >
-                        <img src="./images/clearLogo.png" alt="Logo" class="max-w-24 max-h-24 h-[10vh]">
-                </a>
-            </div>
-        </nav>
+    <header class=" bg-purple sticky top-0 w-full h-[10vh] flex flex-row items-center justify-between">
+        <a href="#" onclick="window.history.back()">
+            <img src="./images/backButton.png" alt="BackButton" class="m-2 h-[32px]">
+        </a>
+        <!-- add onclick for logo -->
+        <a href="/">
+            <img src="./images/clearLogo.png" alt="Logo" class="max-w-24 max-h-24 h-[64px]">
+        </a>
+        <div class="w-[48px]">
 
+        </div>
     </header>
