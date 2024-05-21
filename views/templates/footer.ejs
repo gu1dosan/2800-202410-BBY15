@@ -1,8 +1,7 @@
     <footer class="w-full h-[68px] lg:h-[100px] fixed bottom-0 bg-purple">
         <nav class="flex justify-around items-center w-full h-full">
             <a class="flex flex-col items-center" href="/groups">
-                <% console.log(locals)%>
-                    <img src="/images/<%= locals.pathname.startsWith('/groups') ? 'home-filled' : 'home-rounded'%>.svg" alt="Home" class="h-6 lg:h-10">
+                <img src="/images/<%= locals.pathname.startsWith('/groups') ? 'home-filled' : 'home-rounded'%>.svg" alt="Home" class="h-6 lg:h-10">
                 <p class="text-white text-sm <%= locals.pathname.startsWith('/groups') && 'font-bold'%>">Home</p>
             </a>
             <!-- add onclick for events -->
