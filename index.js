@@ -394,6 +394,25 @@ app.get("/group", sessionValidation, async (req, res) => {
   }
 });
 
+app.get("/group-details", sessionValidation, async (req, res) => {
+    try {
+      const groupId = req.query.id; // Assuming the query parameter is named "id"
+      const group = await groupCollection.findOne({ _id: new ObjectId(groupId) });
+  
+      if (!group) {
+        // Group not found
+        res.status(404).send("Group not found.");
+        return;
+      }
+  
+      // Render the group details page with the retrieved group
+      res.render("groupDetails", { group });
+    } catch (error) {
+      console.error("Error fetching group details:", error);
+      res.status(500).send("Error fetching group details.");
+    }
+  });
+
 app.post('/invite', sessionValidation, async (req, res) => { 
     try { 
         const groupId = req.query.groupId; // Get the group ID from the query parameter 
