@@ -1,0 +1,97 @@
+<%- include("templates/headerV2") %>
+
+<div class="flex justify-center items-center mt-8">
+    <div class="bg-white rounded-lg p-6">
+        <h2 class="text-xl font-semibold mb-4">Group Details</h2>
+        <div class="border border-gray-300 p-4 rounded-md">
+            <h3 class="text-lg font-semibold mb-2"><%= group.name %></h3>
+            <!-- New div for this week's activity -->
+            <div class="mt-8 mb-20">
+                <h2 class="text-lg font-semibold">This week's activity</h2>
+            </div>
+            <!-- Flex container for the green buttons -->
+            <div class="flex justify-center items-center mb-8">
+                <!-- View Members button -->
+                <button onclick="openMembersPopup()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">View Members</button>
+                <!-- Submit Activity button -->
+                <button onclick="submitActivity()" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded ml-2">Submit Activity</button>
+                <a href="/randomizer?id=<%= group._id %>" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded ml-2">Randomize</a>
+            </div>
+            
+            <!-- View Submitted Activities button -->
+            <div class="flex justify-center items-center mb-8">
+                <button onclick="viewSubmittedActivities()" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">View Submitted Activities</button>
+            </div>
+            <!-- Invite new member button -->
+            <div class="flex justify-center items-center mb-4">
+                <button onclick="openInvitePopup()" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">Invite new members</button>
+            </div>
+            <!-- Members List Popup -->
+            <div id="membersPopup" class="hidden fixed top-0 left-0 w-full h-full bg-gray-800 bg-opacity-75 flex justify-center items-center">
+                <div class="bg-white rounded-lg p-6">
+                    <h2 class="text-xl font-semibold mb-4">Members</h2>
+                    
+                    <ul class="list-disc pl-4">
+                        <% group.members.forEach(member => { %>
+                            <li><%= member %></li>
+                        <% }); %>
+                    </ul>
+                    <button onclick="closeMembersPopup()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-2">Close</button>
+                </div>
+            </div>
+            <!-- Invite New Member Popup -->
+            <div id="invitePopup" class="hidden fixed top-0 left-0 w-full h-full bg-gray-800 bg-opacity-75 flex justify-center items-center">
+                <div class="bg-white rounded-lg p-6">
+                    <h2 class="text-xl font-semibold mb-4">Invite New Members</h2>
+                    <form id="inviteForm" action="/invite?groupId=<%= group._id %>" method="post">
+                        <label for="emails" class="block mb-2">Enter email addresses (separated by commas):</label>
+                        <textarea id="emails" name="emails" rows="4" class="border border-gray-300 rounded-md p-2 mb-4 w-full"></textarea>
+                        <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Invite</button>
+                    </form>
+                    <button onclick="closeInvitePopup()" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded mt-2">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include("templates/footer") %>
+
+
+<script>
+    function openMembersPopup() {
+        document.getElementById('membersPopup').classList.remove('hidden');
+    }
+
+    function closeMembersPopup() {
+        document.getElementById('membersPopup').classList.add('hidden');
+    }
+
+    function submitActivity() {
+        // Placeholder function for submitting activity
+        console.log('Submit Activity button clicked');
+        // You can add functionality for submitting activity here
+        window.location.href = '/event_submission?groupId=<%= group._id %>';
+    }
+
+    function editGroup() {
+        // Placeholder function for editing group
+        console.log('Edit Group button clicked');
+        // You can add functionality for editing group here
+    }
+
+    function viewSubmittedActivities() {
+        // Placeholder function for viewing submitted activities
+        console.log('View Submitted Activities button clicked');
+        // You can add functionality for viewing submitted activities here
+        window.location.href = '/submitted_event?groupId=<%= group._id %>';
+    }
+
+    function openInvitePopup() {
+        document.getElementById('invitePopup').classList.remove('hidden');
+    }
+
+    function closeInvitePopup() {
+        document.getElementById('invitePopup').classList.add('hidden');
+    }
+</script>

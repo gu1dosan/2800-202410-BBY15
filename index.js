@@ -376,9 +376,9 @@ app.get("/groupConfirmation", sessionValidation, (req, res) => {
   res.render("GroupCreationConfirmation", { error, message, invalidEmails });
 });
 
-app.get("/group", sessionValidation, async (req, res) => {
+app.get("/group/:groupId", sessionValidation, async (req, res) => {
   try {
-    const groupId = req.query.id; // Assuming the query parameter is named "id"
+    const groupId = req.params.groupId;
     const group = await groupCollection.findOne({ _id: new ObjectId(groupId) });
 
     if (!group) {
@@ -388,16 +388,16 @@ app.get("/group", sessionValidation, async (req, res) => {
     }
 
     // Render the group details page with the retrieved group
-    res.render("groupDetails", { group });
+    res.render("group", { group });
   } catch (error) {
     console.error("Error fetching group details:", error);
     res.status(500).send("Error fetching group details.");
   }
 });
 
-app.get("/group-details", sessionValidation, async (req, res) => {
+app.get("/group-details/:groupId", sessionValidation, async (req, res) => {
     try {
-      const groupId = req.query.id; // Assuming the query parameter is named "id"
+        const groupId = req.params.groupId;
       const group = await groupCollection.findOne({ _id: new ObjectId(groupId) });
   
       if (!group) {
@@ -703,7 +703,7 @@ app.get("/logout", sessionValidation, (req, res) => {
   } else res.redirect("/");
 });
 
-app.use(express.static(__dirname + "/public"));
+app.use('/',express.static("public"));
 
 app.get("*", (req, res) => {
     res.status(404);
