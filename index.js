@@ -347,53 +347,63 @@ app.get("/groups", sessionValidation, async (req, res) => {
 });
 
 app.post("/createGroup", sessionValidation, async (req, res) => {
-  try {
-    // Extract group name and user emails from the request body
-    const { name, emails } = req.body;
+    try {
+        // Extract group name and user emails from the request body
+        const { name, emails } = req.body;
 
-    // Split the emails string into an array of email addresses
-    const emailArray = emails.split(/[;,]+/).map((email) => email.trim());
+        // Initialize arrays for valid and invalid emails
+        const invalidEmails = [];
+        const validEmails = [];
 
-    // Get the email of the user who is creating the group
-    const creatorEmail = req.session.email;
+        // Split the emails string into an array of email addresses if the field is not empty
+        if (emails) {
+            const emailArray = emails.split(/[;,]+/).map((email) => email.trim());
 
-    // Check if all entered emails are associated with users in the database
-    const invalidEmails = [];
-    const validEmails = [];
-    for (const email of emailArray) {
-      const user = await userCollection.findOne({ email });
-      if (!user) {
-        invalidEmails.push(email);
-      } else {
-        validEmails.push(email);
-      }
+            // Check if all entered emails are associated with users in the database
+            for (const email of emailArray) {
+                const user = await userCollection.findOne({ email });
+                if (!user) {
+                    invalidEmails.push(email);
+                } else {
+                    validEmails.push(email);
+                }
+            }
+        }
+
+        // Get the email of the user who is creating the group
+        const creatorEmail = req.session.email;
+
+        // Create a new group object using only the valid emails
+        const newGroup = {
+            name: name,
+            members: [creatorEmail, ...validEmails], // Include the creator's email in the members array
+            admin: [creatorEmail]
+        };
+
+        // Insert the new group document into the groups collection
+        const result = await groupCollection.insertOne(newGroup);
+
+        console.log("New group created:", result.insertedId);
+
+        // Prepare the query parameters for the redirect
+        let queryParams = "?error=false";
+
+        if (invalidEmails.length > 0) {
+            queryParams += "&invalidEmails=" + encodeURIComponent(JSON.stringify(invalidEmails));
+        }
+
+        // Redirect to the confirmation page with the appropriate query parameters
+        res.redirect("/groupConfirmation" + queryParams);
+    } catch (error) {
+        console.error("Error creating group:", error);
+        res.redirect(
+            "/groupConfirmation?error=true&message=" +
+            encodeURIComponent("Error creating group.")
+        );
     }
-
-    // Create a new group object using only the valid emails
-    const newGroup = {
-      name: name,
-      members: [creatorEmail, ...validEmails], // Include the creator's email in the members array
-      admin: [creatorEmail]
-    };
-
-    // Insert the new group document into the groups collection
-    const result = await groupCollection.insertOne(newGroup);
-
-    console.log("New group created:", result.insertedId);
-
-    // Redirect to the confirmation page and pass necessary data
-    res.redirect(
-      "/groupConfirmation?error=false&invalidEmails=" +
-        encodeURIComponent(JSON.stringify(invalidEmails))
-    );
-  } catch (error) {
-    console.error("Error creating group:", error);
-    res.redirect(
-      "/groupConfirmation?error=true&message=" +
-        encodeURIComponent("Error creating group.")
-    );
-  }
 });
+
+  
 
 app.get("/groupConfirmation", sessionValidation, (req, res) => {
   const error = req.query.error === "true";
