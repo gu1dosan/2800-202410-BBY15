@@ -77,12 +77,40 @@ function sessionValidation(req, res, next) {
   }
 }
 
-// function isAdmin(req) {
-//     if (req.session.user_type == 'admin') {
-//         return true;
-//     }
-//     return false;
-// }
+
+async function isAdmin(userEmail, groupId) {
+  try {
+    // Find the group with the specified ID
+    const group = await groupCollection.findOne({ _id: new ObjectId(groupId) });
+
+    // Check if the group exists and if the email is in the admin array
+    if (group && group.admin.includes(userEmail)) {
+      return true;
+    }
+    return false;
+  } catch (error) {
+    console.error("Error checking admin status:", error);
+    return false;
+  }
+}
+
+async function getUserDetails(emails) {
+    try {
+        // Find users with matching email addresses
+        const users = await userCollection.find({ email: { $in: emails } }).toArray();
+
+        // Create an array of objects containing id (converted to string) and name for each user
+        const userDetails = users.map(user => ({ id: user._id.toString(), name: user.name }));
+
+        return userDetails;
+    } catch (error) {
+        console.error("Error fetching user details:", error);
+        return [];
+    }
+}
+
+
+
 
 // function adminAuthorization(req, res, next) {
 //     if (!isAdmin(req)) {
@@ -345,6 +373,7 @@ app.post("/createGroup", sessionValidation, async (req, res) => {
     const newGroup = {
       name: name,
       members: [creatorEmail, ...validEmails], // Include the creator's email in the members array
+      admin: [creatorEmail]
     };
 
     // Insert the new group document into the groups collection
@@ -398,21 +427,58 @@ app.get("/group/:groupId", sessionValidation, async (req, res) => {
 app.get("/group-details/:groupId", sessionValidation, async (req, res) => {
     try {
         const groupId = req.params.groupId;
-      const group = await groupCollection.findOne({ _id: new ObjectId(groupId) });
+        const group = await groupCollection.findOne({ _id: new ObjectId(groupId) });
+        const userEmail = req.session.email;
+        const adminStatus = await isAdmin(userEmail, groupId);
+        
+        if (adminStatus) {
+            // User is an admin, proceed with admin-specific logic
+            console.log("You are an admin for this group.");
+        } else {
+            // User is not an admin
+            console.log("You are not an admin for this group.");
+        }
+
+        if (!group) {
+            // Group not found
+            res.status(404).send("Group not found.");
+            return;
+        }
   
-      if (!group) {
-        // Group not found
-        res.status(404).send("Group not found.");
-        return;
-      }
-  
-      // Render the group details page with the retrieved group
-      res.render("groupDetails", { group });
+        // Retrieve user details (including id and name) for the members of the group
+        const memberEmails = group.members;
+        const memberDetails = await getUserDetails(memberEmails);
+        console.log(memberDetails);
+        
+        // Render the group details page with the retrieved group and member details
+        res.render("groupDetails", { group, isAdmin: adminStatus, memberDetails });
     } catch (error) {
-      console.error("Error fetching group details:", error);
-      res.status(500).send("Error fetching group details.");
+        console.error("Error fetching group details:", error);
+        res.status(500).send("Error fetching group details.");
     }
-  });
+});
+
+
+
+  app.post("/edit-group-name", sessionValidation, async (req, res) => {
+    try {
+        const groupId = req.query.groupId;
+        const newName = req.body.newName;
+
+        // Update the group name in the MongoDB collection
+        await groupCollection.updateOne(
+            { _id: new ObjectId(groupId) },
+            { $set: { name: newName } }
+        );
+
+        // Redirect to the group details page
+        res.redirect(`/group-details/${groupId}`);
+    } catch (error) {
+        console.error("Error updating group name:", error);
+        res.status(500).send("Error updating group name.");
+    }
+});
+
 
 app.post('/invite', sessionValidation, async (req, res) => { 
     try { 
@@ -455,7 +521,7 @@ app.post('/invite', sessionValidation, async (req, res) => {
         const inviteMessage = { 
             success: validEmails.length > 0 ? 'Users were successfully added.' : '', 
             existingMembers: existingMembers.map(email => `${email} is already a member.`), 
-            invalidEmails: invalidEmails.map(email => `${email} is not associated with any user.`), 
+            invalidEmails: invalidEmails, // Just passing the array of invalid emails without modification
             groupID: groupId 
         }; 
  
@@ -465,7 +531,8 @@ app.post('/invite', sessionValidation, async (req, res) => {
         console.error('Error inviting users to group:', error); 
         res.status(500).json({ success: false, message: 'Internal server error.' }); 
     } 
-}); 
+});
+
 
 app.get('/profile', sessionValidation, (req, res) => {
 
