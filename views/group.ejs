@@ -1,60 +1,62 @@
 <%- include("templates/headerV2") %>
 
-<div class="flex justify-center items-center mt-8">
-    <div class="bg-white rounded-lg p-6">
-        <h2 class="text-xl font-semibold mb-4">Group Details</h2>
-        <div class="border border-gray-300 p-4 rounded-md">
-            <h3 class="text-lg font-semibold mb-2"><%= group.name %></h3>
-            <!-- New div for this week's activity -->
-            <div class="mt-8 mb-20">
-                <h2 class="text-lg font-semibold">This week's activity</h2>
-            </div>
-            <!-- Flex container for the green buttons -->
-            <div class="flex justify-center items-center mb-8">
-                <!-- View Members button -->
-                <button onclick="openMembersPopup()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">View Members</button>
-                <!-- Submit Activity button -->
-                <button onclick="submitActivity()" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded ml-2">Submit Activity</button>
-                <a href="/randomizer?id=<%= group._id %>" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded ml-2">Randomize</a>
-            </div>
-            
-            <!-- View Submitted Activities button -->
-            <div class="flex justify-center items-center mb-8">
-                <button onclick="viewSubmittedActivities()" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">View Submitted Activities</button>
-            </div>
-            <!-- Invite new member button -->
-            <div class="flex justify-center items-center mb-4">
-                <button onclick="openInvitePopup()" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">Invite new members</button>
-            </div>
-            <!-- Members List Popup -->
-            <div id="membersPopup" class="hidden fixed top-0 left-0 w-full h-full bg-gray-800 bg-opacity-75 flex justify-center items-center">
-                <div class="bg-white rounded-lg p-6">
-                    <h2 class="text-xl font-semibold mb-4">Members</h2>
-                    
-                    <ul class="list-disc pl-4">
-                        <% group.members.forEach(member => { %>
-                            <li><%= member %></li>
-                        <% }); %>
-                    </ul>
-                    <button onclick="closeMembersPopup()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-2">Close</button>
-                </div>
-            </div>
-            <!-- Invite New Member Popup -->
-            <div id="invitePopup" class="hidden fixed top-0 left-0 w-full h-full bg-gray-800 bg-opacity-75 flex justify-center items-center">
-                <div class="bg-white rounded-lg p-6">
-                    <h2 class="text-xl font-semibold mb-4">Invite New Members</h2>
-                    <form id="inviteForm" action="/invite?groupId=<%= group._id %>" method="post">
-                        <label for="emails" class="block mb-2">Enter email addresses (separated by commas):</label>
-                        <textarea id="emails" name="emails" rows="4" class="border border-gray-300 rounded-md p-2 mb-4 w-full"></textarea>
-                        <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Invite</button>
-                    </form>
-                    <button onclick="closeInvitePopup()" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded mt-2">Cancel</button>
-                </div>
-            </div>
-        </div>
+
+<div class="sticky top-[10vh] bg-white p-4 shadow-md">
+    <!-- New div for this week's activity -->
+    <div class="mb-4">
+        <h2 class="text-lg font-semibold">This week's activity: </h2>
+    </div>
+    <!-- Flex container for the green buttons -->
+    <div class="flex justify-center items-center">
+        <!-- View Members button -->
+        <!-- <button onclick="openMembersPopup()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">View Members</button> -->
+        <!-- Submit Activity button -->
+        <button onclick="submitActivity()" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded ml-2">Submit Activity</button>
+        <a href="/randomizer?id=<%= group._id %>" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded ml-2">Randomize</a>
     </div>
 </div>
+<div class="mt-2 p-2">
+    <ul id="messages" class="flex flex-col">
+        <% group.messages && group.messages.forEach(message => { %>
+            <li class="w-fit max-w-[85vw] py-1 px-3 rounded-2xl mb-2 <%=message.user===session.email?'self-end bg-purple text-white':'self-start bg-slate-200'%>"><%= message.message %></li>
+        <% }); %>
+    </ul>
+</div>
+<div class="h-[68px]" onLoad="">
 
+</div>
+<script src="/socket.io/socket.io.js"></script>
+<script src="/scripts/chat.js"></script>
+<script>
+    var socket = io();
+    socket.emit('join', '<%= group._id %>');
+
+    // var button = document.getElementById('submitMessageButton');
+    // var input = document.getElementById('chatInput');
+    var messages = document.getElementById('messages');
+    document.body.onload = ()=>window.scrollTo(0, document.body.scrollHeight);
+
+    // socket.on('connect', function(socket) {
+    //     console.log('Connected to socket' + socket);
+    // });
+
+    // socket.join('<%= group._id %>')
+    socket.on('chat message', function(msg) {
+        console.log(msg)
+        var item = document.createElement('li');
+        item.style.width = "fit-content";
+        if(msg.user==="<%=session.email%>"){
+            item.className="w-fit max-w-[85vw] py-1 px-3 rounded-2xl mb-2 self-end bg-purple text-white";
+        } else {
+            item.className="w-fit max-w-[85vw] py-1 px-3 rounded-2xl mb-2 self-start bg-slate-200";
+        }
+        item.textContent = msg.message;
+        messages.appendChild(item);
+        window.scrollTo(0, document.body.scrollHeight);
+        // item.scrollIntoView({behavior: "smooth"});
+    });
+    // window.scrollTo(0, document.body.scrollHeight);
+</script>
 <%- include("templates/footer") %>
 
 
