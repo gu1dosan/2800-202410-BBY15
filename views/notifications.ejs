@@ -1,0 +1,46 @@
+<%- include('templates/headerV2') %>
+    <div class="container mx-auto p-4">
+        <h1 class="text-3xl font-bold mb-4 text-center">Notifications</h1>
+
+        <!-- Notification Items -->
+        <div>
+            <% if (notifications.length===0) { %>
+                <div class="flex flex-col items-center justify-center h-full">
+                    <img src="/images/notification.png" alt="No Notifications" class="w-40 h-40 mb-4">
+                    <h2 class="text-xl font-bold text-gray-700 text-center">No Notifications</h2>
+                    <p class="text-sm text-gray-500 text-center">Clutter cleared! We’ll notify you when there is
+                        something new.</p>
+                </div>
+                <% } else { %>
+                    <% notifications.slice().reverse().forEach(notification=> { %>
+                        <div
+                            class="<%= notification.read ? 'bg-gray-500' : 'bg-light-purple' %> p-4 rounded-lg shadow-md flex justify-between items-center mb-4">
+                            <div class="flex-grow">
+                                <p class="text-lg text-white">
+                                    <%= notification.message %>
+                                </p>
+                                <p class="text-sm text-white">Group: <%= notification.groupTitle %>
+                                </p>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <% if (!notification.read) { %>
+                                    <form action="/mark_as_read?userId=<%= userId %>" method="POST" class="inline">
+                                        <input type="hidden" name="notificationId" value="<%= notification._id %>">
+                                        <button
+                                            class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Mark
+                                            as Read</button>
+                                    </form>
+                                    <% } %>
+                                        <form action="/delete_notification?userId=<%= userId %>" method="POST"
+                                            class="inline">
+                                            <input type="hidden" name="notificationId" value="<%= notification._id %>">
+                                            <button
+                                                class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">Delete</button>
+                                        </form>
+                            </div>
+                        </div>
+                        <% }); %>
+                            <% } %>
+        </div>
+    </div>
+    <%- include('templates/footer') %>
