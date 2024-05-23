@@ -465,8 +465,8 @@ app.get("/group/:groupId", sessionValidation, async (req, res) => {
             memberDetails: {
                 _id: 1,
                 name: 1,
-                email: 1
-                // Excluding password field
+                email: 1,
+                profilePicture: 1,
             }
         }}
     ]).toArray();
@@ -497,7 +497,7 @@ io.on('connection', (socket) => {
 });
 app.post('/group/:groupId/message', sessionValidation, jsonParser, async (req, res) => {
     // console.log(req.body)
-    var message = {message:req.body.input, user:req.session.email, time: new Date()};
+    var message = {message:req.body.input, user:req.session.email, name:req.session.name, time: new Date()};
     // console.log(message)
     const groupId = req.params.groupId;
 
