@@ -6,17 +6,24 @@
     
     <!-- Profile Picture Section -->
     <div class="flex flex-col items-center mb-5">
-        <img src="./images/dog.jpeg" alt="Profile Picture" class="w-32 h-32 md:w-48 md:h-48 lg:w-64 lg:h-64 rounded-full shadow-lg mb-4">
+        <% if (profilePicture) { %>
+            <img src="<%= profilePicture %>" alt="Profile Picture" class="w-32 h-32 md:w-48 md:h-48 lg:w-64 lg:h-64 rounded-full shadow-lg mb-4">
+        <% } else { %>
+            <img src="./images/dog.jpeg" alt="Profile Picture" class="w-32 h-32 md:w-48 md:h-48 lg:w-64 lg:h-64 rounded-full shadow-lg mb-4">
+        <% } %>
         <p class="text-center text-sm md:text-md lg:text-lg">Edit your profile details below, <%= name %>!</p>
     </div>
     
     <!-- Form for Editing Profile Details -->
-    <form action="/updateProfile" method="post" class="flex flex-col items-center mb-5">
+    <form action="/updateProfile" method="post" enctype="multipart/form-data" class="flex flex-col items-center mb-5">
         <label for="name" class="text-lg mb-2">Name:</label>
         <input type="text" id="name" name="name" value="<%= name %>" class="text-center mb-4 p-2 rounded border-2 border-gray-300" required>
 
         <label for="biography" class="text-lg mb-2">Biography:</label>
-        <textarea id="biography" name="biography" rows="4" class="w-full max-w-prose text-center p-2 rounded border-2 border-gray-300" required>Enter your biography here...</textarea>
+        <textarea id="biography" name="biography" rows="4" class="w-full max-w-prose text-center p-2 rounded border-2 border-gray-300" required><%= biography %></textarea>
+
+        <label for="profilePicture" class="text-lg mb-2">Profile Picture:</label>
+        <input type="file" id="profilePicture" name="profilePicture" class="text-center mb-4 p-2 rounded border-2 border-gray-300">
 
         <!-- Button Section at the Bottom -->
         <div class="w-full bg-white z-10 shadow-md">
