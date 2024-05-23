@@ -94,20 +94,33 @@ async function isAdmin(userEmail, groupId) {
   }
 }
 
-async function getUserDetails(emails) {
+async function getUserDetails(emails, groupId) {
     try {
         // Find users with matching email addresses
         const users = await userCollection.find({ email: { $in: emails } }).toArray();
 
-        // Create an array of objects containing id (converted to string) and name for each user
-        const userDetails = users.map(user => ({ id: user._id.toString(), name: user.name }));
+        // Initialize an array to store user details
+        const userDetails = [];
+
+        // Retrieve the group information
+        const group = await groupCollection.findOne({ _id: new ObjectId(groupId) });
+        console.log(group);
+
+        // Iterate over each user and check if they are admins
+        for (const user of users) {
+            const isAdmin = group.admin.includes(user.email);
+            userDetails.push({ id: user._id.toString(), name: user.name, isAdmin, email: user.email });
+        }
 
         return userDetails;
     } catch (error) {
         console.error("Error fetching user details:", error);
         return [];
     }
+
 }
+
+
 
 
 
@@ -457,11 +470,11 @@ app.get("/group-details/:groupId", sessionValidation, async (req, res) => {
   
         // Retrieve user details (including id and name) for the members of the group
         const memberEmails = group.members;
-        const memberDetails = await getUserDetails(memberEmails);
+        const memberDetails = await getUserDetails(memberEmails, groupId);
         console.log(memberDetails);
         
         // Render the group details page with the retrieved group and member details
-        res.render("groupDetails", { group, isAdmin: adminStatus, memberDetails });
+        res.render("groupDetails", { group, isAdmin: adminStatus, memberDetails});
     } catch (error) {
         console.error("Error fetching group details:", error);
         res.status(500).send("Error fetching group details.");
@@ -525,6 +538,83 @@ app.get("/leave-group", sessionValidation, async (req, res) => {
         res.redirect("/groups?error=true");
     }
 });
+
+app.delete("/remove-member", sessionValidation, async (req, res) => {
+    const groupId = req.query.groupId;
+    const userId = req.query.userId;
+
+    try {
+        // Find the user by userId to get the email
+        const user = await userCollection.findOne({ _id: new ObjectId(userId) });
+
+        if (!user) {
+            console.error("User not found");
+            return res.status(404).send("User not found");
+        }
+
+        const userEmail = user.email;
+
+        // Remove the user's email from the group's members array
+        const result = await groupCollection.updateOne(
+            { _id: new ObjectId(groupId) },
+            { $pull: { members: userEmail } }
+        );
+
+        if (result.modifiedCount === 0) {
+            console.error("User not removed from group");
+            return res.status(500).send("Failed to remove user from group");
+        }
+
+        console.log(`User ${userEmail} removed from group with ID ${groupId}`);
+
+        // Send a success response
+        res.sendStatus(200);
+    } catch (error) {
+        console.error("Error removing user from group:", error);
+        res.status(500).send("Error removing user from group");
+    }
+});
+
+
+app.post("/toggle-admin-status", sessionValidation, async (req, res) => {
+    try {
+        const groupId = req.query.groupId;
+        const userEmail = req.query.userEmail;
+
+        // Find the group to check if the user is currently an admin
+        const group = await groupCollection.findOne({ _id: new ObjectId(groupId) });
+        
+        if (!group) {
+            return res.status(404).send("Group not found.");
+        }
+
+        const isAdmin = group.admin.includes(userEmail);
+
+        // Toggle admin status
+        if (isAdmin) {
+            // Remove user from admins
+            await groupCollection.updateOne(
+                { _id: new ObjectId(groupId) },
+                { $pull: { admin: userEmail } }
+            );
+        } else {
+            // Add user to admins
+            await groupCollection.updateOne(
+                { _id: new ObjectId(groupId) },
+                { $addToSet: { admin: userEmail } }
+            );
+        }
+
+        console.log(`User ${userEmail} admin status toggled in group with ID ${groupId}`);
+
+        // Redirect to the group details page
+        res.redirect(`/group-details/${groupId}`);
+    } catch (error) {
+        console.error("Error toggling admin status:", error);
+        res.status(500).send("Error toggling admin status.");
+    }
+});
+
 
 
 

@@ -27,18 +27,34 @@
             <div class="flex justify-center items-center mb-8">
                 <button onclick="viewSubmittedActivities()" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">View Submitted Activities</button>
             </div>
-            <!-- Members List Popup -->
-            <div id="membersPopup" class="hidden fixed top-0 left-0 w-full h-full bg-gray-800 bg-opacity-75 flex justify-center items-center">
-                <div class="bg-white rounded-lg p-6 w-80">
-                    <h2 class="text-xl font-semibold mb-4">Members</h2>
-                    <ul class="list-none pl-0">
-                        <% memberDetails.forEach(user => { %>
-                            <li class="border-b border-gray-300 py-2"><a href="/profile/<%= user.id %>"><%= user.name %></a></li>
-                        <% }); %>
-                    </ul>
-                    <button onclick="closeMembersPopup()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-2">Close</button>
-                </div>
+        <!-- Members List Popup -->
+        <div id="membersPopup" class="hidden fixed top-0 left-0 w-full h-full bg-gray-800 bg-opacity-75 flex justify-center items-center">
+            <div class="bg-white rounded-lg p-6 w-80">
+                <h2 class="text-xl font-semibold mb-4">Members</h2>
+                <ul class="list-none pl-0">
+                    <% memberDetails.forEach(user => { %>
+                    <li class="border-b border-gray-300 py-2 flex justify-between items-center">
+                        <a href="/profile/<%= user.id %>">
+                            <%= user.name %><% if (user.isAdmin) { %> (admin) <% } %>
+                        </a>
+                        <% if (user.isAdmin) { %>
+                        <div>
+                            <button onclick="toggleAdminStatus('<%= user.id %>', '<%= user.email %>')" class="text-green-500 hover:text-green-700" title="Toggle admin status">🔽</button>
+                            </div>
+                        <% } else { %>
+                            <div class="flex">
+                            <button onclick="removeMember('<%= user.id %>')" class="text-red-500 hover:text-red-700 mr-2" title="Remove from group">🗑️</button>
+                            <button onclick="toggleAdminStatus('<%= user.id %>', '<%= user.email %>')" class="text-green-500 hover:text-green-700" title="Toggle admin status">🔼</button>
+                            </div>
+                        <% } %>
+                    </li>
+                    <% }); %>
+                </ul>
+                <button onclick="closeMembersPopup()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-2">Close</button>
             </div>
+        </div>
+
+
             <!-- Invite New Member Popup -->
             <div id="invitePopup" class="hidden fixed top-0 left-0 w-full h-full bg-gray-800 bg-opacity-75 flex justify-center items-center">
                 <div class="bg-white rounded-lg p-6">
@@ -97,6 +113,43 @@
 <%- include("templates/footer") %>
 
 <script>
+
+    async function toggleAdminStatus(userId, userEmail) {
+        const groupId = '<%= group._id %>';
+        try {
+            const response = await fetch(`/toggle-admin-status?groupId=${groupId}&userId=${userId}&userEmail=${userEmail}`, {
+                method: 'POST'
+            });
+
+            if (response.ok) {
+                location.reload();
+            } else {
+                console.error('Failed to toggle admin status');
+            }
+        } catch (error) {
+            console.error('Error toggling admin status:', error);
+        }
+    }
+
+
+    async function removeMember(userId) {
+        const groupId = '<%= group._id %>';
+        try {
+            // Send a request to the server to remove the member
+            const response = await fetch(`/remove-member?groupId=${groupId}&userId=${userId}`, {
+                method: 'DELETE'
+            });
+            if (response.ok) {
+                // Reload the page to reflect the updated member list
+                location.reload();
+            } else {
+                console.error('Failed to remove member');
+            }
+        } catch (error) {
+            console.error('Error removing member:', error);
+        }
+    }
+
     function viewSubmittedActivities() {
         window.location.href = '/submitted_event?groupId=<%= group._id %>';
     }
