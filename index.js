@@ -506,6 +506,26 @@ app.get("/delete-group", sessionValidation, async (req, res) => {
     }
 });
 
+app.get("/leave-group", sessionValidation, async (req, res) => {
+    const groupId = req.query.groupId;
+    const userEmail = req.session.email; // Assuming the user's email is stored in the session
+
+    try {
+        // Remove the user's email from the group's members array
+        await groupCollection.updateOne(
+            { _id: new ObjectId(groupId) },
+            { $pull: { members: userEmail } }
+        );
+        console.log(`User ${userEmail} removed from group with ID ${groupId}`);
+
+        // Redirect to the groups page
+        res.redirect("/groups");
+    } catch (error) {
+        console.error("Error leaving group:", error);
+        res.redirect("/groups?error=true");
+    }
+});
+
 
 
 app.post('/invite', sessionValidation, async (req, res) => { 
