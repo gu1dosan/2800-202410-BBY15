@@ -490,6 +490,24 @@ app.get("/group-details/:groupId", sessionValidation, async (req, res) => {
 });
 
 
+app.get("/delete-group", sessionValidation, async (req, res) => {
+    const groupId = req.query.groupId;
+
+    try {
+        // Delete the group from the groups collection
+        await groupCollection.deleteOne({ _id: new ObjectId(groupId) });
+        console.log(`Group with ID ${groupId} deleted`);
+
+        // Redirect to the groups page
+        res.redirect("/groups");
+    } catch (error) {
+        console.error("Error deleting group:", error);
+        res.redirect("/groups?error=true&message=" + encodeURIComponent("Error deleting group."));
+    }
+});
+
+
+
 app.post('/invite', sessionValidation, async (req, res) => { 
     try { 
         const groupId = req.query.groupId; // Get the group ID from the query parameter 
