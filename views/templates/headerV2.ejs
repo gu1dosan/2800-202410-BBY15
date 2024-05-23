@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NextUp</title>
+    <title><%= locals.pageTitle ? locals.pageTitle+' | ' : '' %>NextUp</title>
     <link rel="icon" type="image" href="/public/images/favicon.png" />
     <link href="/styles/output.css" rel="stylesheet">
     <link href="/styles/styles.css" rel="stylesheet">
@@ -17,13 +17,24 @@
 </head>
 <body class="overflow-auto">
     <header class=" bg-purple sticky top-0 w-full h-[10vh] flex flex-row items-center justify-between">
-        <a href="#" onclick="window.history.back()">
+        <a href="#" onclick=<%= locals.backButton ? 'location.href=\"'+backButton+'\"' : 'window.history.back()'%>>
             <img src="/images/backButton.png" alt="BackButton" class="m-2 h-[32px]">
         </a>
         <!-- add onclick for logo -->
-        <a href="/">
-            <img src="/images/clearLogo.png" alt="Logo" class="max-w-24 max-h-24 h-[64px]">
-        </a>
+        <% if(locals.pageTitle) {%>
+            <% if(locals.group){ %>
+                <a href="/group-details/<%= group._id%>"  class="text-center">
+                    <h1 class="text-white text-xl"><%= pageTitle %></h1>
+                    <p class="text-white text-xs">View group details</p>
+                </a>
+            <% } else { %>
+                <h1 class="text-white text-xl"><%= locals.pageTitle %></h1>
+            <% } %>
+        <% } else { %>
+            <a href="/">
+                <img src="/images/clearLogo.png" alt="Logo" class="max-w-24 max-h-24 h-[64px]">
+            </a>
+        <% } %>
         <div class="w-[48px]">
 
         </div>

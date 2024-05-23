@@ -1,25 +1,29 @@
-    <footer class="w-full h-[68px] lg:h-[100px] fixed bottom-0 bg-purple">
-        <nav class="flex justify-around items-center w-full h-full">
-            <a class="flex flex-col items-center" href="/groups">
-                <% console.log(locals)%>
+    <footer class="w-full h-[68px] lg:h-[100px] fixed bottom-0 bg-purple flex items-center">
+        <% if(locals.chat){ %>
+            <input id="chatInput" name="chatInput" value="" type="text" class="m-2 mr-0 block rounded-xl px-2.5 py-2.5 text-sm bg-slate-50 border-2 focus:border-2 border-purple appearance-none focus:outline-none focus:ring-0 focus:border-violet-600 peer placeholder-gray-300" style="width:100%;height:-webkit-fill-available" placeholder="Message" />
+            <img id="sendMessageButton" src="/images/send-rounded.svg" alt="Send" class="m-2" style="height:36px" onclick="sendMessage('<%= group._id %>')">
+        <% } else { %>
+            <nav class="flex justify-around items-center w-full h-full">
+                <a class="flex flex-col items-center" href="/groups">
                     <img src="/images/<%= locals.pathname.startsWith('/groups') ? 'home-filled' : 'home-rounded'%>.svg" alt="Home" class="h-6 lg:h-10">
-                <p class="text-white text-sm <%= locals.pathname.startsWith('/groups') && 'font-bold'%>">Home</p>
-            </a>
-            <!-- add onclick for events -->
-            <a class="flex flex-col items-center" href="/activities">
-                <img src="/images/<%= locals.pathname.startsWith('/activities') ? 'activities-filled' : 'activities-rounded'%>.svg" alt="Event" class="h-6 lg:h-10">
-                <p class="text-white text-sm <%= locals.pathname.startsWith('/activities') && 'font-bold'%>">Activities</p>
-            </a>
-            <!-- add onclick for search -->
-            <a class="flex flex-col items-center" href="/search">
-                <img src="/images/<%= locals.pathname.startsWith('/search') ? 'search-filled' : 'search-rounded'%>.svg" alt="Search" class="h-6 lg:h-10">
-                <p class="text-white text-sm <%= locals.pathname.startsWith('/search') && 'font-bold'%>">Search</p>
-            </a>
-            <a class="flex flex-col items-center" href="/profile">
-                <img src="/images/<%= locals.pathname.startsWith('/profile') ? 'account-filled' : 'account-rounded'%>.svg" alt="Profile" class="h-6 lg:h-10">
-                <p class="text-white text-sm <%= locals.pathname.startsWith('/profile') && 'font-bold'%>">Account</p>
-            </a>
-        </nav>
+                    <p class="text-white text-sm <%= locals.pathname.startsWith('/groups') && 'font-bold'%>">Home</p>
+                </a>
+                <!-- add onclick for events -->
+                <a class="flex flex-col items-center" href="/activities">
+                    <img src="/images/<%= locals.pathname.startsWith('/activities') ? 'activities-filled' : 'activities-rounded'%>.svg" alt="Event" class="h-6 lg:h-10">
+                    <p class="text-white text-sm <%= locals.pathname.startsWith('/activities') && 'font-bold'%>">Activities</p>
+                </a>
+                <!-- add onclick for search -->
+                <a class="flex flex-col items-center" href="/search">
+                    <img src="/images/<%= locals.pathname.startsWith('/search') ? 'search-filled' : 'search-rounded'%>.svg" alt="Search" class="h-6 lg:h-10">
+                    <p class="text-white text-sm <%= locals.pathname.startsWith('/search') && 'font-bold'%>">Search</p>
+                </a>
+                <a class="flex flex-col items-center" href="/profile">
+                    <img src="/images/<%= locals.pathname.startsWith('/profile') ? 'account-filled' : 'account-rounded'%>.svg" alt="Profile" class="h-6 lg:h-10">
+                    <p class="text-white text-sm <%= locals.pathname.startsWith('/profile') && 'font-bold'%>">Account</p>
+                </a>
+            </nav>
+        <% } %>
     </footer>
     <!-- footer above -->
 
