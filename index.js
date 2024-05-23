@@ -94,7 +94,7 @@ async function isAdmin(userEmail, groupId) {
     const group = await groupCollection.findOne({ _id: new ObjectId(groupId) });
 
     // Check if the group exists and if the email is in the admin array
-    if (group && group.admin.includes(userEmail)) {
+    if (group && group.admin && group.admin.includes(userEmail)) {
       return true;
     }
     return false;
@@ -114,11 +114,11 @@ async function getUserDetails(emails, groupId) {
 
         // Retrieve the group information
         const group = await groupCollection.findOne({ _id: new ObjectId(groupId) });
-        console.log(group);
+        // console.log(group);
 
         // Iterate over each user and check if they are admins
         for (const user of users) {
-            const isAdmin = group.admin.includes(user.email);
+            const isAdmin = group.admin && group.admin.includes(user.email);
             userDetails.push({ id: user._id.toString(), name: user.name, isAdmin, email: user.email });
         }
 
@@ -538,7 +538,7 @@ app.get("/group-details/:groupId", sessionValidation, async (req, res) => {
         // Retrieve user details (including id and name) for the members of the group
         const memberEmails = group.members;
         const memberDetails = await getUserDetails(memberEmails, groupId);
-        console.log(memberDetails);
+        // console.log(memberDetails);
         
         // Render the group details page with the retrieved group and member details
         res.render("groupDetails", { group, isAdmin: adminStatus, memberDetails});
