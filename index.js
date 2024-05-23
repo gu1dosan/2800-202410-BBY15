@@ -14,6 +14,11 @@ const Joi = require("joi");
 const { ObjectId } = require("mongodb");
 const sendEmail = require("./utils/sendEmail.js");
 
+const http = require('http');
+const server = http.createServer(app);
+const { Server } = require("socket.io");
+const io = new Server(server);
+
 const expireTime = 15 * 24 * 60 * 60 * 1000; //expires after 15 days
 
 const cloud_name = process.env.CLOUDINARY_CLOUD_NAME;
@@ -142,7 +147,8 @@ app.post('/signup', async (req, res) => {
      
         var hashedPassword = await bcrypt.hash(password, Number(process.env.SALTROUNDS)); 
          
-        await userCollection.insertOne({name: name, email:email, user_type: 'user', password: hashedPassword}); 
+        const {insertedId} = await userCollection.insertOne({name: name, email:email, password: hashedPassword}); 
+        req.session.id = insertedId;
         req.session.authenticated = true; 
         req.session.email = email; 
         req.session.name = name; 
@@ -189,10 +195,10 @@ app.post('/login', async (req, res) => {
 	} 
 	if (await bcrypt.compare(password, result[0].password)) { 
 		// console.log("correct password"); 
+        req.session.id = result[0]._id;
 		req.session.authenticated = true; 
         req.session.email = email; 
         req.session.name = result[0].name; 
-        req.session.user_type = result[0].user_type; 
         req.session.cookie.maxAge = expireTime; 
  
 		return res.redirect('/'); 
@@ -382,21 +388,70 @@ app.get("/groupConfirmation", sessionValidation, (req, res) => {
 app.get("/group/:groupId", sessionValidation, async (req, res) => {
   try {
     const groupId = req.params.groupId;
-    const group = await groupCollection.findOne({ _id: new ObjectId(groupId) });
+    const group = await groupCollection.aggregate([
+        {$match: {_id: new ObjectId(groupId)}},
+        {$lookup: {
+            from: 'users',
+            localField: 'members',
+            foreignField: 'email',
+            as: 'memberDetails'
+        }},
+        {$project: {
+            name: 1,
+            activities:1,
+            events: 1,
+            messages: 1,
+            memberDetails: {
+                _id: 1,
+                name: 1,
+                email: 1
+                // Excluding password field
+            }
+        }}
+    ]).toArray();
 
-    if (!group) {
+    if (!group[0]) {
       // Group not found
       res.status(404).send("Group not found.");
       return;
     }
-
+    // console.log(JSON.stringify(group[0]));
+    
     // Render the group details page with the retrieved group
-    res.render("group", { group });
+    res.render("group", { group:group[0], pageTitle:group[0].name, chat: true, backButton: '/groups'});
   } catch (error) {
     console.error("Error fetching group details:", error);
     res.status(500).send("Error fetching group details.");
   }
 });
+io.on('connection', (socket) => {
+    // console.log('a user connected');
+    // socket.on('disconnect', () => {
+    //     console.log('user disconnected');
+    // });
+    socket.on('join', function(room) {
+        socket.join(room);
+        // console.log(socket)
+    });
+});
+app.post('/group/:groupId/message', sessionValidation, jsonParser, async (req, res) => {
+    // console.log(req.body)
+    var message = {message:req.body.input, user:req.session.email, time: new Date()};
+    // console.log(message)
+    const groupId = req.params.groupId;
+
+    try {
+        await groupCollection.updateOne( 
+            { _id: new ObjectId(groupId) }, 
+            { $push: { messages: message } } 
+        ); 
+        io.to(groupId).emit('chat message', message);
+        return res.status(204).json({ success: true });
+    } catch (error) {
+        console.error("Error sending message:", error);
+        return res.status(500).send("Error sending message.");
+    }
+})
 
 app.get("/group-details/:groupId", sessionValidation, async (req, res) => {
     try {
@@ -825,6 +880,6 @@ app.get("*", (req, res) => {
     res.render("404");
 })
 
-app.listen(port, () => {
+server.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
