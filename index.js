@@ -550,28 +550,27 @@ app.post('/updateProfile', sessionValidation, upload.single('profilePicture'), a
 });
 
 
-app.get('/randomizer', async (req, res) => { 
+app.get('/randomizer', sessionValidation, async (req, res) => { 
     const groupId = req.query.id; 
- 
+
     if (!ObjectId.isValid(groupId)) { 
         return res.status(400).send("Invalid group ID format."); 
     } 
- 
+
     try { 
         const group = await groupCollection.findOne({ _id: new ObjectId(groupId) }); 
- 
+
         if (!group || !group.events || group.events.length === 0) { 
             return res.status(404).send("No events found for this group."); 
         } 
- 
-        const randomEvent = group.events[Math.floor(Math.random() * group.events.length)]; 
- 
-        res.render('randomizer', { event: randomEvent }); 
+
+        res.render('randomizer', { events: group.events }); 
     } catch (error) { 
         console.error("Error fetching group details:", error); 
         res.status(500).send("Error fetching group details."); 
     } 
-}); 
+});
+
 
 app.get('/event_submission', sessionValidation, async (req, res) => {
     const groupId = req.query.groupId;
