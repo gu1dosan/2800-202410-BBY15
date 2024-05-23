@@ -6,6 +6,7 @@ const bcrypt = require("bcrypt");
 require("./utils.js");
 var bodyParser = require("body-parser");
 const crypto = require("crypto");
+const {v4: uuid} = require('uuid');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -22,6 +23,10 @@ const io = new Server(server);
 const expireTime = 15 * 24 * 60 * 60 * 1000; //expires after 15 days
 
 const cloud_name = process.env.CLOUDINARY_CLOUD_NAME;
+
+const multer  = require('multer')
+const storage = multer.memoryStorage()
+const upload = multer({ storage: storage })
 
 const cloudinary = require("cloudinary");
 const { type } = require("os");
@@ -185,7 +190,7 @@ app.post('/login', async (req, res) => {
         return res.render('login',{error: 'Invalid email or password',formData:{email: email, password: password}}); 
 	} 
  
-    const result = await userCollection.find({ email: email }).project({ email: 1, name: 1, user_type: 1, password: 1, _id: 1 }).toArray(); 
+    const result = await userCollection.find({ email: email }).project({ email: 1, name: 1, user_type: 1, password: 1, biography: 1, profilePicture: 1, _id: 1 }).toArray(); 
  
 	// console.log(result); 
 	if (result.length != 1) { 
@@ -199,6 +204,9 @@ app.post('/login', async (req, res) => {
 		req.session.authenticated = true; 
         req.session.email = email; 
         req.session.name = result[0].name; 
+        req.session.user_type = result[0].user_type; 
+        req.session.profilePicture = result[0].profilePicture;  // Retrieve profile picture from database
+        req.session.biography = result[0].biography;  // Retrieve biography from database
         req.session.cookie.maxAge = expireTime; 
  
 		return res.redirect('/'); 
@@ -292,20 +300,25 @@ app.post("/password-reset/:userId/:token", async (req, res) => {
     } 
 }); 
 
-app.get("/profile", (req, res) => {
+app.get('/profile', sessionValidation, (req, res) => {
     var name = req.session.name;
     var biography = req.session.biography;
-  
-    res.render(`profile`, { name, biography });
-  });
+    var profilePicture = req.session.profilePicture; // Ensure this is passed
+
+    res.render('profile', { name, biography, profilePicture });
+});
+
   
 // GET handler for displaying the form
-app.get("/editProfile", (req, res) => {
-if (!req.session.name) {
-    return res.redirect("/login"); // Redirect if the user is not logged in
-}
-res.render("editProfile", { name: req.session.name });
+app.get('/editProfile', sessionValidation, (req, res) => {
+    if (!req.session.name) {
+        return res.redirect('/login');  // Redirect if the user is not logged in
+    }
+    res.render('editProfile', { name: req.session.name, biography: req.session.biography, profilePicture: req.session.profilePicture });
 });
+
+
+  
 
 app.get("/groups", sessionValidation, async (req, res) => {
   try {
@@ -542,8 +555,21 @@ app.get('/editProfile', sessionValidation, (req, res) => {
 });
 
 // POST handler for processing the form submission
-app.post('/updateProfile', sessionValidation, async (req, res) => {
+app.post('/updateProfile', sessionValidation, upload.single('profilePicture'), async (req, res) => {
     const { name, biography } = req.body;
+    let profilePictureUrl = null;
+
+    // If a file is uploaded, upload it to Cloudinary
+    if (req.file) {
+        let buf64 = req.file.buffer.toString('base64');
+        try {
+            const result = await cloudinary.uploader.upload(`data:image/png;base64,${buf64}`, { public_id: uuid() });
+            profilePictureUrl = result.secure_url;  // Use the secure_url provided by Cloudinary
+        } catch (error) {
+            console.error("Error uploading image to Cloudinary:", error);
+            return res.status(500).send("Error uploading image");
+        }
+    }
 
     // Validation schema
     const schema = Joi.object({
@@ -555,14 +581,18 @@ app.post('/updateProfile', sessionValidation, async (req, res) => {
     const validationResult = schema.validate({ name, biography });
     if (validationResult.error != null) {
         console.log(validationResult.error);
-        res.send(`${validationResult.error.message}<br/> <a href='/editProfile'>Try again</a>`);
-        return;
+        return res.status(400).send(`${validationResult.error.message}<br/> <a href='/editProfile'>Try again</a>`);
     }
 
     // Insert or update the document in the database
+    const updateFields = { name, biography };
+    if (profilePictureUrl) {
+        updateFields.profilePicture = profilePictureUrl;  // Add the profile picture URL to the update fields
+    }
+
     await userCollection.updateOne(
         { email: req.session.email },
-        { $set: { name: name, biography: biography } },
+        { $set: updateFields },
         { upsert: true }
     );
 
@@ -570,21 +600,25 @@ app.post('/updateProfile', sessionValidation, async (req, res) => {
     req.session.authenticated = true;
     req.session.biography = biography;
     req.session.name = name;
+    if (profilePictureUrl) {
+        req.session.profilePicture = profilePictureUrl;  // Update session with the new profile picture URL
+    }
     req.session.cookie.maxAge = expireTime;
 
     res.redirect('/profile');
 });
 
-app.get('/randomizer', async (req, res) => { 
+
+app.get('/randomizer', sessionValidation, async (req, res) => { 
     const groupId = req.query.id; 
- 
+
     if (!ObjectId.isValid(groupId)) { 
         return res.status(400).send("Invalid group ID format."); 
     } 
- 
+
     try { 
         const group = await groupCollection.findOne({ _id: new ObjectId(groupId) }); 
- 
+
         if (!group || !group.events || group.events.length === 0) { 
             return res.status(404).send("No events found for this group."); 
         } 
@@ -619,7 +653,7 @@ app.get('/randomizer', async (req, res) => {
             );
         }
  
-        res.render('randomizer', { event: randomEvent }); 
+        res.render('randomizer', { event: group.events }); 
     } catch (error) { 
         console.error("Error fetching group details:", error); 
         res.status(500).send("Error fetching group details."); 
