@@ -100,8 +100,8 @@ app.use((req, res, next) => {
     next();
   });
 
-app.get("/test", (req, res) => {
-  res.render("test");
+app.get('/egg', (req, res) => {
+    res.render("egg");
 });
 
 app.get("/", sessionValidation, (req, res) => {

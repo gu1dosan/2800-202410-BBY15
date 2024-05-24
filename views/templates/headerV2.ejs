@@ -21,10 +21,45 @@
             <img src="/images/backButton.png" alt="BackButton" class="m-2 h-[32px]">
         </a>
         <!-- add onclick for logo -->
-        <a href="/">
+        <a href="#" id="eggLink" class="flex items-center">
             <img src="/images/clearLogo.png" alt="Logo" class="max-w-24 max-h-24 h-[64px]">
         </a>
         <div class="w-[48px]">
 
         </div>
     </header>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const eggLink = document.getElementById('eggLink');
+            let holdTimer;
+
+            eggLink.addEventListener('mousedown', function() {
+                holdTimer = setTimeout(function() {
+                    window.location.href = '/egg';
+                }, 1000); // 1000 milliseconds = 1 seconds
+            });
+
+            eggLink.addEventListener('mouseup', function() {
+                clearTimeout(holdTimer);
+            });
+
+            eggLink.addEventListener('mouseleave', function() {
+                clearTimeout(holdTimer);
+            });
+
+            eggLink.addEventListener('touchstart', function() {
+                holdTimer = setTimeout(function() {
+                    window.location.href = '/egg';
+                }, 1000); // 1000 milliseconds = 1 seconds
+            });
+
+            eggLink.addEventListener('touchend', function() {
+                clearTimeout(holdTimer);
+            });
+
+            eggLink.addEventListener('touchcancel', function() {
+                clearTimeout(holdTimer);
+            });
+        });
+    </script>
+</html>
