@@ -1088,7 +1088,7 @@ app.post("/addDeadline", sessionValidation, async (req, res) => {
         const deadlineDate = new Date(deadline);
         const deadlinePST = new Date(deadlineDate.getTime() - (7 * 60 * 60 * 1000));
 
-        const formattedDeadline = deadlinePST.toLocaleDateString('en-US', {
+        const formattedDeadline = deadlineDate.toLocaleDateString('en-US', {
             year: 'numeric',
             month: 'long',
             day: 'numeric',

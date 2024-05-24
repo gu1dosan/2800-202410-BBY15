@@ -21,9 +21,21 @@
             <img src="/images/backButton.png" alt="BackButton" class="m-2 h-[32px]">
         </a>
         <!-- add onclick for logo -->
-        <a href="#" id="eggLink" class="flex items-center">
-            <img src="/images/clearLogo.png" alt="Logo" class="max-w-24 max-h-24 h-[64px]">
-        </a>
+        <% if(locals.pageTitle) {%>
+            <% if(locals.group){ %>
+                <a href="/group-details/<%= group._id%>"  class="text-center">
+                    <h1 class="text-white text-xl"><%= pageTitle %></h1>
+                    <p class="text-white text-xs">View group details</p>
+                </a>
+            <% } else { %>
+                <h1 class="text-white text-xl"><%= locals.pageTitle %></h1>
+            <% } %>
+        <% } else { %>
+            <a href="#" id="eggLink" class="flex items-center">
+                <img src="/images/clearLogo.png" alt="Logo" class="max-w-24 max-h-24 h-[64px]">
+            </a>
+        <% } %>
+
         <div class="w-[48px]">
 
         </div>
