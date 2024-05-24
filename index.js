@@ -858,7 +858,7 @@ app.get('/randomizer', sessionValidation, async (req, res) => {
             );
         }
  
-        res.render('randomizer', { event: group.events }); 
+        res.render('randomizer', { events: group.events }); 
     } catch (error) { 
         console.error("Error fetching group details:", error); 
         res.status(500).send("Error fetching group details."); 
@@ -901,7 +901,7 @@ app.post('/delete_notification', sessionValidation, async (req, res) => {
         res.redirect('/notifications?userId=' + userId);
 });
 
-app.get('/event_submission', sessionValidation, async (req, res) => {
+app.get('/event_submission', checkDeadline, sessionValidation, async (req, res) => {
     const groupId = req.query.groupId;
     const group = await groupCollection.findOne({ _id: new ObjectId(groupId) });
     const successMessage = req.query.success === 'true' ? 'Event added successfully' : null;
@@ -1080,11 +1080,79 @@ app.post('/event_submission', sessionValidation, async (req, res) => {
     res.redirect('/group/' + groupId);
 });
 
+app.post("/addDeadline", sessionValidation, async (req, res) => {
+
+        const deadline = req.body.deadline;
+        const groupId = req.query.groupId;
+        const group = await groupCollection.findOne({ _id: new ObjectId(groupId) });
+        const deadlineDate = new Date(deadline);
+        const deadlinePST = new Date(deadlineDate.getTime() - (7 * 60 * 60 * 1000));
+
+        const formattedDeadline = deadlinePST.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: 'numeric',
+            minute: 'numeric'
+        });
+
+        await groupCollection.updateOne(
+            { _id: new ObjectId(groupId) },
+            { $set: { deadline: deadlinePST } }
+        );
+
+        for (let userEmail of group.members) {
+            const user = await userCollection.findOne({ email: userEmail });
+        
+            if (!user) {
+                console.error(`User with email ${userEmail} not found.`);
+                continue;
+            }
+        
+            const notification = {
+                _id : new ObjectId(),
+                message: `The Deadline to Submit an event is ${formattedDeadline}.`,
+                groupId: groupId,
+                read: false,
+                type: 'deadline'
+            };
+
+            await userCollection.updateOne(
+                { _id: new ObjectId(user._id) },
+                { $pull: { notifications: { groupId: groupId, type: 'deadline' } } }
+            );
+        
+            await userCollection.updateOne(
+                { _id: new ObjectId(user._id) },
+                { $push: { notifications: notification } }
+            );
+        }
+
+        res.redirect("/group-details/" + groupId);
+    
+});
+
 function convertTo12Hour(time) {
     let [hours, minutes] = time.split(':');
     let period = +hours >= 12 ? 'PM' : 'AM';
     hours = +hours % 12 || 12;
     return `${hours}:${minutes} ${period}`;
+}
+
+async function checkDeadline(req, res, next) {
+    const now = new Date();
+    const groupId = req.query.groupId; 
+    const nowPST = new Date(now.getTime() - (7 * 60 * 60 * 1000));
+
+    const group = await groupCollection.findOne({ _id: new ObjectId(groupId) });
+
+    if (group && nowPST > group.deadline) {
+        console.log(now);
+        console.log(group.deadline);   
+        res.redirect('/group/' + groupId);
+    } else {
+        next();
+    }
 }
 
 // app.get("/admin", sessionValidation, adminAuthorization, async (req, res) => {

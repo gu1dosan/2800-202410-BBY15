@@ -27,6 +27,22 @@
             <div class="flex justify-center items-center mb-8">
                 <button onclick="viewSubmittedActivities()" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">View Submitted Activities</button>
             </div>
+            <!-- Add Deadline button -->
+<button onclick="openDeadlinePopup()"
+    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-2">Add Deadline</button>
+
+<!-- Deadline Popup -->
+<div id="deadlinePopup" class="hidden fixed top-0 left-0 w-full h-full bg-gray-800 bg-opacity-75 flex justify-center items-center">
+    <div class="bg-white rounded-lg p-6 w-80">
+        <h2 class="text-xl font-semibold mb-4">Add Deadline</h2>
+        <button onclick="closeDeadlinePopup()" class="bg-blue-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded text-sm">Close</button>
+        <form id="deadlineForm" action="/addDeadline?groupId=<%= group._id %>" method="post">
+            <label for="deadline">Deadline:</label>
+            <input type="datetime-local" id="deadline" name="deadline" required>
+            <input type="submit" value="Add Deadline">
+        </form>
+    </div>
+</div>
         <!-- Members List Popup -->
         <div id="membersPopup" class="hidden fixed top-0 left-0 w-full h-full bg-gray-800 bg-opacity-75 flex justify-center items-center">
             <div class="bg-white rounded-lg p-6 w-80">
@@ -201,5 +217,22 @@
     function confirmLeaveGroup() {
         window.location.href = '/leave-group?groupId=<%= group._id %>';
     }
+    function openDeadlinePopup() {
+    document.getElementById('deadlinePopup').classList.remove('hidden');
+}
+function closeDeadlinePopup() {
+        document.getElementById('deadlinePopup').classList.add('hidden');
+    }
+
+document.getElementById('deadlineForm').addEventListener('submit', function(event) {
+    const deadlineInput = document.getElementById('deadline');
+    const deadline = new Date(deadlineInput.value);
+    const now = new Date();
+
+    if (deadline <= now) {
+        event.preventDefault();
+        alert('Deadline must be in the future');
+    }
+});
 
 </script>
