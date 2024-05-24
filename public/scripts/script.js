@@ -71,3 +71,35 @@ if(document.getElementById("logoutButton")) {
         location.href = "/logout";
     };
 }
+
+var sendMessageButton = document.getElementById('sendMessageButton');
+var input = document.getElementById('chatInput');
+
+sendMessage = function(groupId) {
+    if (input.value) {
+        fetch(`./${groupId}/message`, {
+                method: "POST",
+                body: JSON.stringify({input: input.value}),
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            })
+            .then((response) => {
+                // console.log(response)
+                input.value = '';
+                // response.json()
+            })
+            // .then((response) => {
+            //     // console.log(response)
+            // });
+        
+    }
+}
+
+if (input)
+    input.addEventListener("keyup", (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            sendMessageButton.click();
+        }
+    });

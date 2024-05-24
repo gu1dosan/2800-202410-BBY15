@@ -1,26 +1,38 @@
 <%- include("templates/header") %>
 
-<div class="mt-8">
-    <% groups.forEach(group => { %>
-        <div class="bg-white rounded-lg shadow-md p-4 mb-4">
-            <h2 class="text-xl font-semibold mb-2"><%= group.name %></h2>
-            <p class="text-gray-600">Members:</p>
-            <ul>
-                <% group.members.forEach(member => { %>
-                    <li><%= member %></li>
-                <% }); %>
-            </ul>
-            <a href="/group?id=<%= group._id %>" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-2 inline-block">View Group</a>
-        </div>
-    <% }); %>
-</div>
+<% if (groups.length === 0) { %>
+    <div class="bg-white rounded-lg shadow-md p-4 mb-4 border border-gray-300">
+        <h2 class="text-xl font-semibold mb-2">You are currently not part of any groups.</h2>
+        <p class="text-gray-600">Get started by creating a group!</p>
+    </div>
+<% } else { %>
+    <!-- Existing group cards -->
+    <div class="mt-8">
+        <% groups.forEach(group => { %>
+            <div class="bg-white rounded-lg shadow-md p-4 mb-4">
+                <h2 class="text-xl font-semibold mb-2"><%= group.name %></h2>
+                <p class="text-gray-600">Members:</p>
+                <ul>
+                    <% group.members.forEach(member => { %>
+                        <li><%= member %></li>
+                    <% }); %>
+                </ul>
+                <a href="/group/<%= group._id %>" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-2 inline-block">View Group</a>
+            </div>
+        <% }); %>
+    </div>
+<% } %>
 
-<div class="flex justify-center items-center mt-8 mb-[86px]">
+<div class="flex justify-center items-center mt-8 mb-8">
     <button onclick="openPopup()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 fixed bottom-[100px] right-[16px] rounded">
         Create Group
     </button>
 </div>
-
+<div class="flex justify-start items-end fixed bottom-16 left-0 ml-4">
+    <a href="/notifications?userId=<%= user._id %>">
+        <img src="/images/notification.svg" alt="Notifications" class="h-6 w-6">
+    </a>
+</div>
 <div id="popup" class="hidden fixed top-0 left-0 w-full h-full bg-gray-800 bg-opacity-75 flex justify-center items-center">
     <div class="bg-white rounded-lg p-6 relative">
         <h2 class="text-2xl font-bold mb-4">Create new group</h2>

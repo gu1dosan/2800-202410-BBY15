@@ -1,40 +1,75 @@
 <%- include('templates/header') %>
 
-<div class="container">
-    <h1 class="text-center">Random Event Selector</h1>
-
-    <div class="flex justify-center">
-        <button id="showEventButton" class="bg-purple hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded">
-            Show Selected Event
-        </button>
+<div class="bg-black min-h-screen text-white flex flex-col items-center justify-center">
+    <div id="gamecubeAnimation" class="flex justify-center mt-5">
+        <img src="/images/gamecube.gif" alt="Loading..." />
     </div>
 
-    <!-- Hidden element to store event details -->
-    <div id="eventDetails" class="hidden">
-        <h2>Selected Event</h2>
-        <p><strong>Title:</strong> <span id="eventTitle"><%= event.title %></span></p>
-        <p><strong>Description:</strong> <span id="eventDescription"><%= event.description %></span></p>
-        <p><strong>Location:</strong> <span id="eventLocation"><%= event.location %></span></p>
-        <p><strong>Info:</strong> <span id="eventInfo"><%= event.info %></span></p>
-        <p><strong>Category:</strong> <span id="eventCategory"><%= event.category %></span></p>
+    <div id="eventDetails" class="hidden mt-5 bg-purple text-white p-6 rounded-lg shadow-lg w-full max-w-md mx-auto">
+        <h2 class="text-center text-2xl mb-4">Selected Event</h2>
+        <div class="text-center">
+            <p><strong>Title:</strong> <span id="eventTitle"></span></p>
+            <p><strong>Description:</strong> <span id="eventDescription"></span></p>
+            <p><strong>Location:</strong> <span id="eventLocation"></span></p>
+            <p><strong>Info:</strong> <span id="eventInfo"></span></p>
+            <p><strong>Category:</strong> <span id="eventCategory"></span></p>
+        </div>
+        <div class="flex justify-center mt-5">
+            <button onclick="goBack()" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded border border-white">
+                Return to group
+            </button>
+        </div>
     </div>
+
+    <!-- Hidden div to store JSON data -->
+    <div id="eventData" data-events="<%= JSON.stringify(events).replace(/"/g, '&quot;') %>" data-group-id="<%= groupId %>" class="hidden"></div>
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const showEventButton = document.getElementById('showEventButton');
+    document.addEventListener('DOMContentLoaded', async () => {
+        const gamecubeAnimation = document.getElementById('gamecubeAnimation');
         const eventDetails = document.getElementById('eventDetails');
+        const eventTitle = document.getElementById('eventTitle');
+        const eventDescription = document.getElementById('eventDescription');
+        const eventLocation = document.getElementById('eventLocation');
+        const eventInfo = document.getElementById('eventInfo');
+        const eventCategory = document.getElementById('eventCategory');
 
-        showEventButton.addEventListener('click', () => {
-            alert(`
-                Title: ${document.getElementById('eventTitle').textContent}
-                Description: ${document.getElementById('eventDescription').textContent}
-                Location: ${document.getElementById('eventLocation').textContent}
-                Info: ${document.getElementById('eventInfo').textContent}
-                Category: ${document.getElementById('eventCategory').textContent}
-            `);
-        });
+        // Retrieve event data from the hidden div
+        const eventDataElement = document.getElementById('eventData');
+        const events = JSON.parse(eventDataElement.getAttribute('data-events').replace(/&quot;/g, '"'));
+        const groupId = eventDataElement.getAttribute('data-group-id');
+
+        // Automatically start animation and display the selected event
+        gamecubeAnimation.classList.remove('hidden');
+        eventDetails.classList.add('hidden');
+
+        setTimeout(async () => {
+            const randomIndex = Math.floor(Math.random() * events.length);
+            const selectedEvent = events[randomIndex];
+            eventTitle.textContent = selectedEvent.title;
+            eventDescription.textContent = selectedEvent.description;
+            eventLocation.textContent = selectedEvent.location;
+            eventInfo.textContent = selectedEvent.info;
+            eventCategory.textContent = selectedEvent.category;
+
+            gamecubeAnimation.classList.add('hidden');
+            eventDetails.classList.remove('hidden');
+
+            // Send the selected event to the server to update the group document
+            await fetch('/selectEvent', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ groupId, selectedEvent })
+            });
+        }, 5000);  // 5-second delay
     });
+
+    function goBack() {
+        window.history.back();
+    }
 </script>
 
 <%- include('templates/footer') %>

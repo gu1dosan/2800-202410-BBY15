@@ -6,14 +6,18 @@
     
     <!-- Profile Picture Section -->
     <div class="flex flex-col items-center mb-5">
-        <img src="./images/dog.jpeg" alt="Profile Picture" class="w-32 h-32 md:w-48 md:h-48 lg:w-64 lg:h-64 rounded-full shadow-lg mb-4">
+        <% if (profilePicture) { %>
+            <img src="<%= profilePicture %>" alt="Profile Picture" class="w-32 h-32 md:w-48 md:h-48 lg:w-64 lg:h-64 rounded-full shadow-lg mb-4">
+        <% } else { %>
+            <img src="./images/empty-profile-pic.png" alt="Profile Picture" class="w-32 h-32 md:w-48 md:h-48 lg:w-64 lg:h-64 rounded-full shadow-lg mb-4">
+        <% } %>
         <p class="text-center text-sm md:text-md lg:text-lg">Welcome to your profile, <%= name %>!</p>
     </div>
     
     <!-- Biography Section -->
     <div class="flex flex-col items-center mb-5">
         <p class="text-center text-xl md:text-xl lg:text-2xl max-w-prose">
-            <%= biography %>!
+            <%= biography %>
         </p>
     </div>
 
