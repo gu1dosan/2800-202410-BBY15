@@ -29,6 +29,7 @@ const storage = multer.memoryStorage()
 const upload = multer({ storage: storage })
 
 const cloudinary = require("cloudinary");
+const { type } = require("os");
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_CLOUD_KEY,
@@ -240,6 +241,7 @@ app.post('/login', async (req, res) => {
 		req.session.authenticated = true; 
         req.session.email = email; 
         req.session.name = result[0].name; 
+        req.session.user_type = result[0].user_type; 
         req.session.profilePicture = result[0].profilePicture;  // Retrieve profile picture from database
         req.session.biography = result[0].biography;  // Retrieve biography from database
         req.session.cookie.maxAge = expireTime; 
@@ -360,13 +362,15 @@ app.get("/groups", sessionValidation, async (req, res) => {
     // Get the email of the current user
     const currentUserEmail = req.session.email;
 
+    const user = await userCollection.findOne({ email: currentUserEmail });
+
     // Find all groups where the current user is a member
     const groups = await groupCollection
       .find({ members: currentUserEmail })
       .toArray();
 
     // Render groups page and pass the groups data to the template
-    res.render("groups", { session: req.session, groups: groups });
+    res.render("groups", { session: req.session, groups: groups, user });
   } catch (error) {
     console.error("Error fetching groups:", error);
     res.status(500).send("Error fetching groups.");
@@ -861,16 +865,81 @@ app.get('/randomizer', sessionValidation, async (req, res) => {
         if (!group || !group.events || group.events.length === 0) { 
             return res.status(404).send("No events found for this group."); 
         } 
+ 
+        const randomEvent = group.events[Math.floor(Math.random() * group.events.length)]; 
 
+        
+        for (let userEmail of group.members) {
+            const user = await userCollection.findOne({ email: userEmail });
+        
+            if (!user) {
+                console.error(`User with email ${userEmail} not found.`);
+                continue;
+            }
+        
+            const notification = {
+                _id : new ObjectId(),
+                message: `The chosen event is ${randomEvent.title}.`,
+                groupId: groupId,
+                read: false,
+                type: 'randomizer'
+            };
+
+            await userCollection.updateOne(
+                { _id: new ObjectId(user._id) },
+                { $pull: { notifications: { groupId: groupId, type: 'randomizer' } } }
+            );
+        
+            await userCollection.updateOne(
+                { _id: new ObjectId(user._id) },
+                { $push: { notifications: notification } }
+            );
+        }
+ 
         res.render('randomizer', { events: group.events }); 
     } catch (error) { 
         console.error("Error fetching group details:", error); 
         res.status(500).send("Error fetching group details."); 
     } 
+}); 
+
+app.get('/notifications', sessionValidation, async (req, res) => {
+    const userId = req.query.userId;
+    const user = await userCollection.findOne({ _id: new ObjectId(userId) });
+
+    const notifications = await Promise.all(user.notifications.map(async (notification) => {
+        const group = await groupCollection.findOne({ _id: new ObjectId(notification.groupId) });
+        return { ...notification, groupTitle: group.name };
+    }));
+    res.render('notifications', { notifications: notifications, userId: userId});
+    
 });
 
+app.post('/mark_as_read', sessionValidation, async (req, res) => {
+    const userId = req.query.userId;
+    const notificationId = req.body.notificationId;
 
-app.get('/event_submission', sessionValidation, async (req, res) => {
+        await userCollection.updateOne(
+            { _id: new ObjectId(userId), "notifications._id": new ObjectId(notificationId) },
+            { $set: { "notifications.$.read": true } },
+        );
+        
+        res.redirect('/notifications?userId=' + userId);
+});
+
+app.post('/delete_notification', sessionValidation, async (req, res) => {
+    const userId = req.query.userId;
+    const notificationId = req.body.notificationId;
+
+        await userCollection.updateOne(
+            { _id: new ObjectId(userId) },
+            { $pull: { notifications: { _id: new ObjectId(notificationId) } } }
+        );
+
+        res.redirect('/notifications?userId=' + userId);
+});
+
+app.get('/event_submission', checkDeadline, sessionValidation, async (req, res) => {
     const groupId = req.query.groupId;
     const group = await groupCollection.findOne({ _id: new ObjectId(groupId) });
     const successMessage = req.query.success === 'true' ? 'Event added successfully' : null;
@@ -880,9 +949,9 @@ app.get('/event_submission', sessionValidation, async (req, res) => {
 app.get('/submitted_event', sessionValidation, async (req, res) => {
     const groupId = req.query.groupId;
     const group = await groupCollection.findOne({ _id: new ObjectId(groupId) });
-    console.log('groupId:', new ObjectId(groupId));
+    //console.log('groupId:', new ObjectId(groupId));
     const events = group.events;
-    res.render('submitted_event', { group, session: req.session, events });
+    res.render('submitted_event', { group, session: req.session, events, convertTo12Hour });
 });
 
 app.get('/editEvent', sessionValidation, async (req, res) => {
@@ -902,26 +971,33 @@ app.get('/editEvent', sessionValidation, async (req, res) => {
 app.post('/editEvent', sessionValidation, async (req, res) => {
     const groupId = req.query.groupId;
     const eventId = req.query.eventId;
-    const title = req.body.eventTitle;
-    const description = req.body.description;
-    const location = req.body.location;
-    const info = req.body.contactInfo;
-    const category = req.body.category;
+    const newTitle = req.body.eventTitle;
+    const newDescription = req.body.description;
+    const newLocation = req.body.location;
+    const newInfo = req.body.contactInfo;
+    const newCategory = req.body.category;
+    const newTime = req.body.eventTime;
 
-    if (!title || !category) {
-        res.send("You must provide a title and category<br/> <a href='/editEvent'>Try again</a>");
-        return
-    }
+
+    const group = await groupCollection.findOne({ _id: new ObjectId(groupId) });
+    const event = group.events.find(event => event._id.toString() === eventId);
+
+    const updatedTitle = newTitle === '' ? event.title : newTitle;
+    const updatedDescription = newDescription === '' ? event.description : newDescription;
+    const updatedLocation = newLocation === '' ? event.location : newLocation;
+    const updatedInfo = newInfo === '' ? event.info : newInfo;
+    const updatedCategory = newCategory === '' ? event.category : newCategory;
+    const updatedTime = newTime === '' ? event.time : newTime;
 
     const schema = Joi.object(
         {
-            title: Joi.string().max(50).required(),
-            description: Joi.string().max(500),
-            location: Joi.string().max(50),
-            info: Joi.string().max(50),
+            title: Joi.string().max(50).allow(''),
+            description: Joi.string().max(500).allow(''),
+            location: Joi.string().max(50).allow(''),
+            info: Joi.string().max(50).allow('')
         });
 
-    const validationResult = schema.validate({ title, description, location, info });
+    const validationResult = schema.validate({ title: updatedTitle, description: updatedDescription, location: updatedLocation, info: updatedInfo });
 
     if (validationResult.error != null) {
         console.log(validationResult.error);
@@ -931,21 +1007,34 @@ app.post('/editEvent', sessionValidation, async (req, res) => {
 
     const updatedEvent = {
         _id: new ObjectId(eventId),
-        title: title,
-        description: description,
-        location: location,
-        info: info,
-        category: category
+        title: updatedTitle,
+        description: updatedDescription,
+        location: updatedLocation,
+        info: updatedInfo,
+        category: updatedCategory,
+        time: updatedTime
     }
 
     await groupCollection.updateOne(
         { _id: new ObjectId(groupId), "events._id": new ObjectId(eventId) },
         { $set: { "events.$": updatedEvent } }
     );
-    console.log('event in edit:', new ObjectId(eventId));
+    //console.log('event in edit:', new ObjectId(eventId));
 
     console.log("Event updated");
-    res.redirect('/group?id=' + groupId);
+    res.redirect('/group/' + groupId);
+});
+
+app.post('/deleteEvent', sessionValidation, async (req, res) => {
+    const groupId = req.query.groupId;
+    const eventId = req.query.eventId;
+
+    await groupCollection.updateOne(
+        { _id: new ObjectId(groupId) },
+        { $pull: { events: { _id: new ObjectId(eventId) } } }
+    );
+
+    res.redirect('/submitted_event' + '?groupId=' + groupId);
 });
 
 // app.use('/test', sessionValidation);
@@ -959,7 +1048,7 @@ app.post('/editEvent', sessionValidation, async (req, res) => {
 
 app.post('/event_submission', sessionValidation, async (req, res) => {
     const groupId = req.query.groupId;
-    console.log('groupId:', new ObjectId(groupId))
+    //console.log('groupId:', new ObjectId(groupId))
     var userId = req.session.user_ID;
 
     var title = req.body.eventTitle;
@@ -967,6 +1056,7 @@ app.post('/event_submission', sessionValidation, async (req, res) => {
     var location = req.body.location;
     var info = req.body.contactInfo;
     var category = req.body.category;
+    var time = req.body.eventTime;
 
     if (!title || !category) {
         res.send("You must provide a title and category<br/> <a href='/event_submission'>Try again</a>");
@@ -976,9 +1066,9 @@ app.post('/event_submission', sessionValidation, async (req, res) => {
     const schema = Joi.object(
         {
             title: Joi.string().max(50).required(),
-            description: Joi.string().max(500),
-            location: Joi.string().max(50),
-            info: Joi.string().max(50),
+            description: Joi.string().max(500).allow(''),
+            location: Joi.string().max(50).allow(''),
+            info: Joi.string().max(50).allow('')
         });
 
     const validationResult = schema.validate({ title, description, location, info });
@@ -995,18 +1085,113 @@ app.post('/event_submission', sessionValidation, async (req, res) => {
         description: description,
         location: location,
         info: info,
-        category: category
+        category: category,
+        time: time
     }
 
     await groupCollection.updateOne(
         { _id: new ObjectId(groupId) }, // need some way to get the group id
         { $push: { events: newEvent } },
-        console.log('groupId:', new ObjectId(groupId))
+        //console.log('groupId:', new ObjectId(groupId))
     );
 
+    const group = await groupCollection.findOne({ _id: new ObjectId(groupId) });
+    
+    for (let userEmail of group.members) {
+        const user = await userCollection.findOne({ email: userEmail });
+
+        const notification = {
+            _id: new ObjectId(),
+            message: `${title} has been suggested in ${group.name}.`,
+            groupId: groupId,
+            read: false,
+            type: 'event'
+        }
+
+        await userCollection.updateOne(
+            { _id: new ObjectId(user._id) },
+            { $push: { notifications: notification } }
+        );
+    }
+
     console.log("Event added");
-    res.redirect('/group?id=' + groupId);
+    res.redirect('/group/' + groupId);
 });
+
+app.post("/addDeadline", sessionValidation, async (req, res) => {
+
+        const deadline = req.body.deadline;
+        const groupId = req.query.groupId;
+        const group = await groupCollection.findOne({ _id: new ObjectId(groupId) });
+        const deadlineDate = new Date(deadline);
+        const deadlinePST = new Date(deadlineDate.getTime() - (7 * 60 * 60 * 1000));
+
+        const formattedDeadline = deadlineDate.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: 'numeric',
+            minute: 'numeric'
+        });
+
+        await groupCollection.updateOne(
+            { _id: new ObjectId(groupId) },
+            { $set: { deadline: deadlinePST } }
+        );
+
+        for (let userEmail of group.members) {
+            const user = await userCollection.findOne({ email: userEmail });
+        
+            if (!user) {
+                console.error(`User with email ${userEmail} not found.`);
+                continue;
+            }
+        
+            const notification = {
+                _id : new ObjectId(),
+                message: `The Deadline to Submit an event is ${formattedDeadline}.`,
+                groupId: groupId,
+                read: false,
+                type: 'deadline'
+            };
+
+            await userCollection.updateOne(
+                { _id: new ObjectId(user._id) },
+                { $pull: { notifications: { groupId: groupId, type: 'deadline' } } }
+            );
+        
+            await userCollection.updateOne(
+                { _id: new ObjectId(user._id) },
+                { $push: { notifications: notification } }
+            );
+        }
+
+        res.redirect("/group-details/" + groupId);
+    
+});
+
+function convertTo12Hour(time) {
+    let [hours, minutes] = time.split(':');
+    let period = +hours >= 12 ? 'PM' : 'AM';
+    hours = +hours % 12 || 12;
+    return `${hours}:${minutes} ${period}`;
+}
+
+async function checkDeadline(req, res, next) {
+    const now = new Date();
+    const groupId = req.query.groupId; 
+    const nowPST = new Date(now.getTime() - (7 * 60 * 60 * 1000));
+
+    const group = await groupCollection.findOne({ _id: new ObjectId(groupId) });
+
+    if (group && nowPST > group.deadline) {
+        console.log(now);
+        console.log(group.deadline);   
+        res.redirect('/group/' + groupId);
+    } else {
+        next();
+    }
+}
 
 // app.get("/admin", sessionValidation, adminAuthorization, async (req, res) => {
 //   const result = await userCollection.find().toArray();
