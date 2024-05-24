@@ -50,9 +50,10 @@
                 <ul class="list-none pl-0">
                     <% memberDetails.forEach(user => { %>
                     <li class="border-b border-gray-300 py-2 flex justify-between items-center">
-                        <a href="/profile/<%= user.id %>">
-                            <%= user.name %><% if (user.isAdmin) { %> (admin) <% } %>
-                        </a>
+                        <li><a href="/userProfile?email=<%= user.email %>" class="text-blue-500 hover:underline"><%= user.name %></a></li>
+                      
+                            <% if (user.isAdmin) { %> (admin) <% } %>
+                        
                         <% if (user.isAdmin) { %>
                         <div>
                             <button onclick="toggleAdminStatus('<%= user.id %>', '<%= user.email %>')" class="text-green-500 hover:text-green-700" title="Toggle admin status">🔽</button>

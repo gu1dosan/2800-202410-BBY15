@@ -520,19 +520,23 @@ app.get("/group/:groupId", sessionValidation, async (req, res) => {
                 name: 1,
                 email: 1,
                 profilePicture: 1,
-            }
+            },
+            selectedEvent: 1,
         }}
     ]).toArray();
+
 
     if (!group[0]) {
       // Group not found
       res.status(404).send("Group not found.");
       return;
     }
-    // console.log(JSON.stringify(group[0]));
+    //console.log(JSON.stringify(group[0]));
     // Retrieve the selected event from the group document
-    const selectedEvent = group.selectedEvent;
-  
+    const selectedEvent = group[0].selectedEvent;
+
+    
+    //console.log(selectedEvent);
     
     // Render the group details page with the retrieved group
     res.render("group", { selectedEvent, group:group[0], pageTitle:group[0].name, chat: true, backButton: '/groups'});
