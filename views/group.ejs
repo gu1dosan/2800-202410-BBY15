@@ -18,8 +18,20 @@
 </div>
 <div class="mt-2 p-2">
     <ul id="messages" class="flex flex-col">
-        <% group.messages && group.messages.forEach(message => { %>
-            <li class="w-fit max-w-[85vw] py-1 px-3 rounded-2xl mb-2 <%=message.user===session.email?'self-end bg-purple text-white':'self-start bg-slate-200'%>"><%= message.message %></li>
+        <% let aux; %>
+        <% group.messages && group.messages.forEach((message,i) => { %>
+            <% if(message.user!==aux){ %>
+                <% if(message.user!==session.email){ %>
+                    <p class="text-slate-400 ml-3 text-xs mt-2 -mb-2"><%= group.memberDetails.find(m=>message.user===m.email).name %></p>
+                <% } %>
+            <% } %>
+            <!-- <div class="flex w-fit max-w-[85vw] <%= aux===message.user ? 'mt-1' : 'mt-2'%> <%=message.user===session.email?'self-end':'self-start'%>"> -->
+                <!-- <% if(group.messages[i+1] && message.user!==session.email && message.user!==group.messages[i+1].email) {%>
+                    <img src="<%= group.memberDetails.find(m=>message.user===m.email).profilePicture %>" alt="" class="w-8 h-8 rounded-full mr-2">
+                <% } %> -->
+                <li class="w-fit max-w-[85vw] py-1 px-3 rounded-2xl <%=aux===message.user ? 'mt-1' : 'mt-2'%> <%=message.user===session.email?'self-end bg-purple text-white':'self-start bg-slate-200'%>"><%= message.message %></li>
+            <!-- </div> -->
+            <% aux=message.user; %>
         <% }); %>
     </ul>
 </div>
@@ -27,7 +39,6 @@
 
 </div>
 <script src="/socket.io/socket.io.js"></script>
-<script src="/scripts/chat.js"></script>
 <script>
     var socket = io();
     socket.emit('join', '<%= group._id %>');
@@ -41,17 +52,24 @@
     //     console.log('Connected to socket' + socket);
     // });
 
+    var lastMessageEmail="<%= group.messages.length>0?group.messages[group.messages.length-1].user:null %>";
+    var myEmail="<%= session.email %>";
+
     // socket.join('<%= group._id %>')
     socket.on('chat message', function(msg) {
-        console.log(msg)
-        var item = document.createElement('li');
-        item.style.width = "fit-content";
-        if(msg.user==="<%=session.email%>"){
-            item.className="w-fit max-w-[85vw] py-1 px-3 rounded-2xl mb-2 self-end bg-purple text-white";
-        } else {
-            item.className="w-fit max-w-[85vw] py-1 px-3 rounded-2xl mb-2 self-start bg-slate-200";
+        // console.log(msg)
+        if(msg.user!==myEmail && msg.user!==lastMessageEmail){
+            var item = document.createElement('p');
+            item.className="text-slate-400 ml-3 text-xs mt-2 -mb-2";
+            item.textContent = msg.name;
+            messages.appendChild(item);
         }
+        var item = document.createElement('li');
+        item.className=`w-fit max-w-[85vw] py-1 px-3 rounded-2xl ${lastMessageEmail===msg.user ? 'mt-1' : 'mt-2'} ${msg.user===myEmail?'self-end bg-purple text-white':'self-start bg-slate-200'}`;
         item.textContent = msg.message;
+        if(msg.user!==lastMessageEmail){
+            lastMessageEmail=msg.user;
+        }
         messages.appendChild(item);
         window.scrollTo(0, document.body.scrollHeight);
         // item.scrollIntoView({behavior: "smooth"});
