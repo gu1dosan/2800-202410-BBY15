@@ -94,7 +94,7 @@ async function isAdmin(userEmail, groupId) {
     const group = await groupCollection.findOne({ _id: new ObjectId(groupId) });
 
     // Check if the group exists and if the email is in the admin array
-    if (group && group.admin.includes(userEmail)) {
+    if (group && group.admin && group.admin.includes(userEmail)) {
       return true;
     }
     return false;
@@ -114,11 +114,11 @@ async function getUserDetails(emails, groupId) {
 
         // Retrieve the group information
         const group = await groupCollection.findOne({ _id: new ObjectId(groupId) });
-        console.log(group);
+        // console.log(group);
 
         // Iterate over each user and check if they are admins
         for (const user of users) {
-            const isAdmin = group.admin.includes(user.email);
+            const isAdmin = group.admin && group.admin.includes(user.email);
             userDetails.push({ id: user._id.toString(), name: user.name, isAdmin, email: user.email });
         }
 
@@ -465,8 +465,8 @@ app.get("/group/:groupId", sessionValidation, async (req, res) => {
             memberDetails: {
                 _id: 1,
                 name: 1,
-                email: 1
-                // Excluding password field
+                email: 1,
+                profilePicture: 1,
             }
         }}
     ]).toArray();
@@ -497,7 +497,7 @@ io.on('connection', (socket) => {
 });
 app.post('/group/:groupId/message', sessionValidation, jsonParser, async (req, res) => {
     // console.log(req.body)
-    var message = {message:req.body.input, user:req.session.email, time: new Date()};
+    var message = {message:req.body.input, user:req.session.email, name:req.session.name, time: new Date()};
     // console.log(message)
     const groupId = req.params.groupId;
 
@@ -538,7 +538,7 @@ app.get("/group-details/:groupId", sessionValidation, async (req, res) => {
         // Retrieve user details (including id and name) for the members of the group
         const memberEmails = group.members;
         const memberDetails = await getUserDetails(memberEmails, groupId);
-        console.log(memberDetails);
+        // console.log(memberDetails);
         
         // Render the group details page with the retrieved group and member details
         res.render("groupDetails", { group, isAdmin: adminStatus, memberDetails});

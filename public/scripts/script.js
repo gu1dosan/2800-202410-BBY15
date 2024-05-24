@@ -96,9 +96,10 @@ sendMessage = function(groupId) {
     }
 }
 
-input.addEventListener("keyup", (e) => {
-    if (e.key === 'Enter') {
-        e.preventDefault();
-        sendMessageButton.click();
-    }
-});
+if (input)
+    input.addEventListener("keyup", (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            sendMessageButton.click();
+        }
+    });
