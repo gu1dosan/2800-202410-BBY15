@@ -12,15 +12,13 @@
         document.querySelector('html').classList.add("hidden");
         window.addEventListener('load', (e) => {
           document.querySelector('html').classList.remove("hidden"); 
-         });
+        });
     </script>
 </head>
 <body class="overflow-auto">
-    <header class=" bg-purple sticky top-0 w-full h-[10vh] flex flex-row items-center justify-between">
-        <div>
-
-        </div>
-        <a href="/" class="flex items-center">
+    <header class="bg-purple sticky top-0 w-full h-[10vh] flex flex-row items-center justify-between">
+        <div></div>
+        <a href="#" id="eggLink" class="flex items-center">
             <img src="/images/clearLogo.png" alt="Logo" class="max-w-24 max-h-24 h-[64px]">
             <!-- <h1 class="text-white -ml-2 font-semibold">nextup</h1> -->
         </a>
@@ -33,3 +31,38 @@
             <!-- <img src="./images/account-filled.svg" alt="profile-picture" class="h-[32px]"> -->
         </div>
     </header>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const eggLink = document.getElementById('eggLink');
+            let holdTimer;
+
+            eggLink.addEventListener('mousedown', function() {
+                holdTimer = setTimeout(function() {
+                    window.location.href = '/egg';
+                }, 3000); // 3000 milliseconds = 3 seconds
+            });
+
+            eggLink.addEventListener('mouseup', function() {
+                clearTimeout(holdTimer);
+            });
+
+            eggLink.addEventListener('mouseleave', function() {
+                clearTimeout(holdTimer);
+            });
+
+            eggLink.addEventListener('touchstart', function() {
+                holdTimer = setTimeout(function() {
+                    window.location.href = '/egg';
+                }, 3000); // 3000 milliseconds = 3 seconds
+            });
+
+            eggLink.addEventListener('touchend', function() {
+                clearTimeout(holdTimer);
+            });
+
+            eggLink.addEventListener('touchcancel', function() {
+                clearTimeout(holdTimer);
+            });
+        });
+    </script>
+</html>
