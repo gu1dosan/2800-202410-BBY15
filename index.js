@@ -151,10 +151,6 @@ app.use((req, res, next) => {
     next();
   });
 
-app.get('/egg', (req, res) => {
-    res.render("egg");
-});
-
 app.get("/", sessionValidation, (req, res) => {
   res.redirect("/groups");
 });
@@ -434,8 +430,6 @@ app.post("/createGroup", sessionValidation, async (req, res) => {
     }
 });
 
-  
-
 app.get("/groupConfirmation", sessionValidation, (req, res) => {
   const error = req.query.error === "true";
   const message = req.query.message;
@@ -549,7 +543,6 @@ app.get("/group-details/:groupId", sessionValidation, async (req, res) => {
 });
 
 
-
   app.post("/edit-group-name", sessionValidation, async (req, res) => {
     try {
         const groupId = req.query.groupId;
@@ -642,6 +635,48 @@ app.delete("/remove-member", sessionValidation, async (req, res) => {
     }
 });
 
+
+app.get('/egg', sessionValidation, (req, res) => {
+    res.render("egg");
+});
+
+app.get('/calendar', sessionValidation, async (req, res) => {
+    const groupId = req.query.id; 
+
+    if (!ObjectId.isValid(groupId)) { 
+        return res.status(400).send("Invalid group ID format."); 
+    } 
+
+    try {
+        // return the group
+        const group = await groupCollection.findOne({_id: new ObjectId(groupId) });
+
+        if (group) {
+            if (!group.calendar) {
+                // Initialize the calendar with an empty array if it doesn't exist
+                // Calendar should contain an array of dates
+                group.calendar = [];
+                await groupCollection.updateOne(
+                    { _id: new ObjectId(groupId) },
+                    { $set: { calendar: group.calendar } }
+                );
+            }
+
+            // Update the group with the enforced calendar structure
+            await groupCollection.updateOne(
+                { _id: new ObjectId(groupId) },
+                { $set: { calendar: group.calendar } }
+            );
+
+            res.render("calendar", { group: group });
+        } else {
+            res.render("404");
+        }
+    } catch (error) {
+        console.error("Error fetching group details:", error);
+        res.status(500).send("Error fetching group details.");
+    }
+});
 
 app.post("/toggle-admin-status", sessionValidation, async (req, res) => {
     try {
@@ -994,6 +1029,11 @@ app.get("/logout", sessionValidation, (req, res) => {
     res.redirect("/");
   } else res.redirect("/");
 });
+
+app.get("403", (req, res) => {
+    res.status(403);
+    res.render("errorMessage", {message: message} );
+})
 
 app.use('/',express.static("public"));
 
