@@ -404,7 +404,10 @@ app.post("/createGroup", sessionValidation, async (req, res) => {
         const newGroup = {
             name: name,
             members: [creatorEmail, ...validEmails], // Include the creator's email in the members array
-            admin: [creatorEmail]
+            admin: [creatorEmail],
+            activities: [], // Initialize activities as an empty array
+            events: [], // Initialize events as an empty array
+            messages: [] // Initialize messages as an empty array
         };
 
         // Insert the new group document into the groups collection
