@@ -4,7 +4,10 @@
 <div class="sticky top-[10vh] bg-white p-4 shadow-md">
     <!-- New div for this week's activity -->
     <div class="mb-4">
-        <h2 class="text-lg font-semibold">This week's activity: </h2>
+        <h2 class="text-lg font-semibold">This week's activity: <%= selectedEvent.title %></h2>
+        <button onclick="openEventDetailsPopup()" class="ml-2 bg-purple text-white rounded-full p-2">
+            ?
+        </button>
     </div>
     <!-- Flex container for the green buttons -->
     <div class="flex justify-center items-center">
@@ -14,6 +17,18 @@
         <button id="submitActivityButton" onclick="submitActivity()" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded ml-2">Submit Activity</button>
         <a href="/randomizer?id=<%= group._id %>" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded ml-2">Randomize</a>
         <a href="/calendar?id=<%= group._id %>" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded ml-2">Time</a>
+    </div>
+</div>
+  <!-- Event Details Popup -->
+  <div id="eventDetailsPopup" class="hidden fixed top-0 left-0 w-full h-full bg-gray-800 bg-opacity-75 flex justify-center items-center">
+    <div class="bg-white rounded-lg p-6 max-w-md mx-auto">
+        <h2 class="text-xl font-semibold mb-4">Event Details</h2>
+        <p><strong>Title:</strong> <%= selectedEvent.title %></p>
+        <p><strong>Description:</strong> <%= selectedEvent.description %></p>
+        <p><strong>Location:</strong> <%= selectedEvent.location %></p>
+        <p><strong>Info:</strong> <%= selectedEvent.info %></p>
+        <p><strong>Category:</strong> <%= selectedEvent.category %></p>
+        <button onclick="closeEventDetailsPopup()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-2">Close</button>
     </div>
 </div>
 <div class="mt-2 p-2">
@@ -78,7 +93,6 @@
 </script>
 <%- include("templates/footer") %>
 
-
 <script>
     function openMembersPopup() {
         document.getElementById('membersPopup').classList.remove('hidden');
@@ -89,22 +103,10 @@
     }
 
     function submitActivity() {
-        // Placeholder function for submitting activity
-        console.log('Submit Activity button clicked');
-        // You can add functionality for submitting activity here
         window.location.href = '/event_submission?groupId=<%= group._id %>';
     }
 
-    function editGroup() {
-        // Placeholder function for editing group
-        console.log('Edit Group button clicked');
-        // You can add functionality for editing group here
-    }
-
     function viewSubmittedActivities() {
-        // Placeholder function for viewing submitted activities
-        console.log('View Submitted Activities button clicked');
-        // You can add functionality for viewing submitted activities here
         window.location.href = '/submitted_event?groupId=<%= group._id %>';
     }
 
@@ -114,5 +116,13 @@
 
     function closeInvitePopup() {
         document.getElementById('invitePopup').classList.add('hidden');
+    }
+
+    function openEventDetailsPopup() {
+        document.getElementById('eventDetailsPopup').classList.remove('hidden');
+    }
+
+    function closeEventDetailsPopup() {
+        document.getElementById('eventDetailsPopup').classList.add('hidden');
     }
 </script>

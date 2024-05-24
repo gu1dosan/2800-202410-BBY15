@@ -73,6 +73,8 @@ app.use(
     maxAge: expireTime,
 }));
 
+app.use(express.json());
+
 function isValidSession(req) {
   if (req.session.authenticated) {
     return true;
@@ -354,6 +356,56 @@ app.get('/editProfile', sessionValidation, (req, res) => {
     res.render('editProfile', { name: req.session.name, biography: req.session.biography, profilePicture: req.session.profilePicture });
 });
 
+app.get('/userProfile', sessionValidation, async (req, res) => {
+    const userEmail = req.query.email;
+    var name = req.session.name;
+    var biography = req.session.biography;
+    var profilePicture = req.session.profilePicture; // Ensure this is passed
+
+    if (!userEmail) {
+        return res.status(400).send("Email query parameter is required.");
+    }
+
+    try {
+        const user = await userCollection.findOne({ email: userEmail });
+
+        if (!user) {
+            return res.status(404).send("User not found.");
+        }
+
+        res.render('userProfile', { user });
+    } catch (error) {
+        console.error("Error fetching user details:", error);
+        res.status(500).send("Error fetching user details.");
+    }
+});
+
+
+app.get('/userProfile', sessionValidation, async (req, res) => {
+    const userEmail = req.query.email;
+    var name = req.session.name;
+    var biography = req.session.biography;
+    var profilePicture = req.session.profilePicture; // Ensure this is passed
+
+    if (!userEmail) {
+        return res.status(400).send("Email query parameter is required.");
+    }
+
+    try {
+        const user = await userCollection.findOne({ email: userEmail });
+
+        if (!user) {
+            return res.status(404).send("User not found.");
+        }
+
+        res.render('userProfile', { user });
+    } catch (error) {
+        console.error("Error fetching user details:", error);
+        res.status(500).send("Error fetching user details.");
+    }
+});
+
+
 
   
 
@@ -448,7 +500,7 @@ app.get("/groupConfirmation", sessionValidation, (req, res) => {
 });
 
 app.get("/group/:groupId", sessionValidation, async (req, res) => {
-  try {
+ try {
     const groupId = req.params.groupId;
     const group = await groupCollection.aggregate([
         {$match: {_id: new ObjectId(groupId)}},
@@ -478,9 +530,12 @@ app.get("/group/:groupId", sessionValidation, async (req, res) => {
       return;
     }
     // console.log(JSON.stringify(group[0]));
+    // Retrieve the selected event from the group document
+    const selectedEvent = group.selectedEvent;
+  
     
     // Render the group details page with the retrieved group
-    res.render("group", { group:group[0], pageTitle:group[0].name, chat: true, backButton: '/groups'});
+    res.render("group", { selectedEvent, group:group[0], pageTitle:group[0].name, chat: true, backButton: '/groups'});
   } catch (error) {
     console.error("Error fetching group details:", error);
     res.status(500).send("Error fetching group details.");
@@ -896,12 +951,41 @@ app.get('/randomizer', sessionValidation, async (req, res) => {
             );
         }
  
-        res.render('randomizer', { events: group.events }); 
+        res.render('randomizer', { events: group.events, groupId: groupId }); 
+
+   
     } catch (error) { 
         console.error("Error fetching group details:", error); 
         res.status(500).send("Error fetching group details."); 
     } 
 }); 
+
+
+app.post('/selectEvent', sessionValidation, async (req, res) => {
+    const { groupId, selectedEvent } = req.body;
+
+    if (!ObjectId.isValid(groupId)) {
+        return res.status(400).send("Invalid group ID format.");
+    }
+
+    try {
+        const updateResult = await groupCollection.updateOne(
+            { _id: new ObjectId(groupId) },
+            { $set: { selectedEvent } },
+            { upsert: true }
+        );
+
+        if (updateResult.matchedCount === 0 && updateResult.upsertedCount === 1) {
+            res.status(201).send("Selected event created successfully.");
+        } else {
+            res.status(200).send("Selected event updated successfully.");
+        }
+    } catch (error) {
+        console.error("Error updating selected event:", error);
+        res.status(500).send("Error updating selected event.");
+    }
+});
+
 
 app.get('/notifications', sessionValidation, async (req, res) => {
     const userId = req.query.userId;
