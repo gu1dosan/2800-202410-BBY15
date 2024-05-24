@@ -1064,7 +1064,7 @@ app.post('/event_submission', sessionValidation, async (req, res) => {
 
         const notification = {
             _id: new ObjectId(),
-            message: `A new event has been added to ${group.name}.`,
+            message: `${title} has been suggested in ${group.name}.`,
             groupId: groupId,
             read: false,
             type: 'event'
