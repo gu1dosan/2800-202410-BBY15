@@ -229,21 +229,20 @@ app.post("/signup", async (req, res) => {
     return res.redirect("/");
   }
 });
-
-app.get("/login", (req, res) => {
-  if (req.session.authenticated) {
-    return res.redirect("/");
-  } else {
-    // if(req.query.error == 'noemailorpw') {
-    //     return res.render('login',{error: 'You must enter an email and password'});
-    // }
-    // if(req.query.error == 'invaliddetails') {
-    //     return res.render('login',{error: 'Invalid email or password'});
-    // }
-    res.render("login");
-  }
-});
-
+ 
+app.get('/login', (req, res) => { 
+  if(req.session.authenticated) { 
+    return res.redirect('/'); 
+  } else { 
+    // if(req.query.error == 'noemailorpw') { 
+    //     return res.render('login',{error: 'You must enter an email and password'}); 
+    // } 
+    // if(req.query.error == 'invaliddetails') { 
+    //     return res.render('login',{error: 'Invalid email or password'}); 
+    // } 
+    res.render('login'); 
+  } 
+}); 
 app.post("/login", async (req, res) => {
   var email = req.body.email;
   var password = req.body.password;
@@ -294,7 +293,7 @@ app.post("/login", async (req, res) => {
     req.session.biography = result[0].biography; // Retrieve biography from database
     req.session.cookie.maxAge = expireTime;
 
-    return res.redirect("/");
+    return req.query.redirect ? res.redirect(req.query.redirect) : res.redirect('/'); 
   } else {
     // console.log("incorrect password");
     return res.render("login", { error: "Invalid email or password" });
@@ -377,7 +376,6 @@ app.get("/password-reset/:userId/:token", async (req, res) => {
     });
   }
 });
-
 app.post("/password-reset/:userId/:token", async (req, res) => {
   try {
     const schema = Joi.object({
@@ -1039,19 +1037,62 @@ app.post("/invite", sessionValidation, async (req, res) => {
   }
 });
 
-app.get("/profile", sessionValidation, (req, res) => {
-  var name = req.session.name;
-  var biography = req.session.biography;
-
-  res.render(`profile`, { name, biography });
+app.get("/group-invite", async (req, res) => { 
+  const groupId = req.query.id; 
+  if(!groupId){
+    return res.redirect('/');
+  }
+  if (!isValidSession(req)) {
+    res.redirect("/login"+'?redirect=/group-invite?id='+groupId);
+  } else {
+    try { 
+      const group = await groupCollection.findOne({ _id: new ObjectId(groupId) }); 
+      if (!group) { 
+        return res.redirect('/'); 
+      } 
+      if(group.members.includes(req.session.email)){
+        return res.redirect('/group/'+groupId);
+      }
+      const memberEmails = group.members;
+      const memberDetails = await getUserDetails(memberEmails, groupId);
+      res.render('groupInvite', { group, memberDetails }); 
+    } catch (error) { 
+      console.error('Error fetching group details:', error); 
+      res.redirect('/'); 
+    } 
+  }
 });
 
-// GET handler for displaying the form
-app.get("/editProfile", sessionValidation, (req, res) => {
-  if (!req.session.name) {
-    return res.redirect("/login"); // Redirect if the user is not logged in
-  }
-  res.render("editProfile", { name: req.session.name });
+app.get("/accept-group-invite", sessionValidation, async (req, res) => { 
+  try { 
+    const groupId = req.query.id; // Get the group ID from the query parameter 
+    const email = req.session.email; // Get the emails from the request body 
+
+    const validEmails = []; 
+
+    // Check if the email exists in the userCollection 
+    const user = await userCollection.findOne({ email }); 
+    if (user) { 
+      // Check if the user is already a member of the group 
+      const group = await groupCollection.findOne({ _id: new ObjectId(groupId), members: email }); 
+      if (!group) { 
+        // If the user exists and is not already a member, add the email to the list of valid emails 
+        validEmails.push(email); 
+      } 
+    } 
+
+    // Update the group document to add the new members 
+    const result = await groupCollection.updateOne( 
+      { _id: new ObjectId(groupId) }, 
+      { $addToSet: { members: { $each: validEmails } } } 
+    ); 
+
+    // Render the InviteConfirmation page with the appropriate message 
+    res.redirect('/group/'+groupId); 
+  } catch (error) { 
+    console.error('Error inviting users to group:', error); 
+    res.status(500).json({ success: false, message: 'Internal server error.' }); 
+  } 
 });
 
 // POST handler for processing the form submission
