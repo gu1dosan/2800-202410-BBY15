@@ -109,6 +109,7 @@
                 contentType: 'application/json',
                 success: function(response) {
                     alert('Timestamps saved successfully!');
+                    window.location.href = `/group/${groupId}`; // Redirect to /groups after successful save
                 },
                 error: function(error) {
                     console.error('Error saving timestamps:', error);

@@ -345,7 +345,6 @@ app.get('/profile', sessionValidation, (req, res) => {
 
     res.render('profile', { name, biography, profilePicture });
 });
-
   
 // GET handler for displaying the form
 app.get('/editProfile', sessionValidation, (req, res) => {
@@ -354,9 +353,6 @@ app.get('/editProfile', sessionValidation, (req, res) => {
     }
     res.render('editProfile', { name: req.session.name, biography: req.session.biography, profilePicture: req.session.profilePicture });
 });
-
-
-  
 
 app.get("/groups", sessionValidation, async (req, res) => {
   try {
@@ -642,6 +638,7 @@ app.delete("/remove-member", sessionValidation, async (req, res) => {
 app.get('/egg', sessionValidation, (req, res) => {
     res.render("egg");
 });
+
 app.get('/calendar', sessionValidation, async (req, res) => {
     const groupId = req.query.id;
 
