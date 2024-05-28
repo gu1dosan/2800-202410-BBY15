@@ -490,7 +490,7 @@ app.get("/userProfile", sessionValidation, async (req, res) => {
     res.render("userProfile", { user });
   } catch (error) {
     console.error("Error fetching user details:", error);
-    res.status(500).send("Error fetching user details.");
+    res.status(500).render("errorMessage", { msg: "Error fetching user details." });
   }
 });
 
@@ -514,7 +514,7 @@ app.get("/userProfile", sessionValidation, async (req, res) => {
     res.render("userProfile", { user });
   } catch (error) {
     console.error("Error fetching user details:", error);
-    res.status(500).send("Error fetching user details.");
+    res.status(500).render("errorMessage", { msg: "Error fetching user details." });
   }
 });
 
@@ -534,7 +534,7 @@ app.get("/groups", sessionValidation, async (req, res) => {
     res.render("groups", { session: req.session, groups: groups, user });
   } catch (error) {
     console.error("Error fetching groups:", error);
-    res.status(500).send("Error fetching groups.");
+    res.status(500).render("errorMessage", { msg: "Error fetching groups." });
   }
 });
 
@@ -662,7 +662,7 @@ app.get("/group/:groupId", sessionValidation, async (req, res) => {
     });
   } catch (error) {
     console.error("Error fetching group details:", error);
-    res.status(500).send("Error fetching group details.");
+    res.status(500).render("errorMessage", { msg: "Error fetching group details." });
   }
 });
 io.on("connection", (socket) => {
@@ -734,7 +734,7 @@ app.get("/group-details/:groupId", sessionValidation, async (req, res) => {
     res.render("groupDetails", { group, isAdmin: adminStatus, memberDetails });
   } catch (error) {
     console.error("Error fetching group details:", error);
-    res.status(500).send("Error fetching group details.");
+    res.status(500).render("errorMessage", { msg: "Error fetching group details." });
   }
 });
 
@@ -753,7 +753,7 @@ app.post("/edit-group-name", sessionValidation, async (req, res) => {
     res.redirect(`/group-details/${groupId}`);
   } catch (error) {
     console.error("Error updating group name:", error);
-    res.status(500).send("Error updating group name.");
+    res.status(500).render("errorMessage", { msg: "Error updating group name" });
   }
 });
 
@@ -828,7 +828,7 @@ app.delete("/remove-member", sessionValidation, async (req, res) => {
     res.sendStatus(200);
   } catch (error) {
     console.error("Error removing user from group:", error);
-    res.status(500).send("Error removing user from group");
+    res.status(500).render("errorMessage", { msg: "Error removing user from group" });
   }
 });
 
@@ -861,7 +861,7 @@ app.get("/calendar", sessionValidation, async (req, res) => {
     }
   } catch (error) {
     console.error("Error fetching group details:", error);
-    res.status(500).send("Error fetching group details.");
+    res.status(500).render("errorMessage", { msg: "Error fetching group details." });
   }
 });
 
@@ -890,7 +890,7 @@ app.get("/calendar", sessionValidation, async (req, res) => {
     }
   } catch (error) {
     console.error("Error fetching group details:", error);
-    res.status(500).send("Error fetching group details.");
+    res.status(500).render("errorMessage", { msg: "Error fetching group details." });
   }
 });
 
@@ -936,7 +936,7 @@ app.post("/save-timestamps", sessionValidation, async (req, res) => {
     res.status(200).send({ message: "Timestamps saved successfully!" });
   } catch (error) {
     console.error("Error saving timestamps:", error);
-    res.status(500).send("An error occurred while saving the timestamps.");
+    res.status(500).render("errorMessage", { msg: "An Error ocurred while saving the timestamps" });
   }
 });
 
@@ -977,7 +977,7 @@ app.post("/toggle-admin-status", sessionValidation, async (req, res) => {
     res.redirect(`/group-details/${groupId}`);
   } catch (error) {
     console.error("Error toggling admin status:", error);
-    res.status(500).send("Error toggling admin status.");
+    res.status(500).render("errorMessage", { msg: "Error toggling admin status" });
   }
 });
 
@@ -1074,7 +1074,7 @@ app.post(
         profilePictureUrl = result.secure_url; // Use the secure_url provided by Cloudinary
       } catch (error) {
         console.error("Error uploading image to Cloudinary:", error);
-        return res.status(500).send("Error uploading image");
+        return res.status(500).render("errorMessage", { msg: "Error uploading image." });
       }
     }
 
@@ -1167,7 +1167,7 @@ app.get("/randomizer", sessionValidation, async (req, res) => {
     res.render("randomizer", { events: group.events, groupId: groupId });
   } catch (error) {
     console.error("Error fetching group details:", error);
-    res.status(500).send("Error fetching group details.");
+    res.status(500).render("errorMessage", { msg: "Error fetching group details"});
   }
 });
 
@@ -1192,7 +1192,7 @@ app.post("/selectEvent", sessionValidation, async (req, res) => {
     }
   } catch (error) {
     console.error("Error updating selected event:", error);
-    res.status(500).send("Error updating selected event.");
+    res.status(500).render("errorMessage", { msg: "Error updating selected event" });
   }
 });
 
