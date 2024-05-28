@@ -2,101 +2,126 @@
 
 <div class="flex justify-center items-center mt-8">
     <div class="bg-white rounded-lg p-6">
-        <h2 class="text-xl font-semibold mb-4">Group Details</h2>
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-semibold">Group Details</h2>
+            <button onclick="openLeavePopup()" class="bg-red text-white font-bold rounded text-sm px-2 py-1">Leave</button>
+        </div>
         <div class="border border-gray-300 p-4 rounded-md">
             <!-- Flex container for group name, Edit button, and Leave button -->
             <div class="flex items-center space-x-2 mb-2">
                 <h3 class="text-lg font-semibold"><%= group.name %></h3>
                 <% if (isAdmin) { %>
-                    <button onclick="openEditPopup()" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-1 px-2 rounded text-sm">Edit</button>
+                    <button onclick="openEditPopup()" class=" text-white font-bold  rounded text-lg">✏️</button>
                 <% } %>
-                <button onclick="openLeavePopup()" class="bg-red hover:bg-red text-white font-bold py-1 px-2 rounded text-sm">Leave Group</button>
+                
             </div>
             <!-- New div for this week's activity -->
-            <div class="mt-8 mb-20">
-                <h2 class="text-lg font-semibold">This week's activity</h2>
+            <div class="mt-8 mb-12">
+                <h2 class="text-lg font-semibold">Selected activity</h2>
+                <div class="mt-4">
+                    <% if (group.selectedEvent) { %>
+                        <p class="text-base text-gray-700"><strong>Title:</strong> <%= group.selectedEvent.title %></p>
+                        <p class="text-base text-gray-700"><strong>Location:</strong> <%= group.selectedEvent.location %></p>
+                        <p class="text-base text-gray-700"><strong>Info:</strong> <%= group.selectedEvent.info %></p>
+                        <p class="text-base text-gray-700"><strong>Category:</strong> <%= group.selectedEvent.category %></p>
+                    <% } else { %>
+                        <p class="text-base text-gray-700 font-semibold">No activity has been selected yet!</p>
+                    <% } %>
+                    
+                        <button onclick="viewSubmittedActivities()" class="bg-purple hover:bg-darkPurple text-white font-bold py-2 px-4 rounded mt-4">Submitted Activities</button>
+                        <!-- Add Deadline button -->
+                        <button onclick="openDeadlinePopup()" class="bg-light-purple hover:bg-purple text-white font-bold py-2 px-4 rounded ml-2">Add Deadline</button>
+                </div>
             </div>
+            
+            
             <!-- Flex container for the green buttons -->
-            <div class="flex justify-center items-center mb-8">
+            <h2 class="text-lg font-semibold">Group Members</h2>
+
+            <div class="flex justify-center items-center mt-4 mb-8">
                 <!-- View Members button -->
-                <button onclick="openMembersPopup()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">View Members</button>
+                <button onclick="openMembersPopup()" class="bg-purple hover:bg-darkPurple text-white font-bold py-2 px-4 rounded">View Members</button>
                 <!-- Invite new member button -->
-                <button onclick="openInvitePopup()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-2">Invite new members</button>
+                <button onclick="openInvitePopup()" class="bg-light-purple hover:bg-purple text-white font-bold py-2 px-4 rounded ml-2">Invite new members</button>
             </div>
             <!-- View Submitted Activities button -->
-            <div class="flex justify-center items-center mb-8">
-                <button onclick="viewSubmittedActivities()" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">View Submitted Activities</button>
-            </div>
-            <!-- Add Deadline button -->
-<button onclick="openDeadlinePopup()"
-    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-2">Add Deadline</button>
+            
+           
 
-<!-- Deadline Popup -->
-<div id="deadlinePopup" class="hidden fixed top-0 left-0 w-full h-full bg-gray-800 bg-opacity-75 flex justify-center items-center">
-    <div class="bg-white rounded-lg p-6 w-80">
-        <h2 class="text-xl font-semibold mb-4">Add Deadline</h2>
-        <button onclick="closeDeadlinePopup()" class="bg-blue-500 hover:bg-red text-white font-bold py-1 px-2 rounded text-sm">Close</button>
-        <form id="deadlineForm" action="/addDeadline?groupId=<%= group._id %>" method="post">
-            <label for="deadline">Deadline:</label>
-            <input type="datetime-local" id="deadline" name="deadline" required>
-            <input type="submit" value="Add Deadline">
-        </form>
-    </div>
-</div>
-        <!-- Members List Popup -->
-        <div id="membersPopup" class="hidden fixed top-0 left-0 w-full h-full bg-gray-800 bg-opacity-75 flex justify-center items-center">
-            <div class="bg-white rounded-lg p-6 w-80">
-                <h2 class="text-xl font-semibold mb-4">Members</h2>
-                <ul class="list-none pl-0">
-                    <% memberDetails.forEach(user => { %>
-                    <li class="border-b border-gray-300 py-2 flex justify-between items-center">
-                        <li><a href="/userProfile?email=<%= user.email %>" class="text-blue-500 hover:underline"><%= user.name %></a></li>
-                      
-                            <% if (user.isAdmin) { %> (admin) <% } %>
-                        
-                        <% if (user.isAdmin) { %>
-                        <div>
-                            <button onclick="toggleAdminStatus('<%= user.id %>', '<%= user.email %>')" class="text-green-500 hover:text-green-700" title="Toggle admin status">🔽</button>
+            <!-- Deadline Popup -->
+            <div id="deadlinePopup" class="hidden fixed top-0 left-0 w-full h-full bg-gray-800 bg-opacity-75 flex justify-center items-center">
+                <div class="bg-white rounded-lg p-6 w-80">
+                    <h2 class="text-xl font-semibold mb-4">Add Deadline</h2>
+                    <button onclick="closeDeadlinePopup()" class="bg-blue-500 hover:bg-red text-white font-bold py-1 px-2 rounded text-sm">Close</button>
+                    <form id="deadlineForm" action="/addDeadline?groupId=<%= group._id %>" method="post">
+                        <label for="deadline">Deadline:</label>
+                        <input type="datetime-local" id="deadline" name="deadline" required>
+                        <input type="submit" value="Add Deadline">
+                    </form>
+                </div>
+            </div>
+
+            <div id="membersPopup" class="hidden fixed top-0 left-0 w-full h-full bg-gray-800 bg-opacity-75 flex justify-center items-center">
+                <div class="bg-white rounded-lg p-6 w-80 relative">
+                    <button onclick="closeMembersPopup()" class="absolute top-2 right-2 text-gray-500 hover:text-gray-800 text-lg">
+                        &times;
+                    </button>
+                    <h2 class="text-xl font-semibold mb-4">Members</h2>
+                    <ul class="list-none pl-0">
+                        <% memberDetails.forEach(user => { %>
+                        <li class="border-b border-gray-300 py-2 flex justify-between items-center">
+                            <div class="flex items-center">
+                                <a href="/userProfile?email=<%= user.email %>" class="text-blue-500 hover:underline"><%= user.name %></a>
+                                <% if (user.isAdmin) { %>
+                                    <span class="ml-2">(admin)</span>
+                                <% } %>
                             </div>
-                        <% } else { %>
                             <div class="flex">
-                            <button onclick="removeMember('<%= user.id %>')" class="text-red-500 hover:text-red-700 mr-2" title="Remove from group">🗑️</button>
-                            <button onclick="toggleAdminStatus('<%= user.id %>', '<%= user.email %>')" class="text-green-500 hover:text-green-700" title="Toggle admin status">🔼</button>
+                                <% if (user.isAdmin) { %>
+                                    <button onclick="toggleAdminStatus('<%= user.id %>', '<%= user.email %>')" class="text-green-500 hover:text-green-700" title="Toggle admin status">🔽</button>
+                                <% } else { %>
+                                    <button onclick="removeMember('<%= user.id %>')" class="text-red-500 hover:text-red-700 mr-2" title="Remove from group">🗑️</button>
+                                    <button onclick="toggleAdminStatus('<%= user.id %>', '<%= user.email %>')" class="text-green-500 hover:text-green-700" title="Toggle admin status">🔼</button>
+                                <% } %>
                             </div>
-                        <% } %>
-                    </li>
-                    <% }); %>
-                </ul>
-                <button onclick="closeMembersPopup()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-2">Close</button>
+                        </li>
+                        <% }); %>
+                    </ul>
+                </div>
             </div>
-        </div>
-
+            
+        
 
             <!-- Invite New Member Popup -->
             <div id="invitePopup" class="hidden fixed top-0 left-0 w-full h-full bg-gray-800 bg-opacity-75 flex justify-center items-center">
-                <div class="bg-white rounded-lg p-6">
+                <div class="bg-white rounded-lg p-6 relative">
+                    <button onclick="closeInvitePopup()" class="absolute top-2 right-2 text-gray-500 hover:text-gray-800 text-lg">
+                        &times;
+                    </button>
                     <h2 class="text-xl font-semibold mb-4">Invite New Members</h2>
                     <form id="inviteForm" action="/invite?groupId=<%= group._id %>" method="post">
                         <label for="emails" class="block mb-2">Enter email addresses (separated by commas):</label>
                         <textarea id="emails" name="emails" rows="4" class="border border-gray-300 rounded-md p-2 mb-4 w-full"></textarea>
-                        <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Invite</button>
+                        <button type="submit" class="bg-light-purple hover:bg-purple text-white font-bold py-2 px-4 rounded">Invite</button>
                     </form>
-                    <button onclick="closeInvitePopup()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-2">Cancel</button>
                 </div>
             </div>
-            <!-- Edit Group Name Popup -->
+
+            <!-- Edit Group Popup -->
             <div id="editPopup" class="hidden fixed top-0 left-0 w-full h-full bg-gray-800 bg-opacity-75 flex justify-center items-center">
-                <div class="bg-white rounded-lg p-6">
+                <div class="relative bg-white rounded-lg p-6">
+                    <button onclick="closeEditPopup()" class="absolute top-2 right-2 text-gray-500 hover:text-gray-800 text-lg">
+                        &times;
+                    </button>
                     <h2 class="text-xl font-semibold mb-4">Edit Group Name</h2>
                     <form id="editForm" action="/edit-group-name?groupId=<%= group._id %>" method="post">
                         <label for="newName" class="block mb-2">New Group Name:</label>
                         <input type="text" id="newName" name="newName" class="border border-gray-300 rounded-md p-2 mb-4 w-full">
-                        <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Confirm</button>
+                        <button type="submit" class="bg-light-purple hover:bg-purple text-white font-bold py-2 px-4 rounded">Confirm</button>
                     </form>
-                    <button onclick="closeEditPopup()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-2">Cancel</button>
                     <!-- Delete Group Section -->
                     <div class="mt-8">
-                        <h2 class="text-xl font-semibold mb-4 text-red">Delete Group</h2>
+                        <h2 class="text-xl font-semibold mb-4">Delete Group</h2>
                         <button onclick="openDeletePopup()" class="bg-red hover:bg-red text-white font-bold py-2 px-4 rounded">Delete Group</button>
                     </div>
                 </div>
