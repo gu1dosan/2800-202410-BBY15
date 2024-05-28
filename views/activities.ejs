@@ -1,0 +1,17 @@
+<%- include('templates/headerV2') %>
+
+<!-- Main Content Wrapper with Padding to Accommodate Button Section -->
+<div class="container mx-auto pt-5 pb-20 overflow-y-auto">
+    <h1 class="mb-3 text-center text-2xl">Selected Activities</h1>
+    
+    <!-- Activities List Section -->
+    <div class="flex flex-col items-center mb-5">
+        <ul class="text-center text-xl md:text-xl lg:text-2xl max-w-prose list-disc list-inside">
+            <% selectedEvents.forEach(event => { %>
+                <li><%= event.title %></li>
+            <% }); %>
+        </ul>
+    </div>
+</div>
+
+<%- include('templates/footer') %>
