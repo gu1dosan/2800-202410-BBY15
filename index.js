@@ -516,6 +516,35 @@ app.get("/userProfile", sessionValidation, async (req, res) => {
   }
 });
 
+app.get('/activities', sessionValidation, async (req, res) => {
+    const userEmail = req.session.email;
+  
+    try {
+      // Find all groups where the user is a member and a selectedEvent exists
+      const groups = await groupCollection.find({
+        members: userEmail,
+        selectedEvent: { $exists: true }
+      }).toArray();
+  
+      // If no groups found, return a 404 status
+      if (!groups.length) {
+        return res.status(404).send('No selected events found for the user.');
+      }
+  
+      // Extract the selected events from each group
+      const selectedEvents = groups.map(group => group.selectedEvent);
+  
+      res.render('activities', { selectedEvents });
+    } catch (error) {
+      console.error("Error fetching selected events:", error);
+      res.status(500).send('Server error');
+    }
+  });
+  
+  
+
+  
+
 app.get("/groups", sessionValidation, async (req, res) => {
   try {
     // Get the email of the current user
