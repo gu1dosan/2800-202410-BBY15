@@ -83,7 +83,7 @@
                     </form>
                     <div class="mt-4 flex items-center justify-center">
                         <p class="">Or send them an invite link:</p>
-                        <button class="ml-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded flex items-center" onclick="copyInviteLink()"><img class="mr-1" src="/images/copy.svg" alt=""/>Copy Link</button>
+                        <button id="copyInviteLinkButton" class="ml-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-3 pl-2 rounded flex items-center" onclick="copyInviteLink()"><img class="mr-1" src="/images/copy.svg" alt=""/>Copy Link</button>
                     </div>
                     <button onclick="closeInvitePopup()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-2">Cancel</button>
                 </div>
@@ -174,7 +174,7 @@
     const copyInviteLink = () => {
         const inviteLink = window.location.origin + '/group-invite?id=<%= group._id %>';
         navigator.clipboard.writeText(inviteLink).then(() => {
-            alert('Invite link copied to clipboard');
+            document.getElementById('copyInviteLinkButton').innerHTML = '<img class="mr-1" src="/images/check-circle.svg" alt=""/>Link copied!';
         }).catch((error) => {
             console.error('Error copying invite link:', error);
         });
