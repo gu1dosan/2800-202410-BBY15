@@ -131,6 +131,7 @@ async function getUserDetails(emails, groupId) {
         name: user.name,
         isAdmin,
         email: user.email,
+        profilePicture: user.profilePicture
       });
     }
 

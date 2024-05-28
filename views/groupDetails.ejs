@@ -71,9 +71,12 @@
                         <% memberDetails.forEach(user => { %>
                         <li class="border-b border-gray-300 py-2 flex justify-between items-center">
                             <div class="flex items-center">
+                                <div class="w-10 h-10 rounded-full overflow-hidden mr-2">
+                                    <img src="<%= user.profilePicture || '../images/dog.jpeg' %>" alt="Profile Picture" class="w-full h-full object-cover">
+                                </div>
                                 <a href="/userProfile?email=<%= user.email %>" class="text-blue-500 hover:underline"><%= user.name %></a>
                                 <% if (user.isAdmin) { %>
-                                    <span class="ml-2">(admin)</span>
+                                    <span class="ml-2">🛡️</span>
                                 <% } %>
                             </div>
                             <div class="flex">
@@ -89,6 +92,7 @@
                     </ul>
                 </div>
             </div>
+            
             
         
 
