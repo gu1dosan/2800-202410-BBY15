@@ -14,9 +14,14 @@
                     <p class="text-white text-sm <%= locals.pathname.startsWith('/activities') && 'font-bold'%>">Activities</p>
                 </a>
                 <!-- add onclick for search -->
-                <a class="flex flex-col items-center" href="/search">
-                    <img src="/images/<%= locals.pathname.startsWith('/search') ? 'search-filled' : 'search-rounded'%>.svg" alt="Search" class="h-6 lg:h-10">
-                    <p class="text-white text-sm <%= locals.pathname.startsWith('/search') && 'font-bold'%>">Search</p>
+                <a class="flex flex-col items-center relative" href="/notifications">
+                    <div style="position: relative;">
+                        <img src="/images/notification.svg" alt="Notifications" class="h-6 lg:h-10">
+                        <% if(user.unreadNotificationCount > 0) { %>
+                            <span class="notification-count text-white absolute top-0 right-0"><sup><%= user.unreadNotificationCount %></sup></span>
+                        <% } %>
+                    </div>
+                    <p class="text-white text-sm <%= locals.pathname.startsWith('/activities') && 'font-bold'%>">Notifications</p>
                 </a>
                 <a class="flex flex-col items-center" href="/profile">
                     <img src="/images/<%= locals.pathname.startsWith('/profile') ? 'account-filled' : 'account-rounded'%>.svg" alt="Profile" class="h-6 lg:h-10">

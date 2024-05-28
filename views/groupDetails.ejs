@@ -35,7 +35,7 @@
 <div id="deadlinePopup" class="hidden fixed top-0 left-0 w-full h-full bg-gray-800 bg-opacity-75 flex justify-center items-center">
     <div class="bg-white rounded-lg p-6 w-80">
         <h2 class="text-xl font-semibold mb-4">Add Deadline</h2>
-        <button onclick="closeDeadlinePopup()" class="bg-blue-500 hover:bg-red text-white font-bold py-1 px-2 rounded text-sm">Close</button>
+        <button onclick="closeDeadlinePopup()" class="bg-rose-500 hover:bg-rose-700 text-white font-bold py-1 px-2 rounded text-sm">Close</button>
         <form id="deadlineForm" action="/addDeadline?groupId=<%= group._id %>" method="post">
             <label for="deadline">Deadline:</label>
             <input type="datetime-local" id="deadline" name="deadline" required>

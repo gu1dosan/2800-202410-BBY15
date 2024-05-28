@@ -31,9 +31,9 @@ const upload = multer({ storage: storage });
 const cloudinary = require("cloudinary");
 const { type } = require("os");
 cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_CLOUD_KEY,
-  api_secret: process.env.CLOUDINARY_CLOUD_SECRET,
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_CLOUD_KEY,
+    api_secret: process.env.CLOUDINARY_CLOUD_SECRET,
 });
 
 const mongodb_host = process.env.MONGODB_HOST;
@@ -67,46 +67,45 @@ app.set("view engine", "ejs");
 app.use(
   session({
     secret: node_session_secret,
-    store: mongoStore, //default is memory store
+    store: mongoStore, //default is memory store 
     saveUninitialized: false,
     resave: true,
     maxAge: expireTime,
-  })
+})
 );
 
-app.use(express.json());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 function isValidSession(req) {
-  if (req.session.authenticated) {
-    return true;
-  }
-  return false;
+    if (req.session.authenticated) {
+        return true;
+    }
+    return false;
 }
 
 function sessionValidation(req, res, next) {
-  if (isValidSession(req)) {
-    return next();
-  } else {
-    res.redirect("/login");
-  }
+    if (isValidSession(req)) {
+        return next();
+    } else {
+        res.redirect("/login");
+    }
 }
 
 async function isAdmin(userEmail, groupId) {
-  try {
-    // Find the group with the specified ID
-    const group = await groupCollection.findOne({ _id: new ObjectId(groupId) });
+    try {
+        // Find the group with the specified ID
+        const group = await groupCollection.findOne({ _id: new ObjectId(groupId) });
 
-    // Check if the group exists and if the email is in the admin array
-    if (group && group.admin && group.admin.includes(userEmail)) {
-      return true;
+        // Check if the group exists and if the email is in the admin array
+        if (group && group.admin && group.admin.includes(userEmail)) {
+            return true;
+        }
+        return false;
+    } catch (error) {
+        console.error("Error checking admin status:", error);
+        return false;
     }
-    return false;
-  } catch (error) {
-    console.error("Error checking admin status:", error);
-    return false;
-  }
 }
 
 async function getUserDetails(emails, groupId) {
@@ -141,6 +140,16 @@ async function getUserDetails(emails, groupId) {
   }
 }
 
+// function adminAuthorization(req, res, next) {
+//     if (!isAdmin(req)) {
+//         res.status(403);
+//         res.render("errorMessage", { error: "403 - Not Authorized" });
+//         return;
+//     } else {
+//         next();
+//     }
+// }
+
 app.use((req, res, next) => {
   res.locals.session = req.session;
   res.locals.pathname = req.url;
@@ -148,7 +157,7 @@ app.use((req, res, next) => {
 });
 
 app.get("/", sessionValidation, (req, res) => {
-  res.redirect("/groups");
+    res.redirect("/groups");
 });
 
 app.get("/signup", (req, res) => {
@@ -158,7 +167,6 @@ app.get("/signup", (req, res) => {
     res.render("signup");
   }
 });
-
 app.post("/signup", async (req, res) => {
   var name = req.body.name;
   var email = req.body.email;
@@ -229,20 +237,21 @@ app.post("/signup", async (req, res) => {
     return res.redirect("/");
   }
 });
+
+app.get("/login", (req, res) => {
+  if (req.session.authenticated) {
+    return res.redirect("/");
+  } else {
+    // if(req.query.error == 'noemailorpw') {
+    //     return res.render('login',{error: 'You must enter an email and password'});
+    // }
+    // if(req.query.error == 'invaliddetails') {
+    //     return res.render('login',{error: 'Invalid email or password'});
+    // }
+    res.render("login");
+  }
+});
  
-app.get('/login', (req, res) => { 
-  if(req.session.authenticated) { 
-    return res.redirect('/'); 
-  } else { 
-    // if(req.query.error == 'noemailorpw') { 
-    //     return res.render('login',{error: 'You must enter an email and password'}); 
-    // } 
-    // if(req.query.error == 'invaliddetails') { 
-    //     return res.render('login',{error: 'Invalid email or password'}); 
-    // } 
-    res.render('login'); 
-  } 
-}); 
 app.post("/login", async (req, res) => {
   var email = req.body.email;
   var password = req.body.password;
@@ -293,7 +302,7 @@ app.post("/login", async (req, res) => {
     req.session.biography = result[0].biography; // Retrieve biography from database
     req.session.cookie.maxAge = expireTime;
 
-    return req.query.redirect ? res.redirect(req.query.redirect) : res.redirect('/'); 
+    return res.redirect("/");
   } else {
     // console.log("incorrect password");
     return res.render("login", { error: "Invalid email or password" });
@@ -307,7 +316,6 @@ app.get("/password-reset", (req, res) => {
     res.render("passwordReset", { success: false });
   }
 });
-
 app.post("/password-reset", async (req, res) => {
   try {
     const schema = Joi.object({ email: Joi.string().email().required() });
@@ -376,6 +384,7 @@ app.get("/password-reset/:userId/:token", async (req, res) => {
     });
   }
 });
+
 app.post("/password-reset/:userId/:token", async (req, res) => {
   try {
     const schema = Joi.object({
@@ -448,92 +457,102 @@ app.post("/password-reset/:userId/:token", async (req, res) => {
   }
 });
 
-app.get("/profile", sessionValidation, (req, res) => {
-  var name = req.session.name;
-  var biography = req.session.biography;
-  var profilePicture = req.session.profilePicture; // Ensure this is passed
-
-  res.render("profile", { name, biography, profilePicture });
-});
-
-// GET handler for displaying the form
-app.get("/editProfile", sessionValidation, (req, res) => {
-  if (!req.session.name) {
-    return res.redirect("/login"); // Redirect if the user is not logged in
-  }
-  res.render("editProfile", {
-    name: req.session.name,
-    biography: req.session.biography,
-    profilePicture: req.session.profilePicture,
-  });
-});
-
-app.get("/userProfile", sessionValidation, async (req, res) => {
-  const userEmail = req.query.email;
-  var name = req.session.name;
-  var biography = req.session.biography;
-  var profilePicture = req.session.profilePicture; // Ensure this is passed
-
-  if (!userEmail) {
-    return res.status(400).send("Email query parameter is required.");
-  }
-
-  try {
-    const user = await userCollection.findOne({ email: userEmail });
-
-    if (!user) {
-      return res.status(404).send("User not found.");
-    }
-
-    res.render("userProfile", { user });
-  } catch (error) {
-    console.error("Error fetching user details:", error);
-    res.status(500).send("Error fetching user details.");
-  }
-});
-
-app.get("/userProfile", sessionValidation, async (req, res) => {
-  const userEmail = req.query.email;
-  var name = req.session.name;
-  var biography = req.session.biography;
-  var profilePicture = req.session.profilePicture; // Ensure this is passed
-
-  if (!userEmail) {
-    return res.status(400).send("Email query parameter is required.");
-  }
-
-  try {
-    const user = await userCollection.findOne({ email: userEmail });
-
-    if (!user) {
-      return res.status(404).send("User not found.");
-    }
-
-    res.render("userProfile", { user });
-  } catch (error) {
-    console.error("Error fetching user details:", error);
-    res.status(500).send("Error fetching user details.");
-  }
-});
-
-app.get("/groups", sessionValidation, async (req, res) => {
-  try {
-    // Get the email of the current user
+app.get('/profile', sessionValidation, async (req, res) => {
     const currentUserEmail = req.session.email;
 
     const user = await userCollection.findOne({ email: currentUserEmail });
 
-    // Find all groups where the current user is a member
-    const groups = await groupCollection
-      .find({ members: currentUserEmail })
-      .toArray();
+    var name = req.session.name;
+    var biography = req.session.biography;
+    var profilePicture = req.session.profilePicture; // Ensure this is passed
 
-    // Render groups page and pass the groups data to the template
-    res.render("groups", { session: req.session, groups: groups, user });
-  } catch (error) {
-    console.error("Error fetching groups:", error);
-    res.status(500).send("Error fetching groups.");
+    res.render('profile', { name, biography, profilePicture, user });
+});
+
+// GET handler for displaying the form
+app.get('/editProfile', sessionValidation, async (req, res) => {
+    if (!req.session.name) {
+        return res.redirect('/login');  // Redirect if the user is not logged in
+    }
+
+    const currentUserEmail = req.session.email;
+
+    const user = await userCollection.findOne({ email: currentUserEmail });
+
+    res.render('editProfile', { name: req.session.name, biography: req.session.biography, profilePicture: req.session.profilePicture, user });
+});
+
+app.get("/userProfile", sessionValidation, async (req, res) => {
+  const userEmail = req.query.email;
+  var name = req.session.name;
+  var biography = req.session.biography;
+  var profilePicture = req.session.profilePicture; // Ensure this is passed
+
+  if (!userEmail) {
+    return res.status(400).send("Email query parameter is required.");
   }
+
+  try {
+    const user = await userCollection.findOne({ email: userEmail });
+
+    if (!user) {
+      return res.status(404).send("User not found.");
+    }
+
+    res.render("userProfile", { user });
+  } catch (error) {
+    console.error("Error fetching user details:", error);
+    res.status(500).send("Error fetching user details.");
+  }
+});
+
+app.get('/activities', sessionValidation, async (req, res) => {
+    const userEmail = req.session.email;
+  
+    try {
+      // Find all groups where the user is a member and a selectedEvent exists
+      const groups = await groupCollection.find({
+        members: userEmail,
+        selectedEvent: { $exists: true }
+      }).toArray();
+  
+      // If no groups found, return a 404 status
+      if (!groups.length) {
+        return res.status(404).send('No selected events found for the user.');
+      }
+  
+      // Extract the selected events from each group
+      const selectedEvents = groups.map(group => group.selectedEvent);
+  
+      res.render('activities', { selectedEvents });
+    } catch (error) {
+      console.error("Error fetching selected events:", error);
+      res.status(500).send('Server error');
+    }
+  });
+  
+  
+
+  
+
+app.get("/groups", sessionValidation, async (req, res) => {
+    try {
+        // Get the email of the current user
+        const currentUserEmail = req.session.email;
+
+        const user = await userCollection.findOne({ email: currentUserEmail });
+
+        // Find all groups where the current user is a member
+        const groups = await groupCollection
+            .find({ members: currentUserEmail })
+            .toArray();
+
+        // Render groups page and pass the groups data to the template
+        res.render("groups", { session: req.session, groups: groups, user });
+    } catch (error) {
+        console.error("Error fetching groups:", error);
+        res.status(500).send("Error fetching groups.");
+    }
 });
 
 app.post("/createGroup", sessionValidation, async (req, res) => {
@@ -597,14 +616,17 @@ app.post("/createGroup", sessionValidation, async (req, res) => {
   }
 });
 
-app.get("/groupConfirmation", sessionValidation, (req, res) => {
-  const error = req.query.error === "true";
-  const message = req.query.message;
-  const invalidEmails = req.query.invalidEmails
-    ? JSON.parse(req.query.invalidEmails)
-    : [];
+app.get("/groupConfirmation", sessionValidation, async (req, res) => {
+    const currentUserEmail = req.session.email;
 
-  res.render("GroupCreationConfirmation", { error, message, invalidEmails });
+    const user = await userCollection.findOne({ email: currentUserEmail });
+    const error = req.query.error === "true";
+    const message = req.query.message;
+    const invalidEmails = req.query.invalidEmails
+        ? JSON.parse(req.query.invalidEmails)
+        : [];
+
+    res.render("GroupCreationConfirmation", { error, message, invalidEmails, user });
 });
 
 app.get("/group/:groupId", sessionValidation, async (req, res) => {
@@ -639,29 +661,45 @@ app.get("/group/:groupId", sessionValidation, async (req, res) => {
       ])
       .toArray();
 
-    if (!group[0]) {
-      // Group not found
-      res.status(404).send("Group not found.");
-      return;
+        if (!group[0]) {
+            // Group not found
+            res.status(404).send("Group not found.");
+            return;
+        }
+
+        const deadlineObject = await groupCollection.findOne({ _id: new ObjectId(groupId) }, { projection: { deadline: 1 } });
+        const now = new Date();
+        const deadlineDate = deadlineObject.deadline;
+        const nowPST = new Date(now.getTime() - (7 * 60 * 60 * 1000));
+
+        //console.log(deadlineDate);
+        //console.log(nowPST);
+        //console.log(JSON.stringify(group[0]));
+        // Retrieve the selected event from the group document
+        const selectedEvent = group[0].selectedEvent;
+
+        const currentUserEmail = req.session.email;
+
+        const user = await userCollection.findOne({ email: currentUserEmail });
+
+
+        //console.log(selectedEvent);
+
+        // Render the group details page with the retrieved group
+        res.render("group", { 
+            selectedEvent, 
+            group: group[0], 
+            pageTitle: group[0].name, 
+            chat: true, 
+            backButton: '/groups', 
+            user, 
+            deadlineDate, 
+            nowPST 
+        });
+    } catch (error) {
+        console.error("Error fetching group details:", error);
+        res.status(500).send("Error fetching group details.");
     }
-    //console.log(JSON.stringify(group[0]));
-    // Retrieve the selected event from the group document
-    const selectedEvent = group[0].selectedEvent;
-
-    //console.log(selectedEvent);
-
-    // Render the group details page with the retrieved group
-    res.render("group", {
-      selectedEvent,
-      group: group[0],
-      pageTitle: group[0].name,
-      chat: true,
-      backButton: "/groups",
-    });
-  } catch (error) {
-    console.error("Error fetching group details:", error);
-    res.status(500).send("Error fetching group details.");
-  }
 });
 io.on("connection", (socket) => {
   // console.log('a user connected');
@@ -673,7 +711,6 @@ io.on("connection", (socket) => {
     // console.log(socket)
   });
 });
-
 app.post(
   "/group/:groupId/message",
   sessionValidation,
@@ -703,37 +740,40 @@ app.post(
 );
 
 app.get("/group-details/:groupId", sessionValidation, async (req, res) => {
-  try {
-    const groupId = req.params.groupId;
-    const group = await groupCollection.findOne({ _id: new ObjectId(groupId) });
-    const userEmail = req.session.email;
-    const adminStatus = await isAdmin(userEmail, groupId);
+    try {
+        const groupId = req.params.groupId;
+        const group = await groupCollection.findOne({ _id: new ObjectId(groupId) });
+        const userEmail = req.session.email;
+        const adminStatus = await isAdmin(userEmail, groupId);
 
-    if (adminStatus) {
-      // User is an admin, proceed with admin-specific logic
-      console.log("You are an admin for this group.");
-    } else {
-      // User is not an admin
-      console.log("You are not an admin for this group.");
+        const user = await userCollection.findOne({ email: userEmail });
+
+        if (adminStatus) {
+            // User is an admin, proceed with admin-specific logic
+            console.log("You are an admin for this group.");
+        } else {
+            // User is not an admin
+            console.log("You are not an admin for this group.");
+        }
+
+        if (!group) {
+            // Group not found
+            res.status(404).send("Group not found.");
+            return;
+        }
+
+        // Retrieve user details (including id and name) for the members of the group
+        const memberEmails = group.members;
+        const memberDetails = await getUserDetails(memberEmails, groupId);
+        // console.log(memberDetails);
+
+
+        // Render the group details page with the retrieved group and member details
+        res.render("groupDetails", { group, isAdmin: adminStatus, memberDetails, user });
+    } catch (error) {
+        console.error("Error fetching group details:", error);
+        res.status(500).send("Error fetching group details.");
     }
-
-    if (!group) {
-      // Group not found
-      res.status(404).send("Group not found.");
-      return;
-    }
-
-    // Retrieve user details (including id and name) for the members of the group
-    const memberEmails = group.members;
-    const memberDetails = await getUserDetails(memberEmails, groupId);
-    // console.log(memberDetails);
-
-    // Render the group details page with the retrieved group and member details
-    res.render("groupDetails", { group, isAdmin: adminStatus, memberDetails });
-  } catch (error) {
-    console.error("Error fetching group details:", error);
-    res.status(500).send("Error fetching group details.");
-  }
 });
 
 app.post("/edit-group-name", sessionValidation, async (req, res) => {
@@ -834,8 +874,11 @@ app.get("/egg", sessionValidation, (req, res) => {
   res.render("egg");
 });
 
-app.get("/calendar", sessionValidation, async (req, res) => {
-  const groupId = req.query.id;
+app.get('/calendar', sessionValidation, async (req, res) => {
+    const groupId = req.query.id;
+    const currentUserEmail = req.session.email;
+
+    const user = await userCollection.findOne({ email: currentUserEmail });
 
   if (!ObjectId.isValid(groupId)) {
     return res.status(400).send("Invalid group ID format.");
@@ -882,15 +925,16 @@ app.get("/calendar", sessionValidation, async (req, res) => {
         );
       }
 
-      res.render("calendar", { group: group, times: group.calendar });
-    } else {
-      res.render("404");
+            res.render("calendar", { group: group, user, times: group.calendar });
+        } else {
+            res.render("404");
+        }
+    } catch (error) {
+        console.error("Error fetching group details:", error);
+        res.status(500).send("Error fetching group details.");
     }
-  } catch (error) {
-    console.error("Error fetching group details:", error);
-    res.status(500).send("Error fetching group details.");
-  }
 });
+
 
 app.post("/save-timestamps", sessionValidation, async (req, res) => {
   const { timestamps } = req.body;
@@ -984,6 +1028,10 @@ app.post("/invite", sessionValidation, async (req, res) => {
     const groupId = req.query.groupId; // Get the group ID from the query parameter
     const { emails } = req.body; // Get the emails from the request body
 
+    const currentUserEmail = req.session.email;
+
+    const user = await userCollection.findOne({ email: currentUserEmail });
+
     // Split the emails string into an array of email addresses
     const emailArray = emails.split(/[;,]+/).map((email) => email.trim());
 
@@ -1030,7 +1078,7 @@ app.post("/invite", sessionValidation, async (req, res) => {
     };
 
     // Render the InviteConfirmation page with the appropriate message
-    res.render("InviteConfirmation", { inviteMessage });
+    res.render("InviteConfirmation", { inviteMessage, user });
   } catch (error) {
     console.error("Error inviting users to group:", error);
     res.status(500).json({ success: false, message: "Internal server error." });
@@ -1164,6 +1212,10 @@ app.post(
 app.get("/randomizer", sessionValidation, async (req, res) => {
   const groupId = req.query.id;
 
+  const currentUserEmail = req.session.email;
+
+  const user = await userCollection.findOne({ email: currentUserEmail });
+
   if (!ObjectId.isValid(groupId)) {
     return res.status(400).send("Invalid group ID format.");
   }
@@ -1175,86 +1227,101 @@ app.get("/randomizer", sessionValidation, async (req, res) => {
       return res.status(404).send("No events found for this group.");
     }
 
-    const randomEvent =
-      group.events[Math.floor(Math.random() * group.events.length)];
-
-    for (let userEmail of group.members) {
-      const user = await userCollection.findOne({ email: userEmail });
-
-      if (!user) {
-        console.error(`User with email ${userEmail} not found.`);
-        continue;
-      }
-
-      const notification = {
-        _id: new ObjectId(),
-        message: `The chosen event is ${randomEvent.title}.`,
-        groupId: groupId,
-        read: false,
-        type: "randomizer",
-      };
-
-      await userCollection.updateOne(
-        { _id: new ObjectId(user._id) },
-        { $pull: { notifications: { groupId: groupId, type: "randomizer" } } }
-      );
-
-      await userCollection.updateOne(
-        { _id: new ObjectId(user._id) },
-        { $push: { notifications: notification } }
-      );
-    }
-
-    res.render("randomizer", { events: group.events, groupId: groupId });
+    res.render("randomizer", { events: group.events, groupId: groupId, user });
   } catch (error) {
     console.error("Error fetching group details:", error);
     res.status(500).send("Error fetching group details.");
   }
 });
 
-app.post("/selectEvent", sessionValidation, async (req, res) => {
-  const { groupId, selectedEvent } = req.body;
 
-  if (!ObjectId.isValid(groupId)) {
-    return res.status(400).send("Invalid group ID format.");
-  }
+app.post('/selectEvent', sessionValidation, async (req, res) => {
+    const { groupId, selectedEvent } = req.body;
 
-  try {
-    const updateResult = await groupCollection.updateOne(
-      { _id: new ObjectId(groupId) },
-      { $set: { selectedEvent } },
-      { upsert: true }
-    );
-
-    if (updateResult.matchedCount === 0 && updateResult.upsertedCount === 1) {
-      res.status(201).send("Selected event created successfully.");
-    } else {
-      res.status(200).send("Selected event updated successfully.");
+    if (!ObjectId.isValid(groupId)) {
+        return res.status(400).send("Invalid group ID format.");
     }
-  } catch (error) {
-    console.error("Error updating selected event:", error);
-    res.status(500).send("Error updating selected event.");
-  }
+
+    try {
+        const updateResult = await groupCollection.updateOne(
+            { _id: new ObjectId(groupId) },
+            { $set: { selectedEvent } },
+            { upsert: true }
+        );
+
+        if (updateResult.matchedCount === 0 && updateResult.upsertedCount === 1) {
+            res.status(201).send("Selected event created successfully.");
+        } else {
+            res.status(200).send("Selected event updated successfully.");
+        }
+    } catch (error) {
+        console.error("Error updating selected event:", error);
+        res.status(500).send("Error updating selected event.");
+    }
+
+    const group = await groupCollection.findOne({ _id: new ObjectId(groupId) });
+
+    for (let userEmail of group.members) {
+        const user = await userCollection.findOne({ email: userEmail });
+
+        if (!user) {
+            console.error(`User with email ${userEmail} not found.`);
+            continue;
+        }
+
+        const notification = {
+            _id: new ObjectId(),
+            message: `The chosen event is ${selectedEvent.title}.`,
+            groupId: groupId,
+            read: false,
+            type: 'randomizer'
+        };
+
+        const existingNotification = user.notifications.find(n => n.groupId === groupId && n.type === 'randomizer');
+
+        if (existingNotification) {
+            await userCollection.updateOne(
+                { _id: new ObjectId(user._id) },
+                {
+                    $pull: { notifications: { groupId: groupId, type: 'randomizer' } },
+                    $inc: { unreadNotificationCount: -1 }
+                }
+            );
+        }
+
+        await userCollection.updateOne(
+            { _id: new ObjectId(user._id) },
+            {
+                $push: { notifications: notification },
+                $inc: { unreadNotificationCount: 1 }
+            }
+        );
+    }
 });
 
 app.get("/notifications", sessionValidation, async (req, res) => {
-  const userId = req.query.userId;
-  const user = await userCollection.findOne({ _id: new ObjectId(userId) });
+  const currentUserEmail = req.session.email;
+
+  const user = await userCollection.findOne({ email: currentUserEmail });
+
+    const userId = user._id;
 
   const notifications = await Promise.all(
     user.notifications.map(async (notification) => {
       const group = await groupCollection.findOne({
         _id: new ObjectId(notification.groupId),
       });
-      return { ...notification, groupTitle: group.name };
+      return { ...notification, groupTitle: group.name, group: group._id };
     })
   );
-  res.render("notifications", { notifications: notifications, userId: userId });
+  res.render("notifications", { notifications: notifications, userId: userId, user });
 });
 
 app.post("/mark_as_read", sessionValidation, async (req, res) => {
   const userId = req.query.userId;
   const notificationId = req.body.notificationId;
+  const groupId = req.body.notificationgroup;
+  const notificationType = req.body.notificationtype;
 
   await userCollection.updateOne(
     {
@@ -1264,12 +1331,31 @@ app.post("/mark_as_read", sessionValidation, async (req, res) => {
     { $set: { "notifications.$.read": true } }
   );
 
-  res.redirect("/notifications?userId=" + userId);
+  await userCollection.updateOne(
+    { _id: new ObjectId(userId) },
+    { $inc: { unreadNotificationCount: -1 } }
+);
+
+if (notificationType === 'randomizer' || notificationType === 'deadline') {
+    res.redirect('/group/' + groupId);
+} else {
+    res.redirect('/submitted_event?groupId=' + groupId);
+}
 });
 
-app.post("/delete_notification", sessionValidation, async (req, res) => {
-  const userId = req.query.userId;
-  const notificationId = req.body.notificationId;
+app.post('/delete_notification', sessionValidation, async (req, res) => {
+    const userId = req.query.userId;
+    const notificationId = req.body.notificationId;
+
+    const user = await userCollection.findOne({ _id: new ObjectId(userId) });
+    const notification = user.notifications.find(notification => notification._id.toString() === notificationId);
+
+    if (notification && !notification.read) {
+        await userCollection.updateOne(
+            { _id: new ObjectId(userId) },
+            { $inc: { unreadNotificationCount: -1 } }
+        );
+    }
 
   await userCollection.updateOne(
     { _id: new ObjectId(userId) },
@@ -1286,9 +1372,11 @@ app.get(
   async (req, res) => {
     const groupId = req.query.groupId;
     const group = await groupCollection.findOne({ _id: new ObjectId(groupId) });
+    const currentUserEmail = req.session.email;
+    const user = await userCollection.findOne({ email: currentUserEmail });
     const successMessage =
       req.query.success === "true" ? "Event added successfully" : null;
-    res.render("event_submission", { group });
+    res.render("event_submission", { group, user });
   }
 );
 
@@ -1296,25 +1384,30 @@ app.get("/submitted_event", sessionValidation, async (req, res) => {
   const groupId = req.query.groupId;
   const group = await groupCollection.findOne({ _id: new ObjectId(groupId) });
   //console.log('groupId:', new ObjectId(groupId));
+  const currentUserEmail = req.session.email;
+  const user = await userCollection.findOne({ email: currentUserEmail });
   const events = group.events;
   res.render("submitted_event", {
     group,
     session: req.session,
     events,
     convertTo12Hour,
+    user
   });
 });
 
 app.get("/editEvent", sessionValidation, async (req, res) => {
   const groupId = req.query.groupId;
   const eventId = req.query.eventId;
+  const currentUserEmail = req.session.email;
+  const user = await userCollection.findOne({ email: currentUserEmail });
   const group = await groupCollection.findOne(
     { _id: new ObjectId(groupId), "events._id": new ObjectId(eventId) },
     { projection: { "events.$": 1 } }
   );
   const event = group.events[0];
 
-  res.render("editEvent", { group, session: req.session, event });
+  res.render("editEvent", { group, session: req.session, event, user });
 });
 
 app.post("/editEvent", sessionValidation, async (req, res) => {
@@ -1327,23 +1420,23 @@ app.post("/editEvent", sessionValidation, async (req, res) => {
   const newCategory = req.body.category;
   const newTime = req.body.eventTime;
 
-  const group = await groupCollection.findOne({ _id: new ObjectId(groupId) });
-  const event = group.events.find((event) => event._id.toString() === eventId);
+    const group = await groupCollection.findOne({ _id: new ObjectId(groupId) });
+    const event = group.events.find(event => event._id.toString() === eventId);
 
-  const updatedTitle = newTitle === "" ? event.title : newTitle;
-  const updatedDescription =
-    newDescription === "" ? event.description : newDescription;
-  const updatedLocation = newLocation === "" ? event.location : newLocation;
-  const updatedInfo = newInfo === "" ? event.info : newInfo;
-  const updatedCategory = newCategory === "" ? event.category : newCategory;
-  const updatedTime = newTime === "" ? event.time : newTime;
+    const updatedTitle = newTitle === '' ? event.title : newTitle;
+    const updatedDescription = newDescription === '' ? event.description : newDescription;
+    const updatedLocation = newLocation === '' ? event.location : newLocation;
+    const updatedInfo = newInfo === '' ? event.info : newInfo;
+    const updatedCategory = newCategory === '' ? event.category : newCategory;
+    const updatedTime = newTime === '' ? event.time : newTime;
 
-  const schema = Joi.object({
-    title: Joi.string().max(50).allow(""),
-    description: Joi.string().max(500).allow(""),
-    location: Joi.string().max(50).allow(""),
-    info: Joi.string().max(50).allow(""),
-  });
+    const schema = Joi.object(
+        {
+            title: Joi.string().max(50).allow(''),
+            description: Joi.string().max(500).allow(''),
+            location: Joi.string().max(50).allow(''),
+            info: Joi.string().max(50).allow('')
+        });
 
   const validationResult = schema.validate({
     title: updatedTitle,
@@ -1358,49 +1451,50 @@ app.post("/editEvent", sessionValidation, async (req, res) => {
     return;
   }
 
-  const updatedEvent = {
-    _id: new ObjectId(eventId),
-    title: updatedTitle,
-    description: updatedDescription,
-    location: updatedLocation,
-    info: updatedInfo,
-    category: updatedCategory,
-    time: updatedTime,
-  };
+    const updatedEvent = {
+        _id: new ObjectId(eventId),
+        title: updatedTitle,
+        description: updatedDescription,
+        location: updatedLocation,
+        info: updatedInfo,
+        category: updatedCategory,
+        time: updatedTime
+    };
 
-  await groupCollection.updateOne(
-    { _id: new ObjectId(groupId), "events._id": new ObjectId(eventId) },
-    { $set: { "events.$": updatedEvent } }
-  );
-  //console.log('event in edit:', new ObjectId(eventId));
+    await groupCollection.updateOne(
+        { _id: new ObjectId(groupId), "events._id": new ObjectId(eventId) },
+        { $set: { "events.$": updatedEvent } }
+    );
+    //console.log('event in edit:', new ObjectId(eventId));
 
-  console.log("Event updated");
-  res.redirect("/group/" + groupId);
+    console.log("Event updated");
+    res.redirect('/group/' + groupId);
 });
 
 app.post("/deleteEvent", sessionValidation, async (req, res) => {
-  const groupId = req.query.groupId;
-  const eventId = req.query.eventId;
+    const groupId = req.query.groupId;
+    const eventId = req.query.eventId;
 
-  await groupCollection.updateOne(
-    { _id: new ObjectId(groupId) },
-    { $pull: { events: { _id: new ObjectId(eventId) } } }
-  );
+    await groupCollection.updateOne(
+        { _id: new ObjectId(groupId) },
+        { $pull: { events: { _id: new ObjectId(eventId) } } }
+    );
 
-  res.redirect("/submitted_event" + "?groupId=" + groupId);
+    res.redirect("/submitted_event" + '?groupId=' + groupId);
 });
 
-app.post("/event_submission", sessionValidation, async (req, res) => {
-  const groupId = req.query.groupId;
-  //console.log('groupId:', new ObjectId(groupId))
-  var userId = req.session.user_ID;
 
-  var title = req.body.eventTitle;
-  var description = req.body.description;
-  var location = req.body.location;
-  var info = req.body.contactInfo;
-  var category = req.body.category;
-  var time = req.body.eventTime;
+app.post("/event_submission", sessionValidation, async (req, res) => {
+    const groupId = req.query.groupId;
+    //console.log('groupId:', new ObjectId(groupId))
+    var userId = req.session.user_ID;
+
+    var title = req.body.eventTitle;
+    var description = req.body.description;
+    var location = req.body.location;
+    var info = req.body.contactInfo;
+    var category = req.body.category;
+    var time = req.body.eventTime;
 
   if (!title || !category) {
     res.send(
@@ -1409,12 +1503,13 @@ app.post("/event_submission", sessionValidation, async (req, res) => {
     return;
   }
 
-  const schema = Joi.object({
-    title: Joi.string().max(50).required(),
-    description: Joi.string().max(500).allow(""),
-    location: Joi.string().max(50).allow(""),
-    info: Joi.string().max(50).allow(""),
-  });
+    const schema = Joi.object(
+        {
+            title: Joi.string().max(50).required(),
+            description: Joi.string().max(500).allow(''),
+            location: Joi.string().max(50).allow(''),
+            info: Joi.string().max(50).allow('')
+        });
 
   const validationResult = schema.validate({
     title,
@@ -1450,19 +1545,23 @@ app.post("/event_submission", sessionValidation, async (req, res) => {
   for (let userEmail of group.members) {
     const user = await userCollection.findOne({ email: userEmail });
 
-    const notification = {
-      _id: new ObjectId(),
-      message: `${title} has been suggested in ${group.name}.`,
-      groupId: groupId,
-      read: false,
-      type: "event",
-    };
+        const notification = {
+            _id: new ObjectId(),
+            message: `${title} has been suggested in ${group.name}.`,
+            groupId: groupId,
+            read: false,
+            type: 'event'
+        }
 
-    await userCollection.updateOne(
-      { _id: new ObjectId(user._id) },
-      { $push: { notifications: notification } }
-    );
-  }
+        await userCollection.updateOne(
+            { _id: new ObjectId(user._id) },
+            {
+                $push: { notifications: notification },
+                $inc: { unreadNotificationCount: 1 }
+            },
+
+        );
+    }
 
   console.log("Event added");
   res.redirect("/group/" + groupId);
@@ -1504,37 +1603,44 @@ app.post("/addDeadline", sessionValidation, async (req, res) => {
       type: "deadline",
     };
 
-    await userCollection.updateOne(
-      { _id: new ObjectId(user._id) },
-      { $pull: { notifications: { groupId: groupId, type: "deadline" } } }
-    );
+        const notificationExists = user.notifications.some(notification => notification.groupId === groupId && notification.type === 'deadline');
 
-    await userCollection.updateOne(
-      { _id: new ObjectId(user._id) },
-      { $push: { notifications: notification } }
-    );
-  }
+        if (notificationExists) {
+            await userCollection.updateOne(
+                { _id: new ObjectId(user._id) },
+                {
+                    $pull: { notifications: { groupId: groupId, type: "deadline" } },
+                    $inc: { unreadNotificationCount: -1 }
+                }
+            );
+        }
+
+        await userCollection.updateOne(
+            { _id: new ObjectId(user._id) },
+            { $push: { notifications: notification }, $inc: { unreadNotificationCount: 1 } }
+        );
+    }
 
   res.redirect("/group-details/" + groupId);
 });
 
 function convertTo12Hour(time) {
-  let [hours, minutes] = time.split(":");
-  let period = +hours >= 12 ? "PM" : "AM";
-  hours = +hours % 12 || 12;
-  return `${hours}:${minutes} ${period}`;
+    let [hours, minutes] = time.split(':');
+    let period = +hours >= 12 ? 'PM' : 'AM';
+    hours = +hours % 12 || 12;
+    return `${hours}:${minutes} ${period}`;
 }
 
 async function checkDeadline(req, res, next) {
-  const now = new Date();
-  const groupId = req.query.groupId;
-  const nowPST = new Date(now.getTime() - 7 * 60 * 60 * 1000);
+    const now = new Date();
+    const groupId = req.query.groupId;
+    const nowPST = new Date(now.getTime() - 7 * 60 * 60 * 1000);
 
-  const group = await groupCollection.findOne({ _id: new ObjectId(groupId) });
+    const group = await groupCollection.findOne({ _id: new ObjectId(groupId) });
 
   if (group && nowPST > group.deadline) {
-    console.log(now);
-    console.log(group.deadline);
+    //console.log(now);
+    //console.log(group.deadline);
     res.redirect("/group/" + groupId);
   } else {
     next();
@@ -1560,10 +1666,10 @@ async function checkDeadline(req, res, next) {
 // });
 
 app.get("/logout", sessionValidation, (req, res) => {
-  if (req.session.authenticated) {
-    req.session.destroy();
-    res.redirect("/");
-  } else res.redirect("/");
+    if (req.session.authenticated) {
+        req.session.destroy();
+        res.redirect("/");
+    } else res.redirect("/");
 });
 
 app.get("403", (req, res) => {
@@ -1579,5 +1685,5 @@ app.get("*", (req, res) => {
 });
 
 server.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
+    console.log(`Server is running on port ${port}`);
 });

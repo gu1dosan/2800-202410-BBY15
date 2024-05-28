@@ -28,11 +28,6 @@
         Create Group
     </button>
 </div>
-<div class="flex justify-start items-end fixed bottom-16 left-0 ml-4">
-    <a href="/notifications?userId=<%= user._id %>">
-        <img src="/images/notification.svg" alt="Notifications" class="h-6 w-6">
-    </a>
-</div>
 <div id="popup" class="hidden fixed top-0 left-0 w-full h-full bg-gray-800 bg-opacity-75 flex justify-center items-center">
     <div class="bg-white rounded-lg p-6 relative">
         <h2 class="text-2xl font-bold mb-4">Create new group</h2>
@@ -57,4 +52,4 @@
     }
 </script>
 
-<%- include("templates/footer") %>
+<%- include("templates/footer", {user: user}) %>
