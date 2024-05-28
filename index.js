@@ -6,7 +6,7 @@ const bcrypt = require("bcrypt");
 require("./utils.js");
 var bodyParser = require("body-parser");
 const crypto = require("crypto");
-const {v4: uuid} = require('uuid');
+const { v4: uuid } = require('uuid');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -24,16 +24,16 @@ const expireTime = 15 * 24 * 60 * 60 * 1000; //expires after 15 days
 
 const cloud_name = process.env.CLOUDINARY_CLOUD_NAME;
 
-const multer  = require('multer')
+const multer = require('multer')
 const storage = multer.memoryStorage()
 const upload = multer({ storage: storage })
 
 const cloudinary = require("cloudinary");
 const { type } = require("os");
 cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_CLOUD_KEY,
-  api_secret: process.env.CLOUDINARY_CLOUD_SECRET,
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_CLOUD_KEY,
+    api_secret: process.env.CLOUDINARY_CLOUD_SECRET,
 });
 
 const mongodb_host = process.env.MONGODB_HOST;
@@ -65,46 +65,46 @@ var mongoStore = MongoStore.create({
 app.set("view engine", "ejs");
 
 app.use(
-  session({
-    secret: node_session_secret,
-    store: mongoStore, //default is memory store 
-    saveUninitialized: false,
-    resave: true,
-    maxAge: expireTime,
-}));
+    session({
+        secret: node_session_secret,
+        store: mongoStore, //default is memory store 
+        saveUninitialized: false,
+        resave: true,
+        maxAge: expireTime,
+    }));
 
 app.use(express.json());
 
 function isValidSession(req) {
-  if (req.session.authenticated) {
-    return true;
-  }
-  return false;
+    if (req.session.authenticated) {
+        return true;
+    }
+    return false;
 }
 
 function sessionValidation(req, res, next) {
-  if (isValidSession(req)) {
-    return next();
-  } else {
-    res.redirect("/login");
-  }
+    if (isValidSession(req)) {
+        return next();
+    } else {
+        res.redirect("/login");
+    }
 }
 
 
 async function isAdmin(userEmail, groupId) {
-  try {
-    // Find the group with the specified ID
-    const group = await groupCollection.findOne({ _id: new ObjectId(groupId) });
+    try {
+        // Find the group with the specified ID
+        const group = await groupCollection.findOne({ _id: new ObjectId(groupId) });
 
-    // Check if the group exists and if the email is in the admin array
-    if (group && group.admin && group.admin.includes(userEmail)) {
-      return true;
+        // Check if the group exists and if the email is in the admin array
+        if (group && group.admin && group.admin.includes(userEmail)) {
+            return true;
+        }
+        return false;
+    } catch (error) {
+        console.error("Error checking admin status:", error);
+        return false;
     }
-    return false;
-  } catch (error) {
-    console.error("Error checking admin status:", error);
-    return false;
-  }
 }
 
 async function getUserDetails(emails, groupId) {
@@ -152,192 +152,192 @@ app.use((req, res, next) => {
     res.locals.session = req.session;
     res.locals.pathname = req.url;
     next();
-  });
-
-app.get("/", sessionValidation, (req, res) => {
-  res.redirect("/groups");
 });
 
-app.get('/signup', (req, res) => { 
-    if (req.session.authenticated) { 
-        res.redirect('/'); 
-    } else { 
-        res.render('signup'); 
-    } 
-}); 
-app.post('/signup', async (req, res) => { 
-    var name = req.body.name; 
-    var email = req.body.email; 
-    var password = req.body.password; 
-    var confirmPassword = req.body.confirmPassword; 
-    if (!name || !email || !password || !confirmPassword) { 
-        res.render('signup',{missing:{name: !name, email: !email, password: !password, confirmPassword: !confirmPassword},formData:{name: name, email: email, password: password, confirmPassword: confirmPassword}}); 
-    } else { 
-        const schema = Joi.object({ 
-            name: Joi.string().alphanum().max(20).required(), 
-            email: Joi.string().email().required(), 
-            password: Joi.string().max(20).required(), 
-            confirmPassword: Joi.ref('password'), 
-        }); 
-         
-        const validationResult = schema.validate({name, email, password, confirmPassword}); 
-        if (validationResult.error != null) { 
+app.get("/", sessionValidation, (req, res) => {
+    res.redirect("/groups");
+});
+
+app.get('/signup', (req, res) => {
+    if (req.session.authenticated) {
+        res.redirect('/');
+    } else {
+        res.render('signup');
+    }
+});
+app.post('/signup', async (req, res) => {
+    var name = req.body.name;
+    var email = req.body.email;
+    var password = req.body.password;
+    var confirmPassword = req.body.confirmPassword;
+    if (!name || !email || !password || !confirmPassword) {
+        res.render('signup', { missing: { name: !name, email: !email, password: !password, confirmPassword: !confirmPassword }, formData: { name: name, email: email, password: password, confirmPassword: confirmPassword } });
+    } else {
+        const schema = Joi.object({
+            name: Joi.string().alphanum().max(20).required(),
+            email: Joi.string().email().required(),
+            password: Joi.string().max(20).required(),
+            confirmPassword: Joi.ref('password'),
+        });
+
+        const validationResult = schema.validate({ name, email, password, confirmPassword });
+        if (validationResult.error != null) {
             // console.log(validationResult.error); 
-            let error = validationResult.error.message; 
-            if(error==="\"email\" must be a valid email") error = "Email is not valid"; 
-            if(error==="\"confirmPassword\" must be [ref:password]") error = "Passwords do not match, try again"; 
-            return res.render('signup',{error: error,formData:{name: name, email: email, password: password, confirmPassword: confirmPassword}});  
-        } 
-     
-        var hashedPassword = await bcrypt.hash(password, Number(process.env.SALTROUNDS)); 
-         
-        const {insertedId} = await userCollection.insertOne({name: name, email:email, password: hashedPassword}); 
+            let error = validationResult.error.message;
+            if (error === "\"email\" must be a valid email") error = "Email is not valid";
+            if (error === "\"confirmPassword\" must be [ref:password]") error = "Passwords do not match, try again";
+            return res.render('signup', { error: error, formData: { name: name, email: email, password: password, confirmPassword: confirmPassword } });
+        }
+
+        var hashedPassword = await bcrypt.hash(password, Number(process.env.SALTROUNDS));
+
+        const { insertedId } = await userCollection.insertOne({ name: name, email: email, password: hashedPassword });
         req.session.id = insertedId;
-        req.session.authenticated = true; 
-        req.session.email = email; 
-        req.session.name = name; 
-        req.session.cookie.maxAge = expireTime; 
-        return res.redirect('/'); 
-    } 
-}); 
- 
-app.get('/login', (req, res) => { 
-    if(req.session.authenticated) { 
-        return res.redirect('/'); 
-    } else { 
+        req.session.authenticated = true;
+        req.session.email = email;
+        req.session.name = name;
+        req.session.cookie.maxAge = expireTime;
+        return res.redirect('/');
+    }
+});
+
+app.get('/login', (req, res) => {
+    if (req.session.authenticated) {
+        return res.redirect('/');
+    } else {
         // if(req.query.error == 'noemailorpw') { 
         //     return res.render('login',{error: 'You must enter an email and password'}); 
         // } 
         // if(req.query.error == 'invaliddetails') { 
         //     return res.render('login',{error: 'Invalid email or password'}); 
         // } 
-        res.render('login'); 
-    } 
-}); 
-app.post('/login', async (req, res) => { 
-    var email = req.body.email; 
-    var password = req.body.password; 
-    if (!email || !password) { 
-        return res.render('login',{error: 'You must enter an email and password',formData:{email: email, password: password}}); 
-    } 
- 
-    const schema = Joi.string().email().required(); 
-	const validationResult = schema.validate(email); 
-	if (validationResult.error != null) { 
-	//    console.log(validationResult.error); 
-	//    return res.redirect('/login?error=noemailorpw'); 
-        return res.render('login',{error: 'Invalid email or password',formData:{email: email, password: password}}); 
-	} 
- 
-    const result = await userCollection.find({ email: email }).project({ email: 1, name: 1, user_type: 1, password: 1, biography: 1, profilePicture: 1, _id: 1 }).toArray(); 
- 
-	// console.log(result); 
-	if (result.length != 1) { 
-		// console.log("user not found"); 
+        res.render('login');
+    }
+});
+app.post('/login', async (req, res) => {
+    var email = req.body.email;
+    var password = req.body.password;
+    if (!email || !password) {
+        return res.render('login', { error: 'You must enter an email and password', formData: { email: email, password: password } });
+    }
+
+    const schema = Joi.string().email().required();
+    const validationResult = schema.validate(email);
+    if (validationResult.error != null) {
+        //    console.log(validationResult.error); 
+        //    return res.redirect('/login?error=noemailorpw'); 
+        return res.render('login', { error: 'Invalid email or password', formData: { email: email, password: password } });
+    }
+
+    const result = await userCollection.find({ email: email }).project({ email: 1, name: 1, user_type: 1, password: 1, biography: 1, profilePicture: 1, _id: 1 }).toArray();
+
+    // console.log(result); 
+    if (result.length != 1) {
+        // console.log("user not found"); 
         // return res.redirect('/login?error=invaliddetails'); 
-        return res.render('login',{error: 'Invalid email or password'}); 
-	} 
-	if (await bcrypt.compare(password, result[0].password)) { 
-		// console.log("correct password"); 
+        return res.render('login', { error: 'Invalid email or password' });
+    }
+    if (await bcrypt.compare(password, result[0].password)) {
+        // console.log("correct password"); 
         req.session.id = result[0]._id;
-		req.session.authenticated = true; 
-        req.session.email = email; 
-        req.session.name = result[0].name; 
-        req.session.user_type = result[0].user_type; 
+        req.session.authenticated = true;
+        req.session.email = email;
+        req.session.name = result[0].name;
+        req.session.user_type = result[0].user_type;
         req.session.profilePicture = result[0].profilePicture;  // Retrieve profile picture from database
         req.session.biography = result[0].biography;  // Retrieve biography from database
-        req.session.cookie.maxAge = expireTime; 
- 
-		return res.redirect('/'); 
-	} else { 
-		// console.log("incorrect password"); 
-		return res.render('login',{error: 'Invalid email or password'}); 
-	} 
-}); 
- 
-app.get('/password-reset', (req, res) => { 
-    if(req.session.authenticated) { 
-        res.redirect('/'); 
-    } else { 
-        res.render('passwordReset',{success:false}); 
-    } 
-}); 
-app.post("/password-reset", async (req, res) => { 
-    try { 
-        const schema = Joi.object({ email: Joi.string().email().required() }); 
-        const { error } = schema.validate(req.body); 
-        if (error) return res.render('passwordReset',{error: 'Email is not valid',formData:{email: req.body.email}}); 
- 
-        const user = await userCollection.findOne({ email: req.body.email }); 
-        if (!user) 
-            return res.render("passwordReset",{success:true, email: req.body.email}); 
- 
-        let token = await pwRecoveryTokensCollection.findOne({ userId: user._id }); 
-        if(token){ 
-            await pwRecoveryTokensCollection.deleteOne({userId: user._id}); 
-        }  
-        let newToken = crypto.randomBytes(32).toString("hex") 
-        await pwRecoveryTokensCollection.insertOne({userId:user._id, token: newToken,createdAt: Date.now()}); 
-        const link = `${process.env.BASE_URL}/password-reset/${user._id}/${newToken}`; 
-        let emailContent = `Hi ${user.name}, Click this link to reset your NextUp password:\n\n${link}\n\nIf you didn't request this, you can safely ignore this email.` 
-        await sendEmail(user.email, "NextUp Password Link", emailContent); 
- 
-        return res.render("passwordReset",{success:true, email: user.email}); 
-    } catch (error) { 
+        req.session.cookie.maxAge = expireTime;
+
+        return res.redirect('/');
+    } else {
+        // console.log("incorrect password"); 
+        return res.render('login', { error: 'Invalid email or password' });
+    }
+});
+
+app.get('/password-reset', (req, res) => {
+    if (req.session.authenticated) {
+        res.redirect('/');
+    } else {
+        res.render('passwordReset', { success: false });
+    }
+});
+app.post("/password-reset", async (req, res) => {
+    try {
+        const schema = Joi.object({ email: Joi.string().email().required() });
+        const { error } = schema.validate(req.body);
+        if (error) return res.render('passwordReset', { error: 'Email is not valid', formData: { email: req.body.email } });
+
+        const user = await userCollection.findOne({ email: req.body.email });
+        if (!user)
+            return res.render("passwordReset", { success: true, email: req.body.email });
+
+        let token = await pwRecoveryTokensCollection.findOne({ userId: user._id });
+        if (token) {
+            await pwRecoveryTokensCollection.deleteOne({ userId: user._id });
+        }
+        let newToken = crypto.randomBytes(32).toString("hex")
+        await pwRecoveryTokensCollection.insertOne({ userId: user._id, token: newToken, createdAt: Date.now() });
+        const link = `${process.env.BASE_URL}/password-reset/${user._id}/${newToken}`;
+        let emailContent = `Hi ${user.name}, Click this link to reset your NextUp password:\n\n${link}\n\nIf you didn't request this, you can safely ignore this email.`
+        await sendEmail(user.email, "NextUp Password Link", emailContent);
+
+        return res.render("passwordReset", { success: true, email: user.email });
+    } catch (error) {
         // console.log(error); 
-        return res.render('passwordReset',{success:false, error:error}); 
-    } 
-}); 
- 
-app.get("/password-reset/:userId/:token", async (req, res) => { 
-    if(req.session.authenticated) { 
-        res.redirect('/'); 
-    } else { 
+        return res.render('passwordReset', { success: false, error: error });
+    }
+});
+
+app.get("/password-reset/:userId/:token", async (req, res) => {
+    if (req.session.authenticated) {
+        res.redirect('/');
+    } else {
         // Check if the token exists and is still valid 
-        const user = await userCollection.findOne({_id: new ObjectId(req.params.userId)}); 
-        if (!user) return res.render('passwordResetForm',{error:'Invalid link or expired', userId: req.params.userId, token: req.params.token}); 
-        const token = await pwRecoveryTokensCollection.findOne({ 
-            userId: user._id, 
-            token: req.params.token, 
-        }); 
-        if (!token) return res.render('passwordResetForm',{error:'Invalid link or expired', userId: req.params.userId, token: req.params.token}); 
-        return res.render('passwordResetForm',{userId: req.params.userId, token: req.params.token}); 
-    } 
-}); 
-app.post("/password-reset/:userId/:token", async (req, res) => { 
-    try { 
-        const schema = Joi.object({ password: Joi.string().required(), confirmPassword: Joi.ref('password')}); 
-        let validationResult = schema.validate(req.body); 
-        if (validationResult.error != null) { 
-            let error = validationResult.error.message; 
+        const user = await userCollection.findOne({ _id: new ObjectId(req.params.userId) });
+        if (!user) return res.render('passwordResetForm', { error: 'Invalid link or expired', userId: req.params.userId, token: req.params.token });
+        const token = await pwRecoveryTokensCollection.findOne({
+            userId: user._id,
+            token: req.params.token,
+        });
+        if (!token) return res.render('passwordResetForm', { error: 'Invalid link or expired', userId: req.params.userId, token: req.params.token });
+        return res.render('passwordResetForm', { userId: req.params.userId, token: req.params.token });
+    }
+});
+app.post("/password-reset/:userId/:token", async (req, res) => {
+    try {
+        const schema = Joi.object({ password: Joi.string().required(), confirmPassword: Joi.ref('password') });
+        let validationResult = schema.validate(req.body);
+        if (validationResult.error != null) {
+            let error = validationResult.error.message;
             // console.log(error) 
-            if(error==="\"confirmPassword\" must be [ref:password]") { 
-                error = "Passwords do not match, try again" 
-            } else error = "Invalid password";  
-            return res.render('passwordResetForm',{error:error, userId: req.params.userId, token: req.params.token,formData:{password: req.body.password, confirmPassword: req.body.confirmPassword}}); 
-        } 
-        const user = await userCollection.findOne({_id: new ObjectId(req.params.userId)}); 
-        if (!user) return res.render('passwordResetForm',{error:'Invalid link or expired', userId: req.params.userId, token: req.params.token}); 
- 
-        const token = await pwRecoveryTokensCollection.findOne({ 
-            userId: user._id, 
-            token: req.params.token, 
-        }); 
-        if (!token) return res.render('passwordResetForm',{error:'Invalid link or expired', userId: req.params.userId, token: req.params.token}); 
- 
-        var hashedPassword = await bcrypt.hash(req.body.password, Number(process.env.SALTROUNDS)); 
-        await userCollection.updateOne({_id: new ObjectId(req.params.userId)}, {$set: {password: hashedPassword}}); 
-        await pwRecoveryTokensCollection.deleteOne({ 
-            userId: user._id, 
-            token: req.params.token, 
-        }) 
- 
-        return res.render('passwordResetForm',{success:true}); 
-    } catch (error) { 
-        console.log(error); 
-        return res.render('passwordResetForm',{error:error, userId: req.params.userId, token: req.params.token,formData:{password: req.body.password, confirmPassword: req.body.confirmPassword}}); 
-    } 
-}); 
+            if (error === "\"confirmPassword\" must be [ref:password]") {
+                error = "Passwords do not match, try again"
+            } else error = "Invalid password";
+            return res.render('passwordResetForm', { error: error, userId: req.params.userId, token: req.params.token, formData: { password: req.body.password, confirmPassword: req.body.confirmPassword } });
+        }
+        const user = await userCollection.findOne({ _id: new ObjectId(req.params.userId) });
+        if (!user) return res.render('passwordResetForm', { error: 'Invalid link or expired', userId: req.params.userId, token: req.params.token });
+
+        const token = await pwRecoveryTokensCollection.findOne({
+            userId: user._id,
+            token: req.params.token,
+        });
+        if (!token) return res.render('passwordResetForm', { error: 'Invalid link or expired', userId: req.params.userId, token: req.params.token });
+
+        var hashedPassword = await bcrypt.hash(req.body.password, Number(process.env.SALTROUNDS));
+        await userCollection.updateOne({ _id: new ObjectId(req.params.userId) }, { $set: { password: hashedPassword } });
+        await pwRecoveryTokensCollection.deleteOne({
+            userId: user._id,
+            token: req.params.token,
+        })
+
+        return res.render('passwordResetForm', { success: true });
+    } catch (error) {
+        console.log(error);
+        return res.render('passwordResetForm', { error: error, userId: req.params.userId, token: req.params.token, formData: { password: req.body.password, confirmPassword: req.body.confirmPassword } });
+    }
+});
 
 app.get('/profile', sessionValidation, async (req, res) => {
     const currentUserEmail = req.session.email;
@@ -351,7 +351,7 @@ app.get('/profile', sessionValidation, async (req, res) => {
     res.render('profile', { name, biography, profilePicture, user });
 });
 
-  
+
 // GET handler for displaying the form
 app.get('/editProfile', sessionValidation, async (req, res) => {
     if (!req.session.name) {
@@ -416,26 +416,26 @@ app.get('/userProfile', sessionValidation, async (req, res) => {
 
 
 
-  
+
 
 app.get("/groups", sessionValidation, async (req, res) => {
-  try {
-    // Get the email of the current user
-    const currentUserEmail = req.session.email;
+    try {
+        // Get the email of the current user
+        const currentUserEmail = req.session.email;
 
-    const user = await userCollection.findOne({ email: currentUserEmail });
+        const user = await userCollection.findOne({ email: currentUserEmail });
 
-    // Find all groups where the current user is a member
-    const groups = await groupCollection
-      .find({ members: currentUserEmail })
-      .toArray();
+        // Find all groups where the current user is a member
+        const groups = await groupCollection
+            .find({ members: currentUserEmail })
+            .toArray();
 
-    // Render groups page and pass the groups data to the template
-    res.render("groups", { session: req.session, groups: groups, user });
-  } catch (error) {
-    console.error("Error fetching groups:", error);
-    res.status(500).send("Error fetching groups.");
-  }
+        // Render groups page and pass the groups data to the template
+        res.render("groups", { session: req.session, groups: groups, user });
+    } catch (error) {
+        console.error("Error fetching groups:", error);
+        res.status(500).send("Error fetching groups.");
+    }
 });
 
 app.post("/createGroup", sessionValidation, async (req, res) => {
@@ -499,97 +499,101 @@ app.post("/createGroup", sessionValidation, async (req, res) => {
 });
 
 app.get("/groupConfirmation", sessionValidation, async (req, res) => {
-  const currentUserEmail = req.session.email;
-
-  const user = await userCollection.findOne({ email: currentUserEmail });
-  const error = req.query.error === "true";
-  const message = req.query.message;
-  const invalidEmails = req.query.invalidEmails
-    ? JSON.parse(req.query.invalidEmails)
-    : [];
-
-  res.render("GroupCreationConfirmation", { error, message, invalidEmails, user });
-});
-
-app.get("/group/:groupId", sessionValidation, async (req, res) => {
- try {
-    const groupId = req.params.groupId;
-    const group = await groupCollection.aggregate([
-        {$match: {_id: new ObjectId(groupId)}},
-        {$lookup: {
-            from: 'users',
-            localField: 'members',
-            foreignField: 'email',
-            as: 'memberDetails'
-        }},
-        {$project: {
-            name: 1,
-            activities:1,
-            events: 1,
-            messages: 1,
-            memberDetails: {
-                _id: 1,
-                name: 1,
-                email: 1,
-                profilePicture: 1,
-            },
-            selectedEvent: 1,
-        }}
-    ]).toArray();
-
-
-    if (!group[0]) {
-      // Group not found
-      res.status(404).send("Group not found.");
-      return;
-    }
-
-    const deadlineObject = await groupCollection.findOne({ _id: new ObjectId(groupId) }, { projection: { deadline: 1 } });
-    const now = new Date();
-    const deadlineDate = deadlineObject.deadline;
-    const nowPST = new Date(now.getTime() - (7 * 60 * 60 * 1000));
-
-    //console.log(deadlineDate);
-    //console.log(nowPST);
-    //console.log(JSON.stringify(group[0]));
-    // Retrieve the selected event from the group document
-    const selectedEvent = group[0].selectedEvent;
-
     const currentUserEmail = req.session.email;
 
     const user = await userCollection.findOne({ email: currentUserEmail });
+    const error = req.query.error === "true";
+    const message = req.query.message;
+    const invalidEmails = req.query.invalidEmails
+        ? JSON.parse(req.query.invalidEmails)
+        : [];
 
-    
-    //console.log(selectedEvent);
-    
-    // Render the group details page with the retrieved group
-    res.render("group", { selectedEvent, group:group[0], pageTitle:group[0].name, chat: true, backButton: '/groups', user, deadlineDate, nowPST});
-  } catch (error) {
-    console.error("Error fetching group details:", error);
-    res.status(500).send("Error fetching group details.");
-  }
+    res.render("GroupCreationConfirmation", { error, message, invalidEmails, user });
+});
+
+app.get("/group/:groupId", sessionValidation, async (req, res) => {
+    try {
+        const groupId = req.params.groupId;
+        const group = await groupCollection.aggregate([
+            { $match: { _id: new ObjectId(groupId) } },
+            {
+                $lookup: {
+                    from: 'users',
+                    localField: 'members',
+                    foreignField: 'email',
+                    as: 'memberDetails'
+                }
+            },
+            {
+                $project: {
+                    name: 1,
+                    activities: 1,
+                    events: 1,
+                    messages: 1,
+                    memberDetails: {
+                        _id: 1,
+                        name: 1,
+                        email: 1,
+                        profilePicture: 1,
+                    },
+                    selectedEvent: 1,
+                }
+            }
+        ]).toArray();
+
+
+        if (!group[0]) {
+            // Group not found
+            res.status(404).send("Group not found.");
+            return;
+        }
+
+        const deadlineObject = await groupCollection.findOne({ _id: new ObjectId(groupId) }, { projection: { deadline: 1 } });
+        const now = new Date();
+        const deadlineDate = deadlineObject.deadline;
+        const nowPST = new Date(now.getTime() - (7 * 60 * 60 * 1000));
+
+        //console.log(deadlineDate);
+        //console.log(nowPST);
+        //console.log(JSON.stringify(group[0]));
+        // Retrieve the selected event from the group document
+        const selectedEvent = group[0].selectedEvent;
+
+        const currentUserEmail = req.session.email;
+
+        const user = await userCollection.findOne({ email: currentUserEmail });
+
+
+        //console.log(selectedEvent);
+
+        // Render the group details page with the retrieved group
+        res.render("group", { selectedEvent, group: group[0], pageTitle: group[0].name, chat: true, backButton: '/groups', user, deadlineDate, nowPST });
+    } catch (error) {
+        console.error("Error fetching group details:", error);
+        res.status(500).send("Error fetching group details.");
+    }
 });
 io.on('connection', (socket) => {
     // console.log('a user connected');
     // socket.on('disconnect', () => {
     //     console.log('user disconnected');
     // });
-    socket.on('join', function(room) {
+    socket.on('join', function (room) {
         socket.join(room);
         // console.log(socket)
     });
 });
 app.post('/group/:groupId/message', sessionValidation, jsonParser, async (req, res) => {
     // console.log(req.body)
-    var message = {message:req.body.input, user:req.session.email, name:req.session.name, time: new Date()};
+    var message = { message: req.body.input, user: req.session.email, name: req.session.name, time: new Date() };
     // console.log(message)
     const groupId = req.params.groupId;
 
     try {
-        await groupCollection.updateOne( 
-            { _id: new ObjectId(groupId) }, 
-            { $push: { messages: message } } 
-        ); 
+        await groupCollection.updateOne(
+            { _id: new ObjectId(groupId) },
+            { $push: { messages: message } }
+        );
         io.to(groupId).emit('chat message', message);
         return res.status(204).json({ success: true });
     } catch (error) {
@@ -606,7 +610,7 @@ app.get("/group-details/:groupId", sessionValidation, async (req, res) => {
         const adminStatus = await isAdmin(userEmail, groupId);
 
         const user = await userCollection.findOne({ email: userEmail });
-        
+
         if (adminStatus) {
             // User is an admin, proceed with admin-specific logic
             console.log("You are an admin for this group.");
@@ -620,14 +624,14 @@ app.get("/group-details/:groupId", sessionValidation, async (req, res) => {
             res.status(404).send("Group not found.");
             return;
         }
-  
+
         // Retrieve user details (including id and name) for the members of the group
         const memberEmails = group.members;
         const memberDetails = await getUserDetails(memberEmails, groupId);
         // console.log(memberDetails);
-        
+
         // Render the group details page with the retrieved group and member details
-        res.render("groupDetails", { group, isAdmin: adminStatus, memberDetails, user});
+        res.render("groupDetails", { group, isAdmin: adminStatus, memberDetails, user });
     } catch (error) {
         console.error("Error fetching group details:", error);
         res.status(500).send("Error fetching group details.");
@@ -635,7 +639,7 @@ app.get("/group-details/:groupId", sessionValidation, async (req, res) => {
 });
 
 
-  app.post("/edit-group-name", sessionValidation, async (req, res) => {
+app.post("/edit-group-name", sessionValidation, async (req, res) => {
     try {
         const groupId = req.query.groupId;
         const newName = req.body.newName;
@@ -733,18 +737,18 @@ app.get('/egg', sessionValidation, (req, res) => {
 });
 
 app.get('/calendar', sessionValidation, async (req, res) => {
-    const groupId = req.query.id; 
+    const groupId = req.query.id;
     const currentUserEmail = req.session.email;
 
     const user = await userCollection.findOne({ email: currentUserEmail });
 
-    if (!ObjectId.isValid(groupId)) { 
-        return res.status(400).send("Invalid group ID format."); 
-    } 
+    if (!ObjectId.isValid(groupId)) {
+        return res.status(400).send("Invalid group ID format.");
+    }
 
     try {
         // return the group
-        const group = await groupCollection.findOne({_id: new ObjectId(groupId) });
+        const group = await groupCollection.findOne({ _id: new ObjectId(groupId) });
 
         if (group) {
             if (!group.calendar) {
@@ -780,7 +784,7 @@ app.post("/toggle-admin-status", sessionValidation, async (req, res) => {
 
         // Find the group to check if the user is currently an admin
         const group = await groupCollection.findOne({ _id: new ObjectId(groupId) });
-        
+
         if (!group) {
             return res.status(404).send("Group not found.");
         }
@@ -815,73 +819,73 @@ app.post("/toggle-admin-status", sessionValidation, async (req, res) => {
 
 
 
-app.post('/invite', sessionValidation, async (req, res) => { 
-    try { 
+app.post('/invite', sessionValidation, async (req, res) => {
+    try {
         const groupId = req.query.groupId; // Get the group ID from the query parameter 
         const { emails } = req.body; // Get the emails from the request body 
 
         const currentUserEmail = req.session.email;
 
         const user = await userCollection.findOne({ email: currentUserEmail });
- 
+
         // Split the emails string into an array of email addresses 
-        const emailArray = emails.split(/[;,]+/).map(email => email.trim()); 
- 
+        const emailArray = emails.split(/[;,]+/).map(email => email.trim());
+
         // Check each email individually 
-        const invalidEmails = []; 
-        const existingMembers = []; 
-        const validEmails = []; 
-        for (const email of emailArray) { 
+        const invalidEmails = [];
+        const existingMembers = [];
+        const validEmails = [];
+        for (const email of emailArray) {
             // Check if the email exists in the userCollection 
-            const user = await userCollection.findOne({ email }); 
-            if (!user) { 
+            const user = await userCollection.findOne({ email });
+            if (!user) {
                 // If the user doesn't exist, add the email to the list of invalid emails 
-                invalidEmails.push(email); 
-            } else { 
+                invalidEmails.push(email);
+            } else {
                 // Check if the user is already a member of the group 
-                const group = await groupCollection.findOne({ _id: new ObjectId(groupId), members: email }); 
-                if (group) { 
+                const group = await groupCollection.findOne({ _id: new ObjectId(groupId), members: email });
+                if (group) {
                     // If the user is already a member, add the email to the list of existing members 
-                    existingMembers.push(email); 
-                } else { 
+                    existingMembers.push(email);
+                } else {
                     // If the user exists and is not already a member, add the email to the list of valid emails 
-                    validEmails.push(email); 
-                } 
-            } 
-        } 
- 
+                    validEmails.push(email);
+                }
+            }
+        }
+
         // Update the group document to add the new members 
-        const result = await groupCollection.updateOne( 
-            { _id: new ObjectId(groupId) }, 
-            { $addToSet: { members: { $each: validEmails } } } 
-        ); 
- 
+        const result = await groupCollection.updateOne(
+            { _id: new ObjectId(groupId) },
+            { $addToSet: { members: { $each: validEmails } } }
+        );
+
         // Prepare the message to be passed to the InviteConfirmation page 
-        const inviteMessage = { 
-            success: validEmails.length > 0 ? 'Users were successfully added.' : '', 
-            existingMembers: existingMembers.map(email => `${email} is already a member.`), 
+        const inviteMessage = {
+            success: validEmails.length > 0 ? 'Users were successfully added.' : '',
+            existingMembers: existingMembers.map(email => `${email} is already a member.`),
             invalidEmails: invalidEmails, // Just passing the array of invalid emails without modification
-            groupID: groupId 
-        }; 
- 
+            groupID: groupId
+        };
+
         // Render the InviteConfirmation page with the appropriate message 
-        res.render('InviteConfirmation', { inviteMessage, user }); 
-    } catch (error) { 
-        console.error('Error inviting users to group:', error); 
-        res.status(500).json({ success: false, message: 'Internal server error.' }); 
-    } 
+        res.render('InviteConfirmation', { inviteMessage, user });
+    } catch (error) {
+        console.error('Error inviting users to group:', error);
+        res.status(500).json({ success: false, message: 'Internal server error.' });
+    }
 });
 
 
 app.get('/profile', sessionValidation, async (req, res) => {
 
-        var name = req.session.name;
-        var biography = req.session.biography;
-        const currentUserEmail = req.session.email;
+    var name = req.session.name;
+    var biography = req.session.biography;
+    const currentUserEmail = req.session.email;
 
-        const user = await userCollection.findOne({ email: currentUserEmail });
+    const user = await userCollection.findOne({ email: currentUserEmail });
 
-        res.render(`profile`, { name, biography, user });
+    res.render(`profile`, { name, biography, user });
 });
 
 // GET handler for displaying the form
@@ -950,33 +954,33 @@ app.post('/updateProfile', sessionValidation, upload.single('profilePicture'), a
 });
 
 
-app.get('/randomizer', sessionValidation, async (req, res) => { 
-    const groupId = req.query.id; 
+app.get('/randomizer', sessionValidation, async (req, res) => {
+    const groupId = req.query.id;
     const currentUserEmail = req.session.email;
 
     const user = await userCollection.findOne({ email: currentUserEmail });
 
-    if (!ObjectId.isValid(groupId)) { 
-        return res.status(400).send("Invalid group ID format."); 
-    } 
+    if (!ObjectId.isValid(groupId)) {
+        return res.status(400).send("Invalid group ID format.");
+    }
 
-    try { 
-        const group = await groupCollection.findOne({ _id: new ObjectId(groupId) }); 
+    try {
+        const group = await groupCollection.findOne({ _id: new ObjectId(groupId) });
 
-        if (!group || !group.events || group.events.length === 0) { 
-            return res.status(404).send("No events found for this group."); 
-        } 
- 
-        const randomEvent = group.events[Math.floor(Math.random() * group.events.length)]; 
- 
-        res.render('randomizer', { events: group.events, groupId: groupId, user }); 
+        if (!group || !group.events || group.events.length === 0) {
+            return res.status(404).send("No events found for this group.");
+        }
 
-   
-    } catch (error) { 
-        console.error("Error fetching group details:", error); 
-        res.status(500).send("Error fetching group details."); 
-    } 
-}); 
+        const randomEvent = group.events[Math.floor(Math.random() * group.events.length)];
+
+        res.render('randomizer', { events: group.events, groupId: groupId, user });
+
+
+    } catch (error) {
+        console.error("Error fetching group details:", error);
+        res.status(500).send("Error fetching group details.");
+    }
+});
 
 
 app.post('/selectEvent', sessionValidation, async (req, res) => {
@@ -1003,18 +1007,18 @@ app.post('/selectEvent', sessionValidation, async (req, res) => {
         res.status(500).send("Error updating selected event.");
     }
 
-    const group = await groupCollection.findOne({ _id: new ObjectId(groupId) }); 
+    const group = await groupCollection.findOne({ _id: new ObjectId(groupId) });
 
     for (let userEmail of group.members) {
         const user = await userCollection.findOne({ email: userEmail });
-    
+
         if (!user) {
             console.error(`User with email ${userEmail} not found.`);
             continue;
         }
-    
+
         const notification = {
-            _id : new ObjectId(),
+            _id: new ObjectId(),
             message: `The chosen event is ${selectedEvent.title}.`,
             groupId: groupId,
             read: false,
@@ -1032,12 +1036,12 @@ app.post('/selectEvent', sessionValidation, async (req, res) => {
                 }
             );
         }
-    
+
         await userCollection.updateOne(
             { _id: new ObjectId(user._id) },
-            { 
-                $push: { notifications: notification }, 
-                $inc: { unreadNotificationCount: 1 } 
+            {
+                $push: { notifications: notification },
+                $inc: { unreadNotificationCount: 1 }
             }
         );
     }
@@ -1056,8 +1060,8 @@ app.get('/notifications', sessionValidation, async (req, res) => {
         return { ...notification, groupTitle: group.name, group: group._id };
     }));
 
-    res.render('notifications', { notifications: notifications, userId: userId, user});
-    
+    res.render('notifications', { notifications: notifications, userId: userId, user });
+
 });
 
 app.post('/mark_as_read', sessionValidation, async (req, res) => {
@@ -1066,21 +1070,21 @@ app.post('/mark_as_read', sessionValidation, async (req, res) => {
     const groupId = req.body.notificationgroup;
     const notificationType = req.body.notificationtype;
 
-        await userCollection.updateOne(
-            { _id: new ObjectId(userId), "notifications._id": new ObjectId(notificationId) },
-            { $set: { "notifications.$.read": true } },
-        );
+    await userCollection.updateOne(
+        { _id: new ObjectId(userId), "notifications._id": new ObjectId(notificationId) },
+        { $set: { "notifications.$.read": true } },
+    );
 
-        await userCollection.updateOne(
-            {_id: new ObjectId(userId)},
-            { $inc: { unreadNotificationCount: -1 } }
-        );
-        
-        if (notificationType === 'randomizer' || notificationType === 'deadline') {
-            res.redirect('/group/' + groupId);
-        } else {
-            res.redirect('/submitted_event?groupId=' + groupId);
-        }
+    await userCollection.updateOne(
+        { _id: new ObjectId(userId) },
+        { $inc: { unreadNotificationCount: -1 } }
+    );
+
+    if (notificationType === 'randomizer' || notificationType === 'deadline') {
+        res.redirect('/group/' + groupId);
+    } else {
+        res.redirect('/submitted_event?groupId=' + groupId);
+    }
 });
 
 app.post('/delete_notification', sessionValidation, async (req, res) => {
@@ -1097,13 +1101,13 @@ app.post('/delete_notification', sessionValidation, async (req, res) => {
         );
     }
 
-        await userCollection.updateOne(
-            { _id: new ObjectId(userId) },
-            { $pull: { notifications: { _id: new ObjectId(notificationId) } } }
-        );
+    await userCollection.updateOne(
+        { _id: new ObjectId(userId) },
+        { $pull: { notifications: { _id: new ObjectId(notificationId) } } }
+    );
 
 
-        res.redirect('/notifications?userId=' + userId);
+    res.redirect('/notifications?userId=' + userId);
 });
 
 app.get('/event_submission', checkDeadline, sessionValidation, async (req, res) => {
@@ -1127,7 +1131,7 @@ app.get('/submitted_event', sessionValidation, async (req, res) => {
     const user = await userCollection.findOne({ email: currentUserEmail });
     //console.log('groupId:', new ObjectId(groupId));
     const events = group.events;
-    res.render('submitted_event', { group, session: req.session, events, convertTo12Hour , user});
+    res.render('submitted_event', { group, session: req.session, events, convertTo12Hour, user });
 });
 
 app.get('/editEvent', sessionValidation, async (req, res) => {
@@ -1142,7 +1146,7 @@ app.get('/editEvent', sessionValidation, async (req, res) => {
         { projection: { "events.$": 1 } }
     );
     const event = group.events[0];
-    
+
 
     res.render('editEvent', { group, session: req.session, event, user });
 
@@ -1260,7 +1264,7 @@ app.post('/event_submission', sessionValidation, async (req, res) => {
     }
 
     const newEvent = {
-        _id : new ObjectId(),
+        _id: new ObjectId(),
         title: title,
         description: description,
         location: location,
@@ -1276,7 +1280,7 @@ app.post('/event_submission', sessionValidation, async (req, res) => {
     );
 
     const group = await groupCollection.findOne({ _id: new ObjectId(groupId) });
-    
+
     for (let userEmail of group.members) {
         const user = await userCollection.findOne({ email: userEmail });
 
@@ -1290,11 +1294,11 @@ app.post('/event_submission', sessionValidation, async (req, res) => {
 
         await userCollection.updateOne(
             { _id: new ObjectId(user._id) },
-            { 
-                $push: { notifications: notification }, 
-                $inc: { unreadNotificationCount: 1 } 
+            {
+                $push: { notifications: notification },
+                $inc: { unreadNotificationCount: 1 }
             },
-    
+
         );
     }
 
@@ -1304,61 +1308,61 @@ app.post('/event_submission', sessionValidation, async (req, res) => {
 
 app.post("/addDeadline", sessionValidation, async (req, res) => {
 
-        const deadline = req.body.deadline;
-        const groupId = req.query.groupId;
-        const group = await groupCollection.findOne({ _id: new ObjectId(groupId) });
-        const deadlineDate = new Date(deadline);
-        const deadlinePST = new Date(deadlineDate.getTime() - (7 * 60 * 60 * 1000));
+    const deadline = req.body.deadline;
+    const groupId = req.query.groupId;
+    const group = await groupCollection.findOne({ _id: new ObjectId(groupId) });
+    const deadlineDate = new Date(deadline);
+    const deadlinePST = new Date(deadlineDate.getTime() - (7 * 60 * 60 * 1000));
 
-        const formattedDeadline = deadlineDate.toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-            hour: 'numeric',
-            minute: 'numeric'
-        });
+    const formattedDeadline = deadlineDate.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: 'numeric'
+    });
 
-        await groupCollection.updateOne(
-            { _id: new ObjectId(groupId) },
-            { $set: { deadline: deadlinePST } }
-        );
+    await groupCollection.updateOne(
+        { _id: new ObjectId(groupId) },
+        { $set: { deadline: deadlinePST } }
+    );
 
-        for (let userEmail of group.members) {
-            const user = await userCollection.findOne({ email: userEmail });
-        
-            if (!user) {
-                console.error(`User with email ${userEmail} not found.`);
-                continue;
-            }
-        
-            const notification = {
-                _id : new ObjectId(),
-                message: `The Deadline to Submit an event is ${formattedDeadline}.`,
-                groupId: groupId,
-                read: false,
-                type: 'deadline'
-            };
+    for (let userEmail of group.members) {
+        const user = await userCollection.findOne({ email: userEmail });
 
-            const notificationExists = user.notifications.some(notification => notification.groupId === groupId && notification.type === 'deadline');
+        if (!user) {
+            console.error(`User with email ${userEmail} not found.`);
+            continue;
+        }
 
-            if (notificationExists) {
-                await userCollection.updateOne(
-                    { _id: new ObjectId(user._id) },
-                    { 
-                        $pull: { notifications: { groupId: groupId, type: 'deadline' } },
-                        $inc: { unreadNotificationCount: -1 }
-                    }
-                );
-            }
-        
+        const notification = {
+            _id: new ObjectId(),
+            message: `The Deadline to Submit an event is ${formattedDeadline}.`,
+            groupId: groupId,
+            read: false,
+            type: 'deadline'
+        };
+
+        const notificationExists = user.notifications.some(notification => notification.groupId === groupId && notification.type === 'deadline');
+
+        if (notificationExists) {
             await userCollection.updateOne(
                 { _id: new ObjectId(user._id) },
-                { $push: { notifications: notification }, $inc: { unreadNotificationCount: 1 } }
+                {
+                    $pull: { notifications: { groupId: groupId, type: 'deadline' } },
+                    $inc: { unreadNotificationCount: -1 }
+                }
             );
         }
 
-        res.redirect("/group-details/" + groupId);
-    
+        await userCollection.updateOne(
+            { _id: new ObjectId(user._id) },
+            { $push: { notifications: notification }, $inc: { unreadNotificationCount: 1 } }
+        );
+    }
+
+    res.redirect("/group-details/" + groupId);
+
 });
 
 function convertTo12Hour(time) {
@@ -1370,7 +1374,7 @@ function convertTo12Hour(time) {
 
 async function checkDeadline(req, res, next) {
     const now = new Date();
-    const groupId = req.query.groupId; 
+    const groupId = req.query.groupId;
     const nowPST = new Date(now.getTime() - (7 * 60 * 60 * 1000));
 
     const group = await groupCollection.findOne({ _id: new ObjectId(groupId) });
@@ -1403,18 +1407,18 @@ async function checkDeadline(req, res, next) {
 // });
 
 app.get("/logout", sessionValidation, (req, res) => {
-  if (req.session.authenticated) {
-    req.session.destroy();
-    res.redirect("/");
-  } else res.redirect("/");
+    if (req.session.authenticated) {
+        req.session.destroy();
+        res.redirect("/");
+    } else res.redirect("/");
 });
 
 app.get("403", (req, res) => {
     res.status(403);
-    res.render("errorMessage", {message: message} );
+    res.render("errorMessage", { message: message });
 })
 
-app.use('/',express.static("public"));
+app.use('/', express.static("public"));
 
 app.get("*", (req, res) => {
     res.status(404);
@@ -1422,5 +1426,5 @@ app.get("*", (req, res) => {
 })
 
 server.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
+    console.log(`Server is running on port ${port}`);
 });
