@@ -158,6 +158,7 @@ app.get("/signup", (req, res) => {
     res.render("signup");
   }
 });
+
 app.post("/signup", async (req, res) => {
   var name = req.body.name;
   var email = req.body.email;
@@ -242,6 +243,7 @@ app.get("/login", (req, res) => {
     res.render("login");
   }
 });
+
 app.post("/login", async (req, res) => {
   var email = req.body.email;
   var password = req.body.password;
@@ -306,6 +308,7 @@ app.get("/password-reset", (req, res) => {
     res.render("passwordReset", { success: false });
   }
 });
+
 app.post("/password-reset", async (req, res) => {
   try {
     const schema = Joi.object({ email: Joi.string().email().required() });
@@ -672,6 +675,7 @@ io.on("connection", (socket) => {
     // console.log(socket)
   });
 });
+
 app.post(
   "/group/:groupId/message",
   sessionValidation,
