@@ -3,7 +3,11 @@
     <div class="logoSpace">
         <img class="logo" src="/images/logo.png" alt="Logo" class="logo">
     </div>
-    <form class="loginForm" action='/login' method='post'>
+    <% if (locals.groupInvite && locals.group) { %>
+        <p class="message">This is an invitation to join <%=group.name%><br/>
+            Login or create a new account to accept this invitation</p>
+    <% } %>
+    <form class="loginForm" action="<%='/login'+locals.groupInvite ? `?groupInvite=${groupInvite}` : ''%>" method='post'>
         <div class="relative">
             <input name="email" value="<%=locals.formData ? formData.email : ''  %>" type="text" id="email" class="mb-4 block rounded-xl px-2.5 pb-2.5 pt-5 w-full text-sm text-white bg-darkPurple border-2 focus:border-2 border-purple appearance-none focus:outline-none focus:ring-0 focus:border-violet-600 peer" placeholder=" " />
             <label for="email" class="absolute text-sm text-gray-50 duration-300 transform -translate-y-4 scale-75 top-4 z-10 origin-[0] start-2.5 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto">Email</label>
@@ -30,10 +34,10 @@
             <p class="errorMessage"><%= error %></p>
         <% } %>
         <button class="loginButton">Log in</button>
-        <button class="forgotPwButton" type="button" onclick="window.location.href='/password-reset'">Forgot password?</button>
+        <button class="forgotPwButton" type="button" onclick="window.location.href='/password-reset'+window.location.search">Forgot password?</button>
     </form>
     <div class="bottomSpace">
-        <button class="newAccButton" onclick="window.location.href='/signup'">Create new account</button>
+        <button class="newAccButton" onclick="window.location.href='/signup'+window.location.search">Create new account</button>
     </div>
     <script src="/scripts/script.js"></script>
 </body>

@@ -112,3 +112,11 @@ p.errorMessage{
   font-weight: 500;
   text-align: center;
 }
+
+p.message{
+  margin-bottom: 8px;
+  width: 100%;
+  color: white;
+  font-weight: 500;
+  text-align: center;
+}

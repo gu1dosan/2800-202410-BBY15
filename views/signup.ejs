@@ -7,7 +7,7 @@
         <span class="sr-only">Back</span>
     </button>
     <h1 class="signupTitle">Create a new NextUp account</h1>
-    <form class="loginForm" action='/signup' method='post'>
+    <form class="loginForm" action="<%='/signup'+locals.groupInvite ? `?groupInvite=${locals.groupInvite}` : ''%>" method='post'>
         <div class="relative">
             <input name="name" value="<%=locals.formData ? formData.name : ''%>" type="text" id="name" class="mb-4 block rounded-xl px-2.5 pb-2.5 pt-5 w-full text-sm text-white bg-darkPurple border-2 focus:border-2 border-purple appearance-none focus:outline-none focus:ring-0 focus:border-violet-600 peer" placeholder=" " />
             <label for="name" class="absolute text-sm text-gray-50 duration-300 transform -translate-y-4 scale-75 top-4 z-10 origin-[0] start-2.5 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto">Name</label>

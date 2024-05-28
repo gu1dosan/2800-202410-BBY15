@@ -7,6 +7,7 @@ require("./utils.js");
 var bodyParser = require("body-parser");
 const crypto = require("crypto");
 const { v4: uuid } = require("uuid");
+var URL = require('url');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -161,13 +162,15 @@ app.get("/", sessionValidation, (req, res) => {
 });
 
 app.get("/signup", (req, res) => {
+  const groupInvite = req.query.groupInvite;
   if (req.session.authenticated) {
     res.redirect("/");
   } else {
-    res.render("signup");
+    res.render("signup",{groupInvite});
   }
 });
 app.post("/signup", async (req, res) => {
+  const groupInvite = req.query.groupInvite;
   var name = req.body.name;
   var email = req.body.email;
   var password = req.body.password;
@@ -186,6 +189,7 @@ app.post("/signup", async (req, res) => {
         password: password,
         confirmPassword: confirmPassword,
       },
+      groupInvite,
     });
   } else {
     const schema = Joi.object({
@@ -216,6 +220,7 @@ app.post("/signup", async (req, res) => {
           password: password,
           confirmPassword: confirmPassword,
         },
+        groupInvite,
       });
     }
 
@@ -234,11 +239,19 @@ app.post("/signup", async (req, res) => {
     req.session.email = email;
     req.session.name = name;
     req.session.cookie.maxAge = expireTime;
-    return res.redirect("/");
+    return req.query.groupInvite ? res.redirect('/group-invite?id='+ req.query.groupInvite) : res.redirect('/');
   }
 });
 
-app.get("/login", (req, res) => {
+app.get("/login", async (req, res) => {
+  const groupInvite = req.query.groupInvite;
+  let group;
+  if(groupInvite){
+    group = await groupCollection.findOne({ _id: new ObjectId(groupInvite) }); 
+    if (!group) { 
+      return res.redirect('/'); 
+    } 
+  }
   if (req.session.authenticated) {
     return res.redirect("/");
   } else {
@@ -248,17 +261,28 @@ app.get("/login", (req, res) => {
     // if(req.query.error == 'invaliddetails') {
     //     return res.render('login',{error: 'Invalid email or password'});
     // }
-    res.render("login");
+    res.render("login",{groupInvite,group});
   }
 });
  
 app.post("/login", async (req, res) => {
+  const groupInvite = req.query.groupInvite;
+  let group;
+  if(groupInvite){
+    group = await groupCollection.findOne({ _id: new ObjectId(groupInvite) }); 
+    if (!group) { 
+      return res.redirect('/'); 
+    } 
+  }
+
   var email = req.body.email;
   var password = req.body.password;
   if (!email || !password) {
     return res.render("login", {
       error: "You must enter an email and password",
       formData: { email: email, password: password },
+      groupInvite,
+      group
     });
   }
 
@@ -270,6 +294,8 @@ app.post("/login", async (req, res) => {
     return res.render("login", {
       error: "Invalid email or password",
       formData: { email: email, password: password },
+      groupInvite,
+      group
     });
   }
 
@@ -290,7 +316,7 @@ app.post("/login", async (req, res) => {
   if (result.length != 1) {
     // console.log("user not found");
     // return res.redirect('/login?error=invaliddetails');
-    return res.render("login", { error: "Invalid email or password" });
+    return res.render("login", { error: "Invalid email or password", groupInvite, group });
   }
   if (await bcrypt.compare(password, result[0].password)) {
     // console.log("correct password");
@@ -302,10 +328,10 @@ app.post("/login", async (req, res) => {
     req.session.biography = result[0].biography; // Retrieve biography from database
     req.session.cookie.maxAge = expireTime;
 
-    return res.redirect("/");
+    return req.query.groupInvite ? res.redirect('/group-invite?id='+ req.query.groupInvite) : res.redirect('/');
   } else {
     // console.log("incorrect password");
-    return res.render("login", { error: "Invalid email or password" });
+    return res.render("login", { error: "Invalid email or password", groupInvite });
   }
 });
 
@@ -1091,7 +1117,7 @@ app.get("/group-invite", async (req, res) => {
     return res.redirect('/');
   }
   if (!isValidSession(req)) {
-    res.redirect("/login"+'?redirect=/group-invite?id='+groupId);
+    res.redirect("/login"+'?groupInvite='+groupId);
   } else {
     try { 
       const group = await groupCollection.findOne({ _id: new ObjectId(groupId) }); 
@@ -1103,7 +1129,9 @@ app.get("/group-invite", async (req, res) => {
       }
       const memberEmails = group.members;
       const memberDetails = await getUserDetails(memberEmails, groupId);
-      res.render('groupInvite', { group, memberDetails }); 
+      const currentUserEmail = req.session.email; 
+      const user = await userCollection.findOne({ email:currentUserEmail });
+      res.render('groupInvite', { group, memberDetails, user }); 
     } catch (error) { 
       console.error('Error fetching group details:', error); 
       res.redirect('/'); 
