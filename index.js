@@ -72,6 +72,9 @@ app.use(
     maxAge: expireTime,
 }));
 
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
 function isValidSession(req) {
   if (req.session.authenticated) {
     return true;
@@ -639,22 +642,18 @@ app.delete("/remove-member", sessionValidation, async (req, res) => {
 app.get('/egg', sessionValidation, (req, res) => {
     res.render("egg");
 });
-
 app.get('/calendar', sessionValidation, async (req, res) => {
-    const groupId = req.query.id; 
+    const groupId = req.query.id;
 
-    if (!ObjectId.isValid(groupId)) { 
-        return res.status(400).send("Invalid group ID format."); 
-    } 
+    if (!ObjectId.isValid(groupId)) {
+        return res.status(400).send("Invalid group ID format.");
+    }
 
     try {
-        // return the group
-        const group = await groupCollection.findOne({_id: new ObjectId(groupId) });
+        const group = await groupCollection.findOne({ _id: new ObjectId(groupId) });
 
         if (group) {
             if (!group.calendar) {
-                // Initialize the calendar with an empty array if it doesn't exist
-                // Calendar should contain an array of dates
                 group.calendar = [];
                 await groupCollection.updateOne(
                     { _id: new ObjectId(groupId) },
@@ -662,13 +661,7 @@ app.get('/calendar', sessionValidation, async (req, res) => {
                 );
             }
 
-            // Update the group with the enforced calendar structure
-            await groupCollection.updateOne(
-                { _id: new ObjectId(groupId) },
-                { $set: { calendar: group.calendar } }
-            );
-
-            res.render("calendar", { group: group });
+            res.render("calendar", { group: group, times: group.calendar });
         } else {
             res.render("404");
         }
@@ -677,6 +670,84 @@ app.get('/calendar', sessionValidation, async (req, res) => {
         res.status(500).send("Error fetching group details.");
     }
 });
+
+
+app.get('/calendar', sessionValidation, async (req, res) => {
+    const groupId = req.query.id;
+
+    if (!ObjectId.isValid(groupId)) {
+        return res.status(400).send("Invalid group ID format.");
+    }
+
+    try {
+        const group = await groupCollection.findOne({ _id: new ObjectId(groupId) });
+
+        if (group) {
+            if (!group.calendar) {
+                group.calendar = [];
+                await groupCollection.updateOne(
+                    { _id: new ObjectId(groupId) },
+                    { $set: { calendar: group.calendar } }
+                );
+            }
+
+            res.render("calendar", { group: group, times: group.calendar });
+        } else {
+            res.render("404");
+        }
+    } catch (error) {
+        console.error("Error fetching group details:", error);
+        res.status(500).send("Error fetching group details.");
+    }
+});
+
+app.post('/save-timestamps', sessionValidation, async (req, res) => {
+    const { timestamps } = req.body;
+    const groupId = req.query.id;
+
+    console.log("Received timestamps:", timestamps);
+    console.log("Received group ID:", groupId);
+
+    if (!Array.isArray(timestamps)) {
+        console.error("Invalid timestamps data:", timestamps);
+        return res.status(400).send("Invalid timestamps data.");
+    }
+
+    if (!ObjectId.isValid(groupId)) {
+        console.error("Invalid group ID format:", groupId);
+        return res.status(400).send("Invalid group ID format.");
+    }
+
+    try {
+        const group = await groupCollection.findOne({ _id: new ObjectId(groupId) });
+
+        if (!group) {
+            console.error("Group not found.");
+            return res.status(404).send("Group not found.");
+        }
+
+        // Update the calendar with the new list of timestamps
+        group.calendar = timestamps;
+        
+        const result = await groupCollection.updateOne(
+            { _id: new ObjectId(groupId) },
+            { $set: { calendar: group.calendar } }
+        );
+
+        if (result.modifiedCount === 0) {
+            console.error("No documents were updated.");
+            return res.status(500).send("Failed to save timestamps.");
+        }
+
+        console.log("Timestamps saved successfully!");
+        res.status(200).send({ message: 'Timestamps saved successfully!' });
+    } catch (error) {
+        console.error("Error saving timestamps:", error);
+        res.status(500).send("An error occurred while saving the timestamps.");
+    }
+});
+
+
 
 app.post("/toggle-admin-status", sessionValidation, async (req, res) => {
     try {

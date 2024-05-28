@@ -5,21 +5,121 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.13/index.global.min.js'></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        .fc-timegrid-slot {
+            cursor: pointer;
+        }
+        body, html {
+            height: 100%;
+            margin: 0;
+            overflow: hidden; /* Prevent scrolling */
+        }
+        .calendar-container {
+            height: calc(100vh - 10vh - 50px); 
+            padding: 10px;
+        }
+        #calendar {
+            height: 100%;
+        }
+        .button-container {
+            text-align: right; /* Align the button to the right */
+            padding: 10px;
+        }
+        /* Custom styles for FullCalendar buttons */
+        .fc .fc-toolbar-title {
+            color: black;
+        }
+        .fc .fc-button {
+            color: black;
+            border-color: black;
+        }
+        .fc .fc-button-primary {
+            background-color: black;
+            color: white;
+        }
+        .fc .fc-button-primary:disabled {
+            background-color: white;
+            color: black;
+        }
+    </style>
     <script>
-      document.addEventListener('DOMContentLoaded', function() {
-        var calendarEl = document.getElementById('calendar');
-        var calendar = new FullCalendar.Calendar(calendarEl, {
-          initialView: 'timeGridWeek',
-          headerToolbar: {
-          left: 'today',
-          center: 'title',
-          right: 'prev,next'
-          }
+    document.addEventListener('DOMContentLoaded', function() {
+        var selectedTimestamps = [];
+        setTimeout(function() {
+            var calendarEl = document.getElementById('calendar');
+            var initialTimes = <%- JSON.stringify(group.calendar || []) %>;
+
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'timeGridWeek',
+                selectable: true,
+                headerToolbar: {
+                    left: 'today',
+                    center: 'title',
+                    right: 'prev,next'
+                },
+                select: function(info) {
+                    var selectedEvent = calendar.getEvents().find(event => 
+                        event.start.getTime() === info.start.getTime() && 
+                        event.end.getTime() === info.end.getTime()
+                    );
+                    if (selectedEvent) {
+                        selectedEvent.remove();
+                        console.log("unadded", { start: info.start.toISOString(), end: info.end.toISOString() });
+                        selectedTimestamps = selectedTimestamps.filter(ts => 
+                            !(new Date(ts.start).getTime() === info.start.getTime() && new Date(ts.end).getTime() === info.end.getTime())
+                        );
+                    } else {
+                        selectedTimestamps.push({ start: info.start.toISOString(), end: info.end.toISOString() });
+                        console.log("added", { start: info.start.toISOString(), end: info.end.toISOString() });
+                        calendar.addEvent({
+                            display: 'background',
+                            start: info.start,
+                            end: info.end,
+                            backgroundColor: '#808080'
+                        });
+                    }
+                    console.log("Selected timestamps:", selectedTimestamps);
+                    calendar.unselect();
+                }
+            });
+
+            if (initialTimes.length > 0) {
+                initialTimes.forEach(function(time) {
+                    console.log("Initial time:", time);
+                    calendar.addEvent({
+                        display: 'background',
+                        start: time.start,
+                        end: time.end,
+                        backgroundColor: '#blue'
+                    });
+                });
+            }
+
+            calendar.render();
+        }, 400); // make sure everything is loaded
+
+        document.getElementById('submit-btn').addEventListener('click', function() {
+            var groupId = "<%= group._id %>";
+            console.log("Selected timestamps before sending:", selectedTimestamps);
+            $.ajax({
+                url: `/save-timestamps?id=${groupId}`,
+                type: 'POST',
+                data: JSON.stringify({ timestamps: selectedTimestamps }),
+                contentType: 'application/json',
+                success: function(response) {
+                    alert('Timestamps saved successfully!');
+                },
+                error: function(error) {
+                    console.error('Error saving timestamps:', error);
+                    alert('An error occurred while saving the timestamps.');
+                }
+            });
         });
-        calendar.render();
+
       });
     </script>
-    <title><%= locals.pageTitle ? locals.pageTitle+' | ' : '' %>NextUp</title>
+    <title><%= locals.pageTitle ? locals.pageTitle + ' | ' : '' %>NextUp</title>
     <link rel="icon" type="image" href="/public/images/favicon.png" />
     <link href="/styles/output.css" rel="stylesheet">
     <link href="/styles/styles.css" rel="stylesheet">
@@ -27,18 +127,17 @@
         document.querySelector('html').classList.add("hidden");
         window.addEventListener('load', (e) => {
           document.querySelector('html').classList.remove("hidden"); 
-         });
+        });
     </script>
 </head>
-<body class="overflow-auto">
-    <header class=" bg-purple sticky top-0 w-full h-[10vh] flex flex-row items-center justify-between">
-        <a href="#" onclick=<%= locals.backButton ? 'location.href=\"'+backButton+'\"' : 'window.history.back()'%>>
+<body>
+    <header class="bg-purple sticky top-0 w-full h-[10vh] flex flex-row items-center justify-between">
+        <a href="#" onclick=<%= locals.backButton ? 'location.href=\"'+backButton+'\"' : 'window.history.back()' %>>
             <img src="/images/backButton.png" alt="BackButton" class="m-2 h-[32px]">
         </a>
-        <!-- add onclick for logo -->
-        <% if(locals.pageTitle) {%>
-            <% if(locals.group){ %>
-                <a href="/group-details/<%= group._id%>"  class="text-center">
+        <% if (locals.pageTitle) { %>
+            <% if (locals.group) { %>
+                <a href="/group-details/<%= group._id %>" class="text-center">
                     <h1 class="text-white text-xl"><%= pageTitle %></h1>
                     <p class="text-white text-xs">View group details</p>
                 </a>
@@ -50,51 +149,13 @@
                 <img src="/images/clearLogo.png" alt="Logo" class="max-w-24 max-h-24 h-[64px]">
             </a>
         <% } %>
-        <div class="w-[48px]">
-
-        </div>
+        <div class="w-[48px]"></div>
     </header>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const eggLink = document.getElementById('eggLink');
-            let holdTimer;
-
-            eggLink.addEventListener('mousedown', function() {
-                holdTimer = setTimeout(function() {
-                    window.location.href = '/egg';
-                }, 1000); // 1000 milliseconds = 1 seconds
-            });
-
-            eggLink.addEventListener('mouseup', function() {
-                clearTimeout(holdTimer);
-            });
-
-            eggLink.addEventListener('mouseleave', function() {
-                clearTimeout(holdTimer);
-            });
-
-            eggLink.addEventListener('touchstart', function() {
-                holdTimer = setTimeout(function() {
-                    window.location.href = '/egg';
-                }, 1000); // 1000 milliseconds = 1 seconds
-            });
-
-            eggLink.addEventListener('touchend', function() {
-                clearTimeout(holdTimer);
-            });
-
-            eggLink.addEventListener('touchcancel', function() {
-                clearTimeout(holdTimer);
-            });
-        });
-    </script>
-    <div id='calendar' class="w-full h-full fixed">
-        <br>
-        <br>
-        <br>
-        <br>
-  </div>
-
-  </body>
-  </html>
-
+    <div class="calendar-container">
+        <div id='calendar'></div>
+    </div>
+    <div class="button-container">
+        <button id="submit-btn" class="bg-purple text-white py-1 px-4 rounded">Submit</button>
+    </div>
+</body>
+</html>
