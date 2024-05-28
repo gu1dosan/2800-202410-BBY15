@@ -1,3 +1,27 @@
 html {
     height: 100vh;
 }
+
+.notification-count {
+    position: absolute;
+    top: -8px; 
+    right: -5px;
+    font-size: 1.3em;
+    font-weight: bold;
+}
+
+#deletePopup {
+    position: fixed; 
+    top: 50%;
+    left: 50%; 
+    transform: translate(-50%, -50%); 
+}
+
+.fade-out {
+    animation: fadeOut 1s forwards;
+}
+
+@keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}

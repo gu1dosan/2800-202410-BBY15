@@ -339,21 +339,30 @@ app.post("/password-reset/:userId/:token", async (req, res) => {
     } 
 }); 
 
-app.get('/profile', sessionValidation, (req, res) => {
+app.get('/profile', sessionValidation, async (req, res) => {
+    const currentUserEmail = req.session.email;
+
+    const user = await userCollection.findOne({ email: currentUserEmail });
+
     var name = req.session.name;
     var biography = req.session.biography;
     var profilePicture = req.session.profilePicture; // Ensure this is passed
 
-    res.render('profile', { name, biography, profilePicture });
+    res.render('profile', { name, biography, profilePicture, user });
 });
 
   
 // GET handler for displaying the form
-app.get('/editProfile', sessionValidation, (req, res) => {
+app.get('/editProfile', sessionValidation, async (req, res) => {
     if (!req.session.name) {
         return res.redirect('/login');  // Redirect if the user is not logged in
     }
-    res.render('editProfile', { name: req.session.name, biography: req.session.biography, profilePicture: req.session.profilePicture });
+
+    const currentUserEmail = req.session.email;
+
+    const user = await userCollection.findOne({ email: currentUserEmail });
+
+    res.render('editProfile', { name: req.session.name, biography: req.session.biography, profilePicture: req.session.profilePicture, user });
 });
 
 app.get('/userProfile', sessionValidation, async (req, res) => {
@@ -489,14 +498,17 @@ app.post("/createGroup", sessionValidation, async (req, res) => {
     }
 });
 
-app.get("/groupConfirmation", sessionValidation, (req, res) => {
+app.get("/groupConfirmation", sessionValidation, async (req, res) => {
+  const currentUserEmail = req.session.email;
+
+  const user = await userCollection.findOne({ email: currentUserEmail });
   const error = req.query.error === "true";
   const message = req.query.message;
   const invalidEmails = req.query.invalidEmails
     ? JSON.parse(req.query.invalidEmails)
     : [];
 
-  res.render("GroupCreationConfirmation", { error, message, invalidEmails });
+  res.render("GroupCreationConfirmation", { error, message, invalidEmails, user });
 });
 
 app.get("/group/:groupId", sessionValidation, async (req, res) => {
@@ -535,11 +547,15 @@ app.get("/group/:groupId", sessionValidation, async (req, res) => {
     // Retrieve the selected event from the group document
     const selectedEvent = group[0].selectedEvent;
 
+    const currentUserEmail = req.session.email;
+
+    const user = await userCollection.findOne({ email: currentUserEmail });
+
     
     //console.log(selectedEvent);
     
     // Render the group details page with the retrieved group
-    res.render("group", { selectedEvent, group:group[0], pageTitle:group[0].name, chat: true, backButton: '/groups'});
+    res.render("group", { selectedEvent, group:group[0], pageTitle:group[0].name, chat: true, backButton: '/groups', user});
   } catch (error) {
     console.error("Error fetching group details:", error);
     res.status(500).send("Error fetching group details.");
@@ -580,6 +596,8 @@ app.get("/group-details/:groupId", sessionValidation, async (req, res) => {
         const group = await groupCollection.findOne({ _id: new ObjectId(groupId) });
         const userEmail = req.session.email;
         const adminStatus = await isAdmin(userEmail, groupId);
+
+        const user = await userCollection.findOne({ email: userEmail });
         
         if (adminStatus) {
             // User is an admin, proceed with admin-specific logic
@@ -601,7 +619,7 @@ app.get("/group-details/:groupId", sessionValidation, async (req, res) => {
         // console.log(memberDetails);
         
         // Render the group details page with the retrieved group and member details
-        res.render("groupDetails", { group, isAdmin: adminStatus, memberDetails});
+        res.render("groupDetails", { group, isAdmin: adminStatus, memberDetails, user});
     } catch (error) {
         console.error("Error fetching group details:", error);
         res.status(500).send("Error fetching group details.");
@@ -708,6 +726,9 @@ app.get('/egg', sessionValidation, (req, res) => {
 
 app.get('/calendar', sessionValidation, async (req, res) => {
     const groupId = req.query.id; 
+    const currentUserEmail = req.session.email;
+
+    const user = await userCollection.findOne({ email: currentUserEmail });
 
     if (!ObjectId.isValid(groupId)) { 
         return res.status(400).send("Invalid group ID format."); 
@@ -734,7 +755,7 @@ app.get('/calendar', sessionValidation, async (req, res) => {
                 { $set: { calendar: group.calendar } }
             );
 
-            res.render("calendar", { group: group });
+            res.render("calendar", { group: group, user });
         } else {
             res.render("404");
         }
@@ -790,6 +811,10 @@ app.post('/invite', sessionValidation, async (req, res) => {
     try { 
         const groupId = req.query.groupId; // Get the group ID from the query parameter 
         const { emails } = req.body; // Get the emails from the request body 
+
+        const currentUserEmail = req.session.email;
+
+        const user = await userCollection.findOne({ email: currentUserEmail });
  
         // Split the emails string into an array of email addresses 
         const emailArray = emails.split(/[;,]+/).map(email => email.trim()); 
@@ -832,7 +857,7 @@ app.post('/invite', sessionValidation, async (req, res) => {
         }; 
  
         // Render the InviteConfirmation page with the appropriate message 
-        res.render('InviteConfirmation', { inviteMessage }); 
+        res.render('InviteConfirmation', { inviteMessage, user }); 
     } catch (error) { 
         console.error('Error inviting users to group:', error); 
         res.status(500).json({ success: false, message: 'Internal server error.' }); 
@@ -840,20 +865,26 @@ app.post('/invite', sessionValidation, async (req, res) => {
 });
 
 
-app.get('/profile', sessionValidation, (req, res) => {
+app.get('/profile', sessionValidation, async (req, res) => {
 
         var name = req.session.name;
         var biography = req.session.biography;
+        const currentUserEmail = req.session.email;
 
-        res.render(`profile`, { name, biography });
+        const user = await userCollection.findOne({ email: currentUserEmail });
+
+        res.render(`profile`, { name, biography, user });
 });
 
 // GET handler for displaying the form
-app.get('/editProfile', sessionValidation, (req, res) => {
+app.get('/editProfile', sessionValidation, async (req, res) => {
+    const currentUserEmail = req.session.email;
+
+    const user = await userCollection.findOne({ email: currentUserEmail });
     if (!req.session.name) {
         return res.redirect('/login');  // Redirect if the user is not logged in
     }
-    res.render('editProfile', { name: req.session.name});
+    res.render('editProfile', { name: req.session.name, user });
 });
 
 // POST handler for processing the form submission
@@ -913,6 +944,9 @@ app.post('/updateProfile', sessionValidation, upload.single('profilePicture'), a
 
 app.get('/randomizer', sessionValidation, async (req, res) => { 
     const groupId = req.query.id; 
+    const currentUserEmail = req.session.email;
+
+    const user = await userCollection.findOne({ email: currentUserEmail });
 
     if (!ObjectId.isValid(groupId)) { 
         return res.status(400).send("Invalid group ID format."); 
@@ -926,36 +960,8 @@ app.get('/randomizer', sessionValidation, async (req, res) => {
         } 
  
         const randomEvent = group.events[Math.floor(Math.random() * group.events.length)]; 
-
-        
-        for (let userEmail of group.members) {
-            const user = await userCollection.findOne({ email: userEmail });
-        
-            if (!user) {
-                console.error(`User with email ${userEmail} not found.`);
-                continue;
-            }
-        
-            const notification = {
-                _id : new ObjectId(),
-                message: `The chosen event is ${randomEvent.title}.`,
-                groupId: groupId,
-                read: false,
-                type: 'randomizer'
-            };
-
-            await userCollection.updateOne(
-                { _id: new ObjectId(user._id) },
-                { $pull: { notifications: { groupId: groupId, type: 'randomizer' } } }
-            );
-        
-            await userCollection.updateOne(
-                { _id: new ObjectId(user._id) },
-                { $push: { notifications: notification } }
-            );
-        }
  
-        res.render('randomizer', { events: group.events, groupId: groupId }); 
+        res.render('randomizer', { events: group.events, groupId: groupId, user }); 
 
    
     } catch (error) { 
@@ -988,18 +994,60 @@ app.post('/selectEvent', sessionValidation, async (req, res) => {
         console.error("Error updating selected event:", error);
         res.status(500).send("Error updating selected event.");
     }
+
+    const group = await groupCollection.findOne({ _id: new ObjectId(groupId) }); 
+
+    for (let userEmail of group.members) {
+        const user = await userCollection.findOne({ email: userEmail });
+    
+        if (!user) {
+            console.error(`User with email ${userEmail} not found.`);
+            continue;
+        }
+    
+        const notification = {
+            _id : new ObjectId(),
+            message: `The chosen event is ${selectedEvent.title}.`,
+            groupId: groupId,
+            read: false,
+            type: 'randomizer'
+        };
+
+        const existingNotification = user.notifications.find(n => n.groupId === groupId && n.type === 'randomizer');
+
+        if (existingNotification) {
+            await userCollection.updateOne(
+                { _id: new ObjectId(user._id) },
+                {
+                    $pull: { notifications: { groupId: groupId, type: 'randomizer' } },
+                    $inc: { unreadNotificationCount: -1 }
+                }
+            );
+        }
+    
+        await userCollection.updateOne(
+            { _id: new ObjectId(user._id) },
+            { 
+                $push: { notifications: notification }, 
+                $inc: { unreadNotificationCount: 1 } 
+            }
+        );
+    }
 });
 
 
 app.get('/notifications', sessionValidation, async (req, res) => {
-    const userId = req.query.userId;
-    const user = await userCollection.findOne({ _id: new ObjectId(userId) });
+    const currentUserEmail = req.session.email;
+
+    const user = await userCollection.findOne({ email: currentUserEmail });
+
+    const userId = user._id;
 
     const notifications = await Promise.all(user.notifications.map(async (notification) => {
         const group = await groupCollection.findOne({ _id: new ObjectId(notification.groupId) });
         return { ...notification, groupTitle: group.name };
     }));
-    res.render('notifications', { notifications: notifications, userId: userId});
+    res.render('notifications', { notifications: notifications, userId: userId, user});
     
 });
 
@@ -1010,6 +1058,11 @@ app.post('/mark_as_read', sessionValidation, async (req, res) => {
         await userCollection.updateOne(
             { _id: new ObjectId(userId), "notifications._id": new ObjectId(notificationId) },
             { $set: { "notifications.$.read": true } },
+        );
+
+        await userCollection.updateOne(
+            {_id: new ObjectId(userId)},
+            { $inc: { unreadNotificationCount: -1 } }
         );
         
         res.redirect('/notifications?userId=' + userId);
@@ -1024,27 +1077,45 @@ app.post('/delete_notification', sessionValidation, async (req, res) => {
             { $pull: { notifications: { _id: new ObjectId(notificationId) } } }
         );
 
+        await userCollection.updateOne(
+            {_id: new ObjectId(userId)},
+            { $inc: { unreadNotificationCount: -1 } }
+        );
+
         res.redirect('/notifications?userId=' + userId);
 });
 
 app.get('/event_submission', checkDeadline, sessionValidation, async (req, res) => {
     const groupId = req.query.groupId;
     const group = await groupCollection.findOne({ _id: new ObjectId(groupId) });
+
+    const currentUserEmail = req.session.email;
+
+    const user = await userCollection.findOne({ email: currentUserEmail });
+
     const successMessage = req.query.success === 'true' ? 'Event added successfully' : null;
-    res.render('event_submission', { group });
+    res.render('event_submission', { group, user });
 });
 
 app.get('/submitted_event', sessionValidation, async (req, res) => {
     const groupId = req.query.groupId;
     const group = await groupCollection.findOne({ _id: new ObjectId(groupId) });
+
+    const currentUserEmail = req.session.email;
+
+    const user = await userCollection.findOne({ email: currentUserEmail });
     //console.log('groupId:', new ObjectId(groupId));
     const events = group.events;
-    res.render('submitted_event', { group, session: req.session, events, convertTo12Hour });
+    res.render('submitted_event', { group, session: req.session, events, convertTo12Hour , user});
 });
 
 app.get('/editEvent', sessionValidation, async (req, res) => {
     const groupId = req.query.groupId;
     const eventId = req.query.eventId;
+    const currentUserEmail = req.session.email;
+
+    const user = await userCollection.findOne({ email: currentUserEmail });
+
     const group = await groupCollection.findOne(
         { _id: new ObjectId(groupId), "events._id": new ObjectId(eventId) },
         { projection: { "events.$": 1 } }
@@ -1052,7 +1123,7 @@ app.get('/editEvent', sessionValidation, async (req, res) => {
     const event = group.events[0];
     
 
-    res.render('editEvent', { group, session: req.session, event });
+    res.render('editEvent', { group, session: req.session, event, user });
 
 });
 
@@ -1198,7 +1269,8 @@ app.post('/event_submission', sessionValidation, async (req, res) => {
 
         await userCollection.updateOne(
             { _id: new ObjectId(user._id) },
-            { $push: { notifications: notification } }
+            { $push: { notifications: notification }, $inc: { unreadNotificationCount: 1 } },
+    
         );
     }
 
@@ -1245,12 +1317,15 @@ app.post("/addDeadline", sessionValidation, async (req, res) => {
 
             await userCollection.updateOne(
                 { _id: new ObjectId(user._id) },
-                { $pull: { notifications: { groupId: groupId, type: 'deadline' } } }
+                { 
+                    $pull: { notifications: { groupId: groupId, type: 'deadline' } },
+                    $inc: { unreadNotificationCount: -1 }
+                }
             );
         
             await userCollection.updateOne(
                 { _id: new ObjectId(user._id) },
-                { $push: { notifications: notification } }
+                { $push: { notifications: notification }, $inc: { unreadNotificationCount: 1 } }
             );
         }
 
