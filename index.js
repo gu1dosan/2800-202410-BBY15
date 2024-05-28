@@ -543,6 +543,14 @@ app.get("/group/:groupId", sessionValidation, async (req, res) => {
       res.status(404).send("Group not found.");
       return;
     }
+
+    const deadlineObject = await groupCollection.findOne({ _id: new ObjectId(groupId) }, { projection: { deadline: 1 } });
+    const now = new Date();
+    const deadlineDate = deadlineObject.deadline;
+    const nowPST = new Date(now.getTime() - (7 * 60 * 60 * 1000));
+
+    //console.log(deadlineDate);
+    //console.log(nowPST);
     //console.log(JSON.stringify(group[0]));
     // Retrieve the selected event from the group document
     const selectedEvent = group[0].selectedEvent;
@@ -555,7 +563,7 @@ app.get("/group/:groupId", sessionValidation, async (req, res) => {
     //console.log(selectedEvent);
     
     // Render the group details page with the retrieved group
-    res.render("group", { selectedEvent, group:group[0], pageTitle:group[0].name, chat: true, backButton: '/groups', user});
+    res.render("group", { selectedEvent, group:group[0], pageTitle:group[0].name, chat: true, backButton: '/groups', user, deadlineDate, nowPST});
   } catch (error) {
     console.error("Error fetching group details:", error);
     res.status(500).send("Error fetching group details.");
@@ -1045,8 +1053,9 @@ app.get('/notifications', sessionValidation, async (req, res) => {
 
     const notifications = await Promise.all(user.notifications.map(async (notification) => {
         const group = await groupCollection.findOne({ _id: new ObjectId(notification.groupId) });
-        return { ...notification, groupTitle: group.name };
+        return { ...notification, groupTitle: group.name, group: group._id };
     }));
+
     res.render('notifications', { notifications: notifications, userId: userId, user});
     
 });
@@ -1054,6 +1063,8 @@ app.get('/notifications', sessionValidation, async (req, res) => {
 app.post('/mark_as_read', sessionValidation, async (req, res) => {
     const userId = req.query.userId;
     const notificationId = req.body.notificationId;
+    const groupId = req.body.notificationgroup;
+    const notificationType = req.body.notificationtype;
 
         await userCollection.updateOne(
             { _id: new ObjectId(userId), "notifications._id": new ObjectId(notificationId) },
@@ -1065,22 +1076,32 @@ app.post('/mark_as_read', sessionValidation, async (req, res) => {
             { $inc: { unreadNotificationCount: -1 } }
         );
         
-        res.redirect('/notifications?userId=' + userId);
+        if (notificationType === 'randomizer' || notificationType === 'deadline') {
+            res.redirect('/group/' + groupId);
+        } else {
+            res.redirect('/submitted_event?groupId=' + groupId);
+        }
 });
 
 app.post('/delete_notification', sessionValidation, async (req, res) => {
     const userId = req.query.userId;
     const notificationId = req.body.notificationId;
 
+    const user = await userCollection.findOne({ _id: new ObjectId(userId) });
+    const notification = user.notifications.find(notification => notification._id.toString() === notificationId);
+
+    if (notification && !notification.read) {
+        await userCollection.updateOne(
+            { _id: new ObjectId(userId) },
+            { $inc: { unreadNotificationCount: -1 } }
+        );
+    }
+
         await userCollection.updateOne(
             { _id: new ObjectId(userId) },
             { $pull: { notifications: { _id: new ObjectId(notificationId) } } }
         );
 
-        await userCollection.updateOne(
-            {_id: new ObjectId(userId)},
-            { $inc: { unreadNotificationCount: -1 } }
-        );
 
         res.redirect('/notifications?userId=' + userId);
 });
@@ -1269,7 +1290,10 @@ app.post('/event_submission', sessionValidation, async (req, res) => {
 
         await userCollection.updateOne(
             { _id: new ObjectId(user._id) },
-            { $push: { notifications: notification }, $inc: { unreadNotificationCount: 1 } },
+            { 
+                $push: { notifications: notification }, 
+                $inc: { unreadNotificationCount: 1 } 
+            },
     
         );
     }
@@ -1315,13 +1339,17 @@ app.post("/addDeadline", sessionValidation, async (req, res) => {
                 type: 'deadline'
             };
 
-            await userCollection.updateOne(
-                { _id: new ObjectId(user._id) },
-                { 
-                    $pull: { notifications: { groupId: groupId, type: 'deadline' } },
-                    $inc: { unreadNotificationCount: -1 }
-                }
-            );
+            const notificationExists = user.notifications.some(notification => notification.groupId === groupId && notification.type === 'deadline');
+
+            if (notificationExists) {
+                await userCollection.updateOne(
+                    { _id: new ObjectId(user._id) },
+                    { 
+                        $pull: { notifications: { groupId: groupId, type: 'deadline' } },
+                        $inc: { unreadNotificationCount: -1 }
+                    }
+                );
+            }
         
             await userCollection.updateOne(
                 { _id: new ObjectId(user._id) },
@@ -1348,8 +1376,8 @@ async function checkDeadline(req, res, next) {
     const group = await groupCollection.findOne({ _id: new ObjectId(groupId) });
 
     if (group && nowPST > group.deadline) {
-        console.log(now);
-        console.log(group.deadline);   
+        //console.log(now);
+        //console.log(group.deadline);   
         res.redirect('/group/' + groupId);
     } else {
         next();

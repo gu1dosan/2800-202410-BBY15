@@ -25,3 +25,7 @@ html {
     from { opacity: 1; }
     to { opacity: 0; }
 }
+
+.disabled-button {
+    background-color: gray !important;
+}

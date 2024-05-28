@@ -29,10 +29,21 @@
 
                     <div class="mt-6 sm:flex sm:gap-4">
                         <% if (!notification.read) { %>
-                            <form action="/mark_as_read?userId=<%= userId %>" method="POST" class="inline">
-                                <input type="hidden" name="notificationId" value="<%= notification._id %>">
-                                <button class="inline-block w-1/4 rounded-lg bg-purple px-5 py-3 text-center text-sm font-semibold text-white sm:w-auto">View</button>
-                            </form>
+                            <% if (notification.type === 'event') { %>
+                                <form action="/mark_as_read?userId=<%= userId %>" method="POST" class="inline">
+                                    <input type="hidden" name="notificationId" value="<%= notification._id %>">
+                                    <input type="hidden" name="notificationgroup" value="<%= notification.group %>">
+                                    <input type="hidden" name="notificationtype" value="<%= notification.type %>">
+                                    <button class="inline-block w-1/4 rounded-lg bg-purple px-5 py-3 text-center text-sm font-semibold text-white sm:w-auto">View</button>
+                                </form>
+                            <% } else if (notification.type === 'randomizer' || notification.type === 'deadline') { %>
+                                <form action="/mark_as_read?userId=<%= userId %>" method="POST" class="inline">
+                                    <input type="hidden" name="notificationId" value="<%= notification._id %>">
+                                    <input type="hidden" name="notificationgroup" value="<%= notification.group %>">
+                                    <input type="hidden" name="notificationtype" value="<%= notification.type %>">
+                                    <button class="inline-block w-1/4 rounded-lg bg-purple px-5 py-3 text-center text-sm font-semibold text-white sm:w-auto">View</button>
+                                </form>
+                            <% } %>
                         <% } %>
                         <form action="/delete_notification?userId=<%= userId %>" method="POST" class="inline">
                             <input type="hidden" name="notificationId" value="<%= notification._id %>">
@@ -53,7 +64,7 @@
         notificationDiv.classList.add('fade-out');
         setTimeout(() => {
             notificationDiv.remove();
-        }, 300);
+        }, 400);
         form.submit();
     }
 </script>
