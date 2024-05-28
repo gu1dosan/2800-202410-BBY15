@@ -125,7 +125,7 @@ async function getUserDetails(emails, groupId) {
 
     // Iterate over each user and check if they are admins
     for (const user of users) {
-      const isAdmin = group.admin.includes(user.email);
+      const isAdmin = group.admin?.includes(user.email);
       userDetails.push({
         id: user._id.toString(),
         name: user.name,

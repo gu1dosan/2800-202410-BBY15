@@ -81,6 +81,10 @@
                         <textarea id="emails" name="emails" rows="4" class="border border-gray-300 rounded-md p-2 mb-4 w-full"></textarea>
                         <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Invite</button>
                     </form>
+                    <div class="mt-4 flex items-center justify-center">
+                        <p class="">Or send them an invite link:</p>
+                        <button class="ml-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded flex items-center" onclick="copyInviteLink()"><img class="mr-1" src="/images/copy.svg" alt=""/>Copy Link</button>
+                    </div>
                     <button onclick="closeInvitePopup()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-2">Cancel</button>
                 </div>
             </div>
@@ -165,6 +169,15 @@
         } catch (error) {
             console.error('Error removing member:', error);
         }
+    }
+
+    const copyInviteLink = () => {
+        const inviteLink = window.location.origin + '/group-invite?id=<%= group._id %>';
+        navigator.clipboard.writeText(inviteLink).then(() => {
+            alert('Invite link copied to clipboard');
+        }).catch((error) => {
+            console.error('Error copying invite link:', error);
+        });
     }
 
     function viewSubmittedActivities() {
