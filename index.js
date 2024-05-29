@@ -726,7 +726,7 @@ app.get("/group/:groupId", sessionValidation, async (req, res) => {
     //console.log(JSON.stringify(group[0]));
     // Retrieve the selected event from the group document
     const selectedEvent = group[0].selectedEvent;
-    const time = group[0].time;
+    const time = group[0].time.start;
 
     const currentUserEmail = req.session.email;
 
@@ -1306,12 +1306,6 @@ app.post("/selectEvent", sessionValidation, async (req, res) => {
     return res.status(400).send("Invalid group ID format.");
   }
 
-  if (!time) {
-    time == "No time entered.";
-  } else {
-    time = selectedTime.start;
-  }
-
   try {
     const updateResult = await groupCollection.updateOne(
       { _id: new ObjectId(groupId) },
@@ -1339,9 +1333,28 @@ app.post("/selectEvent", sessionValidation, async (req, res) => {
       continue;
     }
 
+    if (typeof time === "undefined" || time === "" || time === null) {
+      time = "No time(s) chosen.";
+    } else if (selectedTime && selectedTime.start) {
+      const date = new Date(selectedTime.start);
+      const formattedTime = date.toLocaleString("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+      const formattedDate = date.toLocaleString("en-US", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+      time = `${formattedTime}, ${formattedDate}`;
+    } else {
+      time = "No time slots chosen.";
+    }
+
     const notification = {
       _id: new ObjectId(),
-      message: `The chosen event is ${selectedEvent.title}, at ${time}`,
+      message: `The chosen event is ${selectedEvent.title}, at: ${time}`,
       groupId: groupId,
       read: false,
       type: "randomizer",
