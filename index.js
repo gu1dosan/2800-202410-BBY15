@@ -773,6 +773,7 @@ app.post(
       message: req.body.input,
       user: req.session.email,
       time: new Date(),
+      name: req.session.name
     };
     // console.log(message)
     const groupId = req.params.groupId;

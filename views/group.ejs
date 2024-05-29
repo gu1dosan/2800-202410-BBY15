@@ -73,8 +73,8 @@
 </div>
 <div class="mt-2 p-2">
   <ul id="messages" class="flex flex-col">
-    <% let aux; %> <% group.messages && group.messages.forEach((message,i) => {
-    %> <% if(message.user!==aux){ %> <% if(message.user!==session.email){ %>
+    <% let aux; %> <% group.messages && group.messages.forEach((message,i) => { %>
+    <% if(message.user!==aux){ %> <% if(message.user!==session.email){ %>
     <p class="text-slate-400 ml-3 text-xs mt-2 -mb-2"><%= message.name %></p>
     <% } %> <% } %>
     <!-- <div class="flex w-fit max-w-[85vw] <%= aux===message.user ? 'mt-1' : 'mt-2'%> <%=message.user===session.email?'self-end':'self-start'%>"> -->
