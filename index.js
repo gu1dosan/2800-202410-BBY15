@@ -1350,7 +1350,7 @@ app.post("/selectEvent", sessionValidation, async (req, res) => {
 
     const notification = {
       _id: new ObjectId(),
-      message: `The chosen event is ${selectedEvent.title}, at: ${time}`,
+      message: `The chosen activity is ${selectedEvent.title}, at: ${time}`,
       groupId: groupId,
       read: false,
       type: "randomizer",
@@ -1687,7 +1687,7 @@ app.post("/addDeadline", sessionValidation, async (req, res) => {
 
     const notification = {
       _id: new ObjectId(),
-      message: `The Deadline to Submit an event is ${formattedDeadline}.`,
+      message: `The Deadline to Submit an activity is ${formattedDeadline}.`,
       groupId: groupId,
       read: false,
       type: "deadline",
