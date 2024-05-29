@@ -21,6 +21,7 @@
         <a href="/randomizer?id=<%= group._id %>" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded ml-2">Randomize</a>
         <a href="/calendar?id=<%= group._id %>" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded ml-2">Time</a>
     </div>
+    <button onclick="scrollToBottom()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-2">View Members</button>
 </div>
   <!-- Event Details Popup -->
   <div id="eventDetailsPopup" class="hidden fixed top-0 left-0 w-full h-full bg-gray-800 bg-opacity-75 flex justify-center items-center">
@@ -54,6 +55,7 @@
             <% aux=message.user; %>
         <% }); %>
     </ul>
+    <div id="bottom"></div>
 </div>
 <div class="h-[68px]" onLoad="">
 
@@ -66,7 +68,11 @@
     // var button = document.getElementById('submitMessageButton');
     // var input = document.getElementById('chatInput');
     var messages = document.getElementById('messages');
-    document.body.onload = ()=>window.scrollTo(0, document.body.scrollHeight);
+    function scrollToBottom() {
+        document.getElementById('bottom').scrollIntoView({behavior: "smooth"});
+    };
+    document.body.onload = ()=>scrollToBottom();
+    // scrollToBottom();
 
     // socket.on('connect', function(socket) {
     //     console.log('Connected to socket' + socket);
@@ -91,8 +97,8 @@
             lastMessageEmail=msg.user;
         }
         messages.appendChild(item);
-        window.scrollTo(0, document.body.scrollHeight);
-        // item.scrollIntoView({behavior: "smooth"});
+        // window.scrollTo(0, document.body.scrollHeight);
+        item.scrollIntoView({behavior: "smooth"});
     });
     // window.scrollTo(0, document.body.scrollHeight);
 </script>
