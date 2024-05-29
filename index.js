@@ -1741,12 +1741,10 @@ async function checkDeadline(req, res, next) {
   const group = await groupCollection.findOne({ _id: new ObjectId(groupId) });
 
   if (group && nowPST > group.deadline) {
-    //console.log(now);
-    //console.log(group.deadline);
-    res.redirect("/group/" + groupId);
-  } else {
+    res.sendStatus(204); 
+} else {
     next();
-  }
+}
 }
 
 // app.get("/admin", sessionValidation, adminAuthorization, async (req, res) => {
