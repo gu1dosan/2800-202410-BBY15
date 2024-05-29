@@ -6,13 +6,14 @@
     <div class="flex items-center">
       <h2 class="text-lg font-semibold">
         This week's activity: <%= selectedEvent ? selectedEvent.title : "TBD" %>
-      </h2>
       <button
         onclick="openEventDetailsPopup()"
-        class="ml-2 bg-purple text-white rounded-full p-2"
+        class="ml-1 bg-purple text-white rounded-full px-[10px]"
+
       >
         ?
       </button>
+    </h2>
     </div>
     <div class="flex flex-col items-center">
       <button
@@ -22,8 +23,8 @@
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          width="35px"
-          height="35px"
+          width="33px"
+          height="33px"
           viewBox="0 0 24 24"
           class="stroke-purple fill-none group-hover:fill-light-purple group-active:duration-0 duration-300"
         >
