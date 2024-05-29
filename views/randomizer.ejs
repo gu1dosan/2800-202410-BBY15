@@ -1,4 +1,4 @@
-<%- include('templates/header') %>
+<%- include('templates/headerV2') %>
 
 <div class="bg-black min-h-screen text-white flex flex-col items-center justify-center">
     <div id="gamecubeAnimation" class="flex justify-center mt-5">
@@ -13,6 +13,7 @@
             <p><strong>Location:</strong> <span id="eventLocation"></span></p>
             <p><strong>Contact Info:</strong> <span id="eventInfo"></span></p>
             <p><strong>Category:</strong> <span id="eventCategory"></span></p>
+            <p><strong>Time:</strong> <span id="eventTime" id="eventTimeDisplay"></span></p>
         </div>
         <div class="flex justify-center mt-5">
             <button onclick="goBack()" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded border border-white">
@@ -23,6 +24,7 @@
 
     <!-- Hidden div to store JSON data -->
     <div id="eventData" data-events="<%= JSON.stringify(events).replace(/"/g, '&quot;') %>" data-group-id="<%= groupId %>" class="hidden"></div>
+    <div id="calendarData" data-calendar="<%= JSON.stringify(calendar).replace(/"/g, '&quot;') %>" class="hidden"></div>
 </div>
 
 <script>
@@ -34,11 +36,14 @@
         const eventLocation = document.getElementById('eventLocation');
         const eventInfo = document.getElementById('eventInfo');
         const eventCategory = document.getElementById('eventCategory');
+        const eventTime = document.getElementById('eventTime');
 
         // Retrieve event data from the hidden div
         const eventDataElement = document.getElementById('eventData');
         const events = JSON.parse(eventDataElement.getAttribute('data-events').replace(/&quot;/g, '"'));
         const groupId = eventDataElement.getAttribute('data-group-id');
+        const calendarDataElement = document.getElementById('calendarData');
+        const calendar = JSON.parse(calendarDataElement.getAttribute('data-calendar').replace(/&quot;/g, '"'));
 
         // Automatically start animation and display the selected event
         gamecubeAnimation.classList.remove('hidden');
@@ -47,22 +52,42 @@
         setTimeout(async () => {
             const randomIndex = Math.floor(Math.random() * events.length);
             const selectedEvent = events[randomIndex];
+            const randomTIndex = Math.floor(Math.random() * calendar.length);
+            const selectedTime = calendar[randomTIndex];
             eventTitle.textContent = selectedEvent.title;
             eventDescription.textContent = selectedEvent.description;
             eventLocation.textContent = selectedEvent.location;
             eventInfo.textContent = selectedEvent.info;
             eventCategory.textContent = selectedEvent.category;
 
+            if (selectedTime && selectedTime.start) {
+                eventTime.textContent = selectedTime.start;
+
+                const date = new Date(eventTime.textContent);
+                const formattedTime = date.toLocaleString("en-US", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                });
+                const formattedDate = date.toLocaleString("en-US", {
+                    weekday: "long",
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                });
+                eventTime.textContent = `${formattedTime}, ${formattedDate}`;
+            } else {
+                eventTime.textContent = "No time slots chosen.";
+            }
+
             gamecubeAnimation.classList.add('hidden');
             eventDetails.classList.remove('hidden');
 
-            // Send the selected event to the server to update the group document
             await fetch('/selectEvent', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ groupId, selectedEvent })
+                body: JSON.stringify({ groupId, selectedEvent, selectedTime })
             });
         }, 5000);  // 5-second delay
     });
