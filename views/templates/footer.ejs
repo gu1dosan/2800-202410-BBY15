@@ -17,7 +17,7 @@
                 <a class="flex flex-col items-center relative" href="/notifications">
                     <div style="position: relative;">
                         <img src="/images/notification.svg" alt="Notifications" class="h-6 lg:h-10">
-                        <% if(user.unreadNotificationCount && user.unreadNotificationCount > 0) { %>
+                        <% if (typeof user !== 'undefined' && user.unreadNotificationCount && user.unreadNotificationCount > 0) { %>
                             <span class="notification-count text-white absolute top-0 right-0"><sup><%= user.unreadNotificationCount %></sup></span>
                         <% } %>
                     </div>
