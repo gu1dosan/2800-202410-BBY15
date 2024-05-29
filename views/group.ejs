@@ -5,13 +5,13 @@
   <div class="mb-4">
     <h2 class="text-lg font-semibold">
       This week's activity: <%= selectedEvent ? selectedEvent.title : "TBD" %>
+      <button
+        onclick="openEventDetailsPopup()"
+        class="ml-1 bg-purple text-white rounded-full px-[10px]"
+      >
+        ?
+      </button>
     </h2>
-    <button
-      onclick="openEventDetailsPopup()"
-      class="ml-2 bg-purple text-white rounded-full p-2"
-    >
-      ?
-    </button>
   </div>
   <!-- Flex container for the green buttons -->
   <div class="flex justify-center items-center relative">
@@ -21,7 +21,7 @@
     <button
       id="submitActivityButton"
       onclick="submitActivity()"
-      class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded ml-2"
+      class="bg-purple hover:bg-darkPurple text-white font-bold py-2 px-4 rounded ml-2"
     >
       Submit Activity
     </button>
@@ -33,21 +33,15 @@
     </div>
     <a
       href="/randomizer?id=<%= group._id %>"
-      class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded ml-2"
+      class="bg-purple hover:bg-darkPurple text-white font-bold py-2 px-4 rounded ml-2"
       >Randomize</a
     >
     <a
       href="/calendar?id=<%= group._id %>"
-      class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded ml-2"
+      class="bg-purple hover:bg-darkPurple text-white font-bold py-2 px-4 rounded ml-2"
       >Time</a
     >
   </div>
-  <button
-    onclick="scrollToBottom()"
-    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-2"
-  >
-    View Members
-  </button>
 </div>
 <!-- Event Details Popup -->
 <div
@@ -66,7 +60,9 @@
       <strong>Time:</strong>
       <span id="eventTimeDisplay"><%= time ? time : "No time set" %></span>
     </p>
-    <% } %>
+    <% } else { %>
+      <p>No event has been selected yet.</p>
+      <% } %>
     <button
       onclick="closeEventDetailsPopup()"
       class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-2"
@@ -77,8 +73,8 @@
 </div>
 <div class="mt-2 p-2">
   <ul id="messages" class="flex flex-col">
-    <% let aux; %> <% group.messages && group.messages.forEach((message,i) => {
-    %> <% if(message.user!==aux){ %> <% if(message.user!==session.email){ %>
+    <% let aux; %> <% group.messages && group.messages.forEach((message,i) => { %>
+    <% if(message.user!==aux){ %> <% if(message.user!==session.email){ %>
     <p class="text-slate-400 ml-3 text-xs mt-2 -mb-2"><%= message.name %></p>
     <% } %> <% } %>
     <!-- <div class="flex w-fit max-w-[85vw] <%= aux===message.user ? 'mt-1' : 'mt-2'%> <%=message.user===session.email?'self-end':'self-start'%>"> -->
@@ -104,11 +100,6 @@
   // var button = document.getElementById('submitMessageButton');
   // var input = document.getElementById('chatInput');
   var messages = document.getElementById("messages");
-  function scrollToBottom() {
-    document.getElementById("bottom").scrollIntoView({ behavior: "smooth" });
-  }
-  document.body.onload = () => scrollToBottom();
-  // scrollToBottom();
 
   // socket.on('connect', function(socket) {
   //     console.log('Connected to socket' + socket);
@@ -140,10 +131,8 @@
       lastMessageEmail = msg.user;
     }
     messages.appendChild(item);
-    // window.scrollTo(0, document.body.scrollHeight);
     item.scrollIntoView({ behavior: "smooth" });
   });
-  // window.scrollTo(0, document.body.scrollHeight);
 </script>
 <%- include("templates/footer"), { user: user } %>
 
@@ -181,6 +170,7 @@
   }
 
   window.onload = function () {
+    window.scrollTo(0, document.body.scrollHeight);
     const deadline = new Date("<%= deadlineDate %>");
     const deadlinenow = new Date("<%= nowPST %>");
     if (deadlinenow >= deadline) {
@@ -220,8 +210,8 @@
     const popover = document.getElementById("popover");
     const rect = button.getBoundingClientRect();
 
-    const popoverWidth = popover.offsetWidth;
-    const popoverHeight = popover.offsetHeight;
+        const popoverWidth = popover.offsetWidth;
+        const popoverHeight = popover.offsetHeight;
 
     popover.style.left = `${rect.right - popoverWidth}px`;
     popover.style.top = `${rect.top - popoverHeight}px`;

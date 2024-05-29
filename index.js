@@ -131,6 +131,7 @@ async function getUserDetails(emails, groupId) {
         name: user.name,
         isAdmin,
         email: user.email,
+        profilePicture: user.profilePicture
       });
     }
 
@@ -544,12 +545,13 @@ app.get("/userProfile", sessionValidation, async (req, res) => {
     res.render("userProfile", { user });
   } catch (error) {
     console.error("Error fetching user details:", error);
-    res.status(500).send("Error fetching user details.");
+    res.status(500).render("errorMessage", { msg: "Error fetching user details." });
   }
 });
 
 app.get("/activities", sessionValidation, async (req, res) => {
   const userEmail = req.session.email;
+  const user = await userCollection.findOne({ email: userEmail });
 
   try {
     // Find all groups where the user is a member and a selectedEvent exists
@@ -568,10 +570,10 @@ app.get("/activities", sessionValidation, async (req, res) => {
     // Extract the selected events from each group
     const selectedEvents = groups.map((group) => group.selectedEvent);
 
-    res.render("activities", { selectedEvents });
+    res.render("activities", { selectedEvents, user });
   } catch (error) {
-    console.error("Error fetching selected events:", error);
-    res.status(500).send("Server error");
+    console.error("Error fetching user details:", error);
+    res.status(500).render("errorMessage", { msg: "Error fetching selected events" });
   }
 });
 
@@ -591,7 +593,7 @@ app.get("/groups", sessionValidation, async (req, res) => {
     res.render("groups", { session: req.session, groups: groups, user });
   } catch (error) {
     console.error("Error fetching groups:", error);
-    res.status(500).send("Error fetching groups.");
+    res.status(500).render("errorMessage", { msg: "Error fetching groups." });
   }
 });
 
@@ -726,13 +728,7 @@ app.get("/group/:groupId", sessionValidation, async (req, res) => {
     //console.log(JSON.stringify(group[0]));
     // Retrieve the selected event from the group document
     const selectedEvent = group[0].selectedEvent;
-    var time;
-
-    if (group[0].time) {
-      time = group[0].time.start;
-    } else {
-      time = new Object();
-    }
+    const time = group[0].time ? group[0].time.start : null;
 
     const currentUserEmail = req.session.email;
 
@@ -754,7 +750,7 @@ app.get("/group/:groupId", sessionValidation, async (req, res) => {
     });
   } catch (error) {
     console.error("Error fetching group details:", error);
-    res.status(500).send("Error fetching group details.");
+    res.status(500).render("errorMessage", { msg: "Error fetching group details." });
   }
 });
 io.on("connection", (socket) => {
@@ -777,6 +773,7 @@ app.post(
       message: req.body.input,
       user: req.session.email,
       time: new Date(),
+      name: req.session.name
     };
     // console.log(message)
     const groupId = req.params.groupId;
@@ -832,7 +829,7 @@ app.get("/group-details/:groupId", sessionValidation, async (req, res) => {
     });
   } catch (error) {
     console.error("Error fetching group details:", error);
-    res.status(500).send("Error fetching group details.");
+    res.status(500).render("errorMessage", { msg: "Error fetching group details." });
   }
 });
 
@@ -851,7 +848,7 @@ app.post("/edit-group-name", sessionValidation, async (req, res) => {
     res.redirect(`/group-details/${groupId}`);
   } catch (error) {
     console.error("Error updating group name:", error);
-    res.status(500).send("Error updating group name.");
+    res.status(500).render("errorMessage", { msg: "Error updating group name" });
   }
 });
 
@@ -926,7 +923,7 @@ app.delete("/remove-member", sessionValidation, async (req, res) => {
     res.sendStatus(200);
   } catch (error) {
     console.error("Error removing user from group:", error);
-    res.status(500).send("Error removing user from group");
+    res.status(500).render("errorMessage", { msg: "Error removing user from group" });
   }
 });
 
@@ -962,7 +959,7 @@ app.get("/calendar", sessionValidation, async (req, res) => {
     }
   } catch (error) {
     console.error("Error fetching group details:", error);
-    res.status(500).send("Error fetching group details.");
+    res.status(500).render("errorMessage", { msg: "Error fetching group details." });
   }
 });
 
@@ -991,7 +988,7 @@ app.get("/calendar", sessionValidation, async (req, res) => {
     }
   } catch (error) {
     console.error("Error fetching group details:", error);
-    res.status(500).send("Error fetching group details.");
+    res.status(500).render("errorMessage", { msg: "Error fetching group details." });
   }
 });
 
@@ -1037,7 +1034,7 @@ app.post("/save-timestamps", sessionValidation, async (req, res) => {
     res.status(200).send({ message: "Timestamps saved successfully!" });
   } catch (error) {
     console.error("Error saving timestamps:", error);
-    res.status(500).send("An error occurred while saving the timestamps.");
+    res.status(500).render("errorMessage", { msg: "An Error ocurred while saving the timestamps" });
   }
 });
 
@@ -1078,7 +1075,7 @@ app.post("/toggle-admin-status", sessionValidation, async (req, res) => {
     res.redirect(`/group-details/${groupId}`);
   } catch (error) {
     console.error("Error toggling admin status:", error);
-    res.status(500).send("Error toggling admin status.");
+    res.status(500).render("errorMessage", { msg: "Error toggling admin status" });
   }
 });
 
@@ -1229,7 +1226,7 @@ app.post(
         profilePictureUrl = result.secure_url; // Use the secure_url provided by Cloudinary
       } catch (error) {
         console.error("Error uploading image to Cloudinary:", error);
-        return res.status(500).send("Error uploading image");
+        return res.status(500).render("errorMessage", { msg: "Error uploading image." });
       }
     }
 
@@ -1300,7 +1297,7 @@ app.get("/randomizer", sessionValidation, async (req, res) => {
     });
   } catch (error) {
     console.error("Error fetching group details:", error);
-    res.status(500).send("Error fetching group details.");
+    res.status(500).render("errorMessage", { msg: "Error fetching group details"});
   }
 });
 
@@ -1374,21 +1371,28 @@ app.post("/selectEvent", sessionValidation, async (req, res) => {
       await userCollection.updateOne(
         { _id: new ObjectId(user._id) },
         {
-          $pull: { notifications: { groupId: groupId, type: "randomizer" } },
-          $inc: { unreadNotificationCount: -1 },
+          $pull: { notifications: { groupId: groupId, type: "randomizer" } }
         }
       );
     }
 
+    if (existingNotification && !existingNotification.read) {
+        await userCollection.updateOne(
+            { _id: new ObjectId(user._id) },
+            { $inc: { unreadNotificationCount: -1 } }
+        );
+    }
+
     await userCollection.updateOne(
-      { _id: new ObjectId(user._id) },
-      {
-        $push: { notifications: notification },
-        $inc: { unreadNotificationCount: 1 },
-      }
-    );
+        { _id: new ObjectId(user._id) },
+        {
+          $push: { notifications: notification },
+          $inc: { unreadNotificationCount: 1 },
+        }
+      );
   }
 });
+
 
 app.get("/notifications", sessionValidation, async (req, res) => {
   const currentUserEmail = req.session.email;
@@ -1697,28 +1701,34 @@ app.post("/addDeadline", sessionValidation, async (req, res) => {
       type: "deadline",
     };
 
-    const notificationExists = user.notifications.some(
-      (notification) =>
-        notification.groupId === groupId && notification.type === "deadline"
+    const existingNotification = user.notifications.find(
+        (notification) =>
+            notification.groupId === groupId && notification.type === "deadline"
     );
 
-    if (notificationExists) {
+    if (existingNotification && !existingNotification.read) {
+        await userCollection.updateOne(
+            { _id: new ObjectId(user._id) },
+            { $inc: { unreadNotificationCount: -1 } }
+        );
+    }
+
+    if (existingNotification) {
+        await userCollection.updateOne(
+          { _id: new ObjectId(user._id) },
+          {
+            $pull: { notifications: { groupId: groupId, type: "deadline" } }
+          }
+        );
+      }
+
       await userCollection.updateOne(
         { _id: new ObjectId(user._id) },
         {
-          $pull: { notifications: { groupId: groupId, type: "deadline" } },
-          $inc: { unreadNotificationCount: -1 },
+          $push: { notifications: notification },
+          $inc: { unreadNotificationCount: 1 },
         }
       );
-    }
-
-    await userCollection.updateOne(
-      { _id: new ObjectId(user._id) },
-      {
-        $push: { notifications: notification },
-        $inc: { unreadNotificationCount: 1 },
-      }
-    );
   }
 
   res.redirect("/group-details/" + groupId);

@@ -7,29 +7,34 @@
     </div>
 <% } else { %>
     <!-- Existing group cards -->
-    <div class="mt-8">
+    <div class="mt-4 mb-24 ml-6 mr-6">
         <% groups.forEach(group => { %>
-            <div class="bg-white rounded-lg shadow-md p-4 mb-4">
-                <h2 class="text-xl font-semibold mb-2"><%= group.name %></h2>
-                <p class="text-gray-600">Members:</p>
-                <ul>
-                    <% group.members.forEach(member => { %>
-                        <li><%= member %></li>
-                    <% }); %>
-                </ul>
-                <a href="/group/<%= group._id %>" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-2 inline-block">View Group</a>
-            </div>
+            <a href="/group/<%= group._id %>" class="block mb-4">
+                <div class="bg-white rounded-lg shadow-md p-4">
+                    <h2 class="text-xl font-semibold mb-2"><%= group.name %></h2>
+                    <p class="text-gray-600 font-semibold">Current Activity:</p>
+                    <% if (group.selectedEvent) { %>
+                        <p><strong>Title:</strong> <%= group.selectedEvent.title || 'tbd' %></p>
+                        <p><strong>Location:</strong> <%= group.selectedEvent.location || 'tbd' %></p>
+                        <p><strong>Info:</strong> <%= group.selectedEvent.info || 'tbd' %></p>
+                        <p><strong>Time:</strong> <%= group.selectedEvent.time || 'tbd' %></p>
+                    <% } else { %>
+                        <p>No event selected yet</p>
+                    <% } %>
+                </div>
+            </a>
         <% }); %>
     </div>
 <% } %>
 
+
+
 <div class="flex justify-center items-center mt-8 mb-8">
-    <button onclick="openPopup()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 fixed bottom-[100px] right-[16px] rounded">
-        Create Group
+    <button onclick="openPopup()" class="bg-lightPurple hover:bg-light-purple text-white font-bold py-2 px-4 fixed bottom-[100px] right-[16px] rounded">➕
     </button>
 </div>
 <div id="popup" class="hidden fixed top-0 left-0 w-full h-full bg-gray-800 bg-opacity-75 flex justify-center items-center">
-    <div class="bg-white rounded-lg p-6 relative">
+    <div class="bg-white rounded-lg p-6 relative ml-6 mr-6">
         <h2 class="text-2xl font-bold mb-4">Create new group</h2>
         <form id="groupForm" action="/createGroup" method="post">
             <input type="text" name="name" placeholder="Group Name" class="border border-gray-300 p-2 mb-4 w-full">
