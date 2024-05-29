@@ -4,24 +4,26 @@
 <div class="sticky top-[10vh] bg-white p-4 shadow-md">
     <!-- New div for this week's activity -->
     <div class="mb-4">
-        <h2 class="text-lg font-semibold">This week's activity: <%= selectedEvent ? selectedEvent.title : "TBD" %></h2>
-        <button onclick="openEventDetailsPopup()" class="ml-2 bg-purple text-white rounded-full p-2">
+        <h2 class="text-lg font-semibold">
+            This week's activity: <%= selectedEvent ? selectedEvent.title : "TBD" %>
+            <button onclick="openEventDetailsPopup()" class="ml-1 bg-purple text-white rounded-full px-[10px]">
             ?
-        </button>
+            </button>
+        </h2>
     </div>
     <!-- Flex container for the green buttons -->
     <div class="flex justify-center items-center relative">
         <!-- View Members button -->
         <!-- <button onclick="openMembersPopup()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">View Members</button> -->
         <!-- Submit Activity button -->
-        <button id="submitActivityButton" onclick="submitActivity()" class="bg-yellow-500 hover:bg-yellow-700  text-white font-bold py-2 px-4 rounded ml-2">Submit Activity</button>
+        <button id="submitActivityButton" onclick="submitActivity()" class="bg-purple hover:bg-darkPurple  text-white font-bold py-2 px-4 rounded ml-2">Submit Activity</button>
         <div id="popover" class="hidden absolute z-10 w-48 p-2 bg-white rounded-lg shadow-lg">
             <p class="text-sm">The submission deadline has passed.</p>
         </div>
-        <a href="/randomizer?id=<%= group._id %>" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded ml-2">Randomize</a>
-        <a href="/calendar?id=<%= group._id %>" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded ml-2">Time</a>
+        <a href="/randomizer?id=<%= group._id %>" class="bg-purple hover:bg-darkPurple text-white font-bold py-2 px-4 rounded ml-2">Randomize</a>
+        <a href="/calendar?id=<%= group._id %>" class="bg-purple hover:bg-darkPurple text-white font-bold py-2 px-4 rounded ml-2">Time</a>
     </div>
-    <button onclick="scrollToBottom()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-2">View Members</button>
+    <!-- <button onclick="scrollToBottom()" class="bg-purple hover:bg-darkPurple text-white font-bold py-2 px-4 rounded mt-2">Scroll to bottom</button> -->
 </div>
   <!-- Event Details Popup -->
   <div id="eventDetailsPopup" class="hidden fixed top-0 left-0 w-full h-full bg-gray-800 bg-opacity-75 flex justify-center items-center">
@@ -69,10 +71,17 @@
     // var input = document.getElementById('chatInput');
     var messages = document.getElementById('messages');
     function scrollToBottom() {
-        document.getElementById('bottom').scrollIntoView({behavior: "smooth"});
+        console.log('should scroll down')
+        window.scrollTo(0, document.body.scrollHeight);
+        // document.getElementById('bottom').scrollIntoView({behavior: "smooth"});
     };
-    document.body.onload = ()=>scrollToBottom();
+    document.body.onload = scrollToBottom();
     // scrollToBottom();
+    // body.onload = ()=>{
+    //     console.log('should scroll down')
+    //     window.scrollTo(0, document.body.scrollHeight);
+    // }
+    
 
     // socket.on('connect', function(socket) {
     //     console.log('Connected to socket' + socket);
@@ -97,10 +106,8 @@
             lastMessageEmail=msg.user;
         }
         messages.appendChild(item);
-        // window.scrollTo(0, document.body.scrollHeight);
         item.scrollIntoView({behavior: "smooth"});
     });
-    // window.scrollTo(0, document.body.scrollHeight);
 </script>
 <%- include("templates/footer"), { user: user } %>
 
