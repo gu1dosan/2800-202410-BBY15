@@ -158,20 +158,20 @@
     }
 
     function showPopover() {
-    const button = document.getElementById('submitActivityButton');
-    const popover = document.getElementById('popover');
-    const rect = button.getBoundingClientRect();
+        const button = document.getElementById('submitActivityButton');
+        const popover = document.getElementById('popover');
+        const rect = button.getBoundingClientRect();
 
-    const popoverWidth = popover.offsetWidth;
-    const popoverHeight = popover.offsetHeight;
+        const popoverWidth = popover.offsetWidth;
+        const popoverHeight = popover.offsetHeight;
 
-    popover.style.left = `${rect.right - popoverWidth}px`;
-    popover.style.top = `${rect.top - popoverHeight}px`;
-    popover.classList.remove('hidden');
-}
+        popover.style.left = `${rect.right - popoverWidth}px`;
+        popover.style.top = `${rect.top - popoverHeight}px`;
+        popover.classList.remove('hidden');
+    }
 
-function hidePopover() {
-    const popover = document.getElementById('popover');
-    popover.classList.add('hidden');
-}
+    function hidePopover() {
+        const popover = document.getElementById('popover');
+        popover.classList.add('hidden');
+    }
 </script>
