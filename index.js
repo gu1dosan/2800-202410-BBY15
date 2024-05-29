@@ -550,6 +550,7 @@ app.get("/userProfile", sessionValidation, async (req, res) => {
 
 app.get("/activities", sessionValidation, async (req, res) => {
   const userEmail = req.session.email;
+  const user = await userCollection.findOne({ email: userEmail });
 
   try {
     // Find all groups where the user is a member and a selectedEvent exists
@@ -568,7 +569,7 @@ app.get("/activities", sessionValidation, async (req, res) => {
     // Extract the selected events from each group
     const selectedEvents = groups.map((group) => group.selectedEvent);
 
-    res.render("activities", { selectedEvents });
+    res.render("activities", { selectedEvents, user });
   } catch (error) {
     console.error("Error fetching selected events:", error);
     res.status(500).send("Server error");
@@ -1368,19 +1369,25 @@ app.post("/selectEvent", sessionValidation, async (req, res) => {
       await userCollection.updateOne(
         { _id: new ObjectId(user._id) },
         {
-          $pull: { notifications: { groupId: groupId, type: "randomizer" } },
-          $inc: { unreadNotificationCount: -1 },
+          $pull: { notifications: { groupId: groupId, type: "randomizer" } }
         }
       );
     }
 
+    if (existingNotification && !existingNotification.read) {
+        await userCollection.updateOne(
+            { _id: new ObjectId(user._id) },
+            { $inc: { unreadNotificationCount: -1 } }
+        );
+    }
+
     await userCollection.updateOne(
-      { _id: new ObjectId(user._id) },
-      {
-        $push: { notifications: notification },
-        $inc: { unreadNotificationCount: 1 },
-      }
-    );
+        { _id: new ObjectId(user._id) },
+        {
+          $push: { notifications: notification },
+          $inc: { unreadNotificationCount: 1 },
+        }
+      );
   }
 });
 
@@ -1691,28 +1698,34 @@ app.post("/addDeadline", sessionValidation, async (req, res) => {
       type: "deadline",
     };
 
-    const notificationExists = user.notifications.some(
-      (notification) =>
-        notification.groupId === groupId && notification.type === "deadline"
+    const existingNotification = user.notifications.find(
+        (notification) =>
+            notification.groupId === groupId && notification.type === "deadline"
     );
 
-    if (notificationExists) {
+    if (existingNotification && !existingNotification.read) {
+        await userCollection.updateOne(
+            { _id: new ObjectId(user._id) },
+            { $inc: { unreadNotificationCount: -1 } }
+        );
+    }
+
+    if (existingNotification) {
+        await userCollection.updateOne(
+          { _id: new ObjectId(user._id) },
+          {
+            $pull: { notifications: { groupId: groupId, type: "deadline" } }
+          }
+        );
+      }
+
       await userCollection.updateOne(
         { _id: new ObjectId(user._id) },
         {
-          $pull: { notifications: { groupId: groupId, type: "deadline" } },
-          $inc: { unreadNotificationCount: -1 },
+          $push: { notifications: notification },
+          $inc: { unreadNotificationCount: 1 },
         }
       );
-    }
-
-    await userCollection.updateOne(
-      { _id: new ObjectId(user._id) },
-      {
-        $push: { notifications: notification },
-        $inc: { unreadNotificationCount: 1 },
-      }
-    );
   }
 
   res.redirect("/group-details/" + groupId);
