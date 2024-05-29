@@ -2,35 +2,52 @@
 
 <div class="sticky top-[10vh] bg-white p-4 shadow-md">
   <!-- New div for this week's activity -->
-  <div class="mb-4">
-    <h2 class="text-lg font-semibold">
-      This week's activity: <%= selectedEvent ? selectedEvent.title : "TBD" %>
+  <div class="mb-4 flex items-center justify-between">
+    <div class="flex items-center">
+      <h2 class="text-lg font-semibold">
+        This week's activity: <%= selectedEvent ? selectedEvent.title : "TBD" %>
+      </h2>
       <button
         onclick="openEventDetailsPopup()"
-        class="ml-1 bg-purple text-white rounded-full px-[10px]"
+        class="ml-2 bg-purple text-white rounded-full p-2"
       >
         ?
       </button>
-    </h2>
+    </div>
+    <div class="flex flex-col items-center">
+      <button
+        id="submitActivityButton"
+        onclick="submitActivity()"
+        class="group cursor-pointer outline-none hover:rotate-90 duration-300 p-0 border-none bg-transparent"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="35px"
+          height="35px"
+          viewBox="0 0 24 24"
+          class="stroke-purple fill-none group-hover:fill-light-purple group-active:duration-0 duration-300"
+        >
+          <path
+            d="M12 22C17.5 22 22 17.5 22 12C22 6.5 17.5 2 12 2C6.5 2 2 6.5 2 12C2 17.5 6.5 22 12 22Z"
+            stroke-width="1.5"
+          ></path>
+          <path d="M8 12H16" stroke-width="1.5"></path>
+          <path d="M12 16V8" stroke-width="1.5"></path>
+        </svg>
+      </button>
+      <div
+        id="popover"
+        class="hidden absolute z-10 w-48 p-2 bg-white rounded-lg shadow-lg"
+      >
+        <p class="text-sm text-center">The submission deadline has passed.</p>
+      </div>
+    </div>
   </div>
   <!-- Flex container for the green buttons -->
   <div class="flex justify-center items-center relative">
     <!-- View Members button -->
     <!-- <button onclick="openMembersPopup()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">View Members</button> -->
     <!-- Submit Activity button -->
-    <button
-      id="submitActivityButton"
-      onclick="submitActivity()"
-      class="bg-purple hover:bg-darkPurple text-white font-bold py-2 px-4 rounded ml-2"
-    >
-      Submit Activity
-    </button>
-    <div
-      id="popover"
-      class="hidden absolute z-10 w-48 p-2 bg-white rounded-lg shadow-lg"
-    >
-      <p class="text-sm">The submission deadline has passed.</p>
-    </div>
     <a
       href="/randomizer?id=<%= group._id %>"
       class="bg-purple hover:bg-darkPurple text-white font-bold py-2 px-4 rounded ml-2"
@@ -213,9 +230,13 @@
         const popoverWidth = popover.offsetWidth;
         const popoverHeight = popover.offsetHeight;
 
-    popover.style.left = `${rect.right - popoverWidth}px`;
-    popover.style.top = `${rect.top - popoverHeight}px`;
-    popover.classList.remove("hidden");
+    popover.style.left = `${rect.left - popoverWidth - 150}px`;
+    popover.style.top = `${rect.top - popoverHeight - 150}px`; 
+    if (popover.classList.contains("hidden")) {
+        popover.classList.remove("hidden");
+    } else {
+        popover.classList.add("hidden");
+    }
   }
 
   function hidePopover() {

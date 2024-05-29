@@ -27,32 +27,35 @@
                         <%= notification.message %>
                     </p>
 
-                    <div class="mt-6 sm:flex sm:gap-4">
+                    <div class="mt-6 sm:flex sm:gap-4 justify-center">
                         <% if (!notification.read) { %>
                             <% if (notification.type === 'event') { %>
                                 <form action="/mark_as_read?userId=<%= userId %>" method="POST" class="inline">
                                     <input type="hidden" name="notificationId" value="<%= notification._id %>">
                                     <input type="hidden" name="notificationgroup" value="<%= notification.group %>">
                                     <input type="hidden" name="notificationtype" value="<%= notification.type %>">
-                                    <button class="inline-block w-1/4 rounded-lg bg-purple px-5 py-3 text-center text-sm font-semibold text-white sm:w-auto">View</button>
+                                    <button class="inline-block rounded-lg bg-purple px-5 py-3 text-center text-sm font-semibold text-white sm:w-auto">View</button>
                                 </form>
                             <% } else if (notification.type === 'randomizer' || notification.type === 'deadline') { %>
                                 <form action="/mark_as_read?userId=<%= userId %>" method="POST" class="inline">
                                     <input type="hidden" name="notificationId" value="<%= notification._id %>">
                                     <input type="hidden" name="notificationgroup" value="<%= notification.group %>">
                                     <input type="hidden" name="notificationtype" value="<%= notification.type %>">
-                                    <button class="inline-block w-1/4 rounded-lg bg-purple px-5 py-3 text-center text-sm font-semibold text-white sm:w-auto">View</button>
+                                    <button class="inline-block  rounded-lg bg-purple px-5 py-3 text-center text-sm font-semibold text-white sm:w-auto">View</button>
                                 </form>
                             <% } %>
                         <% } %>
                         <form action="/delete_notification?userId=<%= userId %>" method="POST" class="inline">
                             <input type="hidden" name="notificationId" value="<%= notification._id %>">
-                            <button onclick="dismissNotification(event, '<%= notification._id %>')" class="mt-2 inline-block w-1/4 rounded-lg bg-stone-300 px-5 py-3 text-center text-sm font-semibold text-gray-800 sm:mt-0 sm:w-auto">Dismiss</button>
+                            <button onclick="dismissNotification(event, '<%= notification._id %>')" class="mt-2 inline-block rounded-lg bg-stone-300 px-5 py-3 text-center text-sm font-semibold text-gray-800 sm:mt-0 sm:w-auto">Dismiss</button>
                         </form>
                     </div>
                 </div>
             <% }); %>
         <% } %>
+        <div id="bottom"></div>
+    </div>
+    <div class="h-[80px]" onLoad=""></div>
     </div>
 </div>
 
