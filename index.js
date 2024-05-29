@@ -1322,95 +1322,7 @@ app.post("/selectEvent", sessionValidation, async (req, res) => {
     }
   } catch (error) {
     console.error("Error updating selected event:", error);
-    res.status(500).render("errorMessage", { msg: "Error updating selected event" });
-  }
-
-  const group = await groupCollection.findOne({ _id: new ObjectId(groupId) });
-
-  for (let userEmail of group.members) {
-    const user = await userCollection.findOne({ email: userEmail });
-
-    if (!user) {
-      console.error(`User with email ${userEmail} not found.`);
-      continue;
-    }
-
-    if (typeof time === "undefined" || time === "" || time === null) {
-      time = "No time(s) chosen.";
-    } else if (selectedTime && selectedTime.start) {
-      const date = new Date(selectedTime.start);
-      const formattedTime = date.toLocaleString("en-US", {
-        hour: "2-digit",
-        minute: "2-digit",
-      });
-      const formattedDate = date.toLocaleString("en-US", {
-        weekday: "long",
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      });
-      time = `${formattedTime}, ${formattedDate}`;
-    } else {
-      time = "No time slots chosen.";
-    }
-
-    const notification = {
-      _id: new ObjectId(),
-      message: `The chosen event is ${selectedEvent.title}, at: ${time}`,
-      groupId: groupId,
-      read: false,
-      type: "randomizer",
-    };
-
-    const existingNotification = user.notifications.find(
-      (n) => n.groupId === groupId && n.type === "randomizer"
-    );
-
-    if (existingNotification) {
-      await userCollection.updateOne(
-        { _id: new ObjectId(user._id) },
-        {
-          $pull: { notifications: { groupId: groupId, type: "randomizer" } }
-        }
-      );
-    }
-
-      await userCollection.updateOne(
-        { _id: new ObjectId(user._id) },
-        { $push: { notifications: notification } }
-      );
-    }
-
-    res.render("randomizer", { events: group.events, groupId: groupId });
-  } catch (error) {
-    console.error("Error fetching group details:", error);
-    res.status(500).render("errorMessage", { msg: "Error fetching group details"});
-  }
-});
-
-app.post("/selectEvent", sessionValidation, async (req, res) => {
-  const { groupId, selectedEvent, selectedTime } = req.body;
-  var time = selectedTime;
-
-  if (!ObjectId.isValid(groupId)) {
-    return res.status(400).send("Invalid group ID format.");
-  }
-
-  try {
-    const updateResult = await groupCollection.updateOne(
-      { _id: new ObjectId(groupId) },
-      { $set: { selectedEvent, time } },
-      { upsert: true }
-    );
-
-    if (updateResult.matchedCount === 0 && updateResult.upsertedCount === 1) {
-      res.status(201).send("Selected event created successfully.");
-    } else {
-      res.status(200).send("Selected event updated successfully.");
-    }
-  } catch (error) {
-    console.error("Error updating selected event:", error);
-    res.status(500).render("errorMessage", { msg: "Error updating selected event" });
+    res.status(500).send("Error updating selected event.");
   }
 
   const group = await groupCollection.findOne({ _id: new ObjectId(groupId) });
@@ -1479,6 +1391,7 @@ app.post("/selectEvent", sessionValidation, async (req, res) => {
       );
   }
 });
+
 
 app.get("/notifications", sessionValidation, async (req, res) => {
   const currentUserEmail = req.session.email;
