@@ -726,7 +726,13 @@ app.get("/group/:groupId", sessionValidation, async (req, res) => {
     //console.log(JSON.stringify(group[0]));
     // Retrieve the selected event from the group document
     const selectedEvent = group[0].selectedEvent;
-    const time = group[0].time.start;
+    var time;
+
+    if (group[0].time) {
+      time = group[0].time.start;
+    } else {
+      time = new Object();
+    }
 
     const currentUserEmail = req.session.email;
 
