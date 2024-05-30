@@ -1,57 +1,68 @@
 <%- include("templates/headerV2") %>
-<div class="container mx-auto bg-gray text-center">
-    <div class="bg-white p-8">
-    <h1 class="text-3xl font-bold mb-4">Submit Your Activity Idea</h1>
-    <form action="/event_submission?groupId=<%= group._id %>" method="POST" class="bg-lavender p-6 rounded shadow-inner">
-        <div class="form-group mb-4">
-            <label for="eventTitle" class="block text-gray-700">
-                <span class="text-rose-500">*</span> Activity Title
-                <span class="text-rose-500 font-semibold italic ml-2"> Required</span>
-            </label>
-            <input type="text" id="eventTitle" name="eventTitle" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-light-purple focus:border-transparent transition duration-200 p-2" required>
-        </div>
-        <div class="form-group mb-4">
-            <label for="description" class="block text-gray-700">Description</label>
-            <textarea id="description" name="description" rows="4" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-light-purple focus:border-transparent transition duration-200 p-2"></textarea>
-        </div>
-        <div class="form-group mb-4 flex">
-            <div class="w-32 mr-2">
-                <label for="location" class="block text-gray-700">Location</label>
-                <input type="text" id="location" name="location" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-light-purple focus:border-transparent transition duration-200 p-2">
-            </div>
-            <div class="w-32 ml-2">
-                <label for="eventTime" class="block text-gray-700">Activity Time</label>
-                <input type="time" id="eventTime" name="eventTime" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-light-purple focus:border-transparent transition duration-200 p-2">
-            </div>
-        </div>
-        <div class="form-group mb-4">
-            <label for="contactInfo" class="block text-gray-700">Contact Information</label>
-            <input type="text" id="contactInfo" name="contactInfo" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-light-purple focus:border-transparent transition duration-200 p-2">
-        </div>
-        <div class="form-group mb-4">
-            <label for="category" class="block text-gray-700">
-                <span class="text-rose-500">* </span>Activitiy Category
-                <span class="text-rose-500 font-semibold italic ml-2"> Required</span>
-            </label>
-            <select id="category" name="category" class="w-full p-2 mt-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent transition duration-300" required>
-                <option value="" disabled selected>Select</option>
-                <option value="Social">Social</option>
-                <option value="Workshop">Workshop</option>
-                <option value="Meeting">Meeting</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <button type="submit" class="bg-purple hover:bg-purple focus:outline-none focus:ring focus:ring-violet-300 active:bg-violet-700 px-6 py-2 text-base leading-5 rounded-full font-semibold text-white">Submit Activity</button>
-        </div>
+    <div class="container mx-auto bg-gray text-center">
+        <div class="bg-white p-8">
+            <h1 class="text-3xl font-bold mb-4">Submit Your Activity Idea</h1>
+            <form action="/event_submission?groupId=<%= group._id %>" method="POST"
+                class="bg-lavender p-6 rounded shadow-inner">
+                <div class="form-group mb-4">
+                    <label for="eventTitle" class="block text-gray-700">
+                        <span class="text-rose-500">*</span> Activity Title
+                        <span class="text-rose-500 font-semibold italic ml-2"> Required</span>
+                    </label>
+                    <input type="text" id="eventTitle" name="eventTitle"
+                        class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-light-purple focus:border-transparent transition duration-200 p-2"
+                        required>
+                </div>
+                <div class="form-group mb-4">
+                    <label for="description" class="block text-gray-700">Description</label>
+                    <textarea id="description" name="description" rows="4"
+                        class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-light-purple focus:border-transparent transition duration-200 p-2"></textarea>
+                </div>
+                <div class="form-group mb-4 flex">
+                    <div class="w-32 mr-2">
+                        <label for="location" class="block text-gray-700">Location</label>
+                        <input type="text" id="location" name="location"
+                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-light-purple focus:border-transparent transition duration-200 p-2">
+                    </div>
+                    <div class="w-32 ml-2">
+                        <label for="eventTime" class="block text-gray-700">Activity Time</label>
+                        <input type="time" id="eventTime" name="eventTime"
+                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-light-purple focus:border-transparent transition duration-200 p-2">
+                    </div>
+                </div>
+                <div class="form-group mb-4">
+                    <label for="contactInfo" class="block text-gray-700">Contact Information</label>
+                    <input type="text" id="contactInfo" name="contactInfo"
+                        class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-light-purple focus:border-transparent transition duration-200 p-2">
+                </div>
+                <div class="form-group mb-4">
+                    <label for="category" class="block text-gray-700">
+                        <span class="text-rose-500">* </span>Activitiy Category
+                        <span class="text-rose-500 font-semibold italic ml-2"> Required</span>
+                    </label>
+                    <select id="category" name="category"
+                        class="w-full p-2 mt-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent transition duration-300"
+                        required>
+                        <option value="" disabled selected>Select</option>
+                        <option value="Social">Social</option>
+                        <option value="Workshop">Workshop</option>
+                        <option value="Meeting">Meeting</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <button type="submit"
+                        class="bg-purple hover:bg-purple focus:outline-none focus:ring focus:ring-violet-300 active:bg-violet-700 px-6 py-2 text-base leading-5 rounded-full font-semibold text-white">Submit
+                        Activity</button>
+                </div>
 
-    </form>
+            </form>
+        </div>
     </div>
-</div>
-<div id="bottom"></div>
-</div>
-<div class="h-[20px]" onLoad=""></div>
-<br>
-<!-- <div class="container mx-auto bg-gray flex items-center justify-center py-6">
+    <div id="bottom"></div>
+    </div>
+    <div class="h-[20px]" onLoad=""></div>
+    <br>
+    <!-- <div class="container mx-auto bg-gray flex items-center justify-center py-6">
     <div class="bg-white p-8">
         <h1 class="text-3xl font-bold mb-4">Submit Your Event Idea</h1>
         <form action="/test?groupId=<%= group._id %>" method="POST" class="bg-lavender p-6 rounded shadow-inner">
@@ -87,4 +98,4 @@
     </div>
 </div> -->
 
-<%- include("templates/footer") %>
+    <%- include("templates/footer") %>
