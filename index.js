@@ -1413,6 +1413,13 @@ app.post("/mark_as_read", sessionValidation, async (req, res) => {
   const notificationId = req.body.notificationId;
   const groupId = req.body.notificationgroup;
   const notificationType = req.body.notificationtype;
+  const userEmail = req.session.email;
+
+  const group = await groupCollection.findOne({ _id: new ObjectId(groupId) });
+
+  const isPartOfGroup = group.members.includes(userEmail);
+
+if (isPartOfGroup) {
 
   await userCollection.updateOne(
     {
@@ -1432,6 +1439,19 @@ app.post("/mark_as_read", sessionValidation, async (req, res) => {
   } else {
     res.redirect("/submitted_event?groupId=" + groupId);
   }
+} else {
+    await userCollection.updateOne(
+        { _id: new ObjectId(userId) },
+        { $pull: { notifications: { _id: new ObjectId(notificationId) } } }
+      );
+
+    await userCollection.updateOne(
+        { _id: new ObjectId(userId) },
+        { $inc: { unreadNotificationCount: -1 } }
+      );
+      res.redirect("/notifications?userId=" + userId);
+    }
+
 });
 
 app.post("/delete_notification", sessionValidation, async (req, res) => {

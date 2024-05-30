@@ -4,7 +4,10 @@
     <h1 class="text-3xl font-bold mb-4">Submit Your Activity Idea</h1>
     <form action="/event_submission?groupId=<%= group._id %>" method="POST" class="bg-lavender p-6 rounded shadow-inner">
         <div class="form-group mb-4">
-            <label for="eventTitle" class="block text-gray-700">Activity Title</label>
+            <label for="eventTitle" class="block text-gray-700">
+                <span class="text-rose-500">*</span> Activity Title
+                <span class="text-rose-500 font-semibold italic ml-2"> Required</span>
+            </label>
             <input type="text" id="eventTitle" name="eventTitle" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-light-purple focus:border-transparent transition duration-200 p-2" required>
         </div>
         <div class="form-group mb-4">
@@ -26,8 +29,12 @@
             <input type="text" id="contactInfo" name="contactInfo" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-light-purple focus:border-transparent transition duration-200 p-2">
         </div>
         <div class="form-group mb-4">
-            <label for="category" class="block text-sm font-medium text-gray-700">Activitiy Category</label>
+            <label for="category" class="block text-gray-700">
+                <span class="text-rose-500">* </span>Activitiy Category
+                <span class="text-rose-500 font-semibold italic ml-2"> Required</span>
+            </label>
             <select id="category" name="category" class="w-full p-2 mt-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent transition duration-300" required>
+                <option value="" disabled selected>Select</option>
                 <option value="Social">Social</option>
                 <option value="Workshop">Workshop</option>
                 <option value="Meeting">Meeting</option>
