@@ -321,6 +321,7 @@ app.post("/login", async (req, res) => {
     // return res.redirect('/login?error=invaliddetails');
     return res.render("login", {
       error: "Invalid email or password",
+      formData: { email: email, password: password },
       groupInvite,
       group,
     });
@@ -342,6 +343,7 @@ app.post("/login", async (req, res) => {
     // console.log("incorrect password");
     return res.render("login", {
       error: "Invalid email or password",
+      formData: { email: email, password: password },
       groupInvite,
     });
   }
