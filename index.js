@@ -1668,7 +1668,9 @@ app.post("/editEvent", sessionValidation, async (req, res) => {
 
   if (validationResult.error != null) {
     console.log(validationResult.error);
-    res.send("/editEvent");
+    return res
+      .status(400)
+      .render("errorMessage", { msg: validationResult.error.message });
     return;
   }
 
@@ -1858,8 +1860,9 @@ app.post("/event_submission", sessionValidation, async (req, res) => {
 
   if (validationResult.error != null) {
     console.log(validationResult.error);
-    res.send("/event_submission");
-    return;
+    return res
+      .status(400)
+      .render("errorMessage", { msg: validationResult.error.message });
   }
 
   const newEvent = {
