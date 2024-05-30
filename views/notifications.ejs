@@ -1,75 +1,196 @@
 <%- include('templates/headerV2') %>
-<div class="container mx-auto p-4">
-    <h1 class="text-3xl font-bold mb-4 text-center">Notifications</h1>
+    <div class="container mx-auto p-4">
+        <h1 class="text-3xl font-bold mb-4 text-center">Notifications</h1>
 
-    <!-- Notification Items -->
-    <div>
-        <% if (notifications.length === 0) { %>
-            <div class="flex flex-col items-center justify-center h-full">
-                <img src="/images/notification.png" alt="No Notifications" class="w-42 h-40 mb-4">
-                <h2 class="text-xl font-bold text-gray-700 text-center">No Notifications</h2>
-                <p class="text-sm text-gray-500 text-center">Clutter cleared! We’ll notify you when there is something new.</p>
-            </div>
-        <% } else { %>
-            <% notifications.slice().reverse().forEach(notification => { %>
-                <div id="<%= notification._id %>" class="mx-auto max-w-lg rounded-lg border border-stone <%= notification.read ? 'bg-gray-400' : 'bg-white' %> p-4 shadow-lg sm:p-6 lg:p-8 mb-4 transition-opacity">
-                    <div class="flex items-center gap-4">
-                        <span class="shrink-0 rounded-full bg-purple p-2 text-white">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="h-4 w-4">
-                                <path fill-rule="evenodd" d="M18 3a1 1 0 00-1.447-.894L8.763 6H5a3 3 0 000 6h.28l1.771 5.316A1 1 0 008 18h1a1 1 0 001-1v-4.382l6.553 3.276A1 1 0 0018 15V3z" clip-rule="evenodd"></path>
-                            </svg>
-                        </span>
 
-                        <p class="font-medium sm:text-lg text-purple">New notification from <%= notification.groupTitle %>!</p>
-                    </div>
-
-                    <p class="mt-4 text-black">
-                        <%= notification.message %>
-                    </p>
-
-                    <div class="mt-6 sm:flex sm:gap-4 justify-center">
-                        <% if (!notification.read) { %>
-                            <% if (notification.type === 'event') { %>
-                                <form action="/mark_as_read?userId=<%= userId %>" method="POST" class="inline">
-                                    <input type="hidden" name="notificationId" value="<%= notification._id %>">
-                                    <input type="hidden" name="notificationgroup" value="<%= notification.group %>">
-                                    <input type="hidden" name="notificationtype" value="<%= notification.type %>">
-                                    <button class="inline-block rounded-lg bg-purple px-5 py-3 text-center text-sm font-semibold text-white sm:w-auto">View</button>
-                                </form>
-                            <% } else if (notification.type === 'randomizer' || notification.type === 'deadline' || notification.type === 'editEvent') { %>
-                                <form action="/mark_as_read?userId=<%= userId %>" method="POST" class="inline">
-                                    <input type="hidden" name="notificationId" value="<%= notification._id %>">
-                                    <input type="hidden" name="notificationgroup" value="<%= notification.group %>">
-                                    <input type="hidden" name="notificationtype" value="<%= notification.type %>">
-                                    <button class="inline-block  rounded-lg bg-purple px-5 py-3 text-center text-sm font-semibold text-white sm:w-auto">View</button>
-                                </form>
-                            <% } %>
-                        <% } %>
-                        <form action="/delete_notification?userId=<%= userId %>" method="POST" class="inline">
-                            <input type="hidden" name="notificationId" value="<%= notification._id %>">
-                            <button onclick="dismissNotification(event, '<%= notification._id %>')" class="mt-2 inline-block rounded-lg bg-stone-300 px-5 py-3 text-center text-sm font-semibold text-gray-800 sm:mt-0 sm:w-auto">Dismiss</button>
-                        </form>
-                    </div>
+        <!-- Notification Items -->
+        <div>
+            <% if (notifications.length===0) { %>
+                <div class="flex flex-col items-center justify-center h-full">
+                    <img src="/images/notification.png" alt="No Notifications" class="w-42 h-40 mb-4">
+                    <h2 class="text-xl font-bold text-gray-700 text-center">No Notifications</h2>
+                    <p class="text-sm text-gray-500 text-center">Clutter cleared! We’ll notify you when there is
+                        something new.</p>
                 </div>
-            <% }); %>
-        <% } %>
-        <div id="bottom"></div>
-    </div>
-    <div class="h-[80px]" onLoad=""></div>
-    </div>
-</div>
+                <% } else { %>
+                    <% notifications.slice().reverse().forEach(notification=> { %>
+                        <div id="<%= notification._id %>"
+                            class="mx-auto max-w-lg rounded-lg border border-stone <%= notification.read ? 'bg-gray-400' : 'bg-white' %> p-4 shadow-lg sm:p-6 lg:p-8 mb-4 transition-opacity">
+                            <div class="flex items-center gap-4">
+                                <span class="shrink-0 rounded-full bg-purple p-2 text-white">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
+                                        class="h-4 w-4">
+                                        <path fill-rule="evenodd"
+                                            d="M18 3a1 1 0 00-1.447-.894L8.763 6H5a3 3 0 000 6h.28l1.771 5.316A1 1 0 008 18h1a1 1 0 001-1v-4.382l6.553 3.276A1 1 0 0018 15V3z"
+                                            clip-rule="evenodd"></path>
+                                    </svg>
+                                </span>
 
-<script>
-    function dismissNotification(event, notificationId) {
-        event.preventDefault();
-        const notificationDiv = document.getElementById(notificationId);
-        const form = event.target.closest('form');
-        notificationDiv.classList.add('fade-out');
-        setTimeout(() => {
-            notificationDiv.remove();
-        }, 400);
-        form.submit();
-    }
-</script>
+                                <p class="font-medium sm:text-lg text-purple">New notification from <%=
+                                        notification.groupTitle %>!</p>
+                            </div>
 
-<%- include('templates/footer', { user: user }) %>
+                            <p class="mt-4 text-black">
+                                <%= notification.message %>
+                            </p>
+
+                            <div class="mt-6 sm:flex sm:gap-4 justify-center">
+                                <% if (!notification.read) { %>
+                                    <% if (notification.type==='event' ) { %>
+                                        <form action="/mark_as_read?userId=<%= userId %>" method="POST" class="inline">
+                                            <input type="hidden" name="notificationId" value="<%= notification._id %>">
+                                            <input type="hidden" name="notificationgroup"
+                                                value="<%= notification.group %>">
+                                            <input type="hidden" name="notificationtype"
+                                                value="<%= notification.type %>">
+                                            <button
+                                                class="inline-block rounded-lg bg-purple px-5 py-3 text-center text-sm font-semibold text-white sm:w-auto">View</button>
+                                        </form>
+                                        <% } else if (notification.type==='randomizer' || notification.type==='deadline'
+                                            || notification.type==='editEvent' ) { %>
+                                            <form action="/mark_as_read?userId=<%= userId %>" method="POST"
+                                                class="inline">
+                                                <input type="hidden" name="notificationId"
+                                                    value="<%= notification._id %>">
+                                                <input type="hidden" name="notificationgroup"
+                                                    value="<%= notification.group %>">
+                                                <input type="hidden" name="notificationtype"
+                                                    value="<%= notification.type %>">
+                                                <button
+                                                    class="inline-block  rounded-lg bg-purple px-5 py-3 text-center text-sm font-semibold text-white sm:w-auto">View</button>
+                                            </form>
+                                            <% } %>
+                                                <% } %>
+                                                    <form action="/delete_notification?userId=<%= userId %>"
+                                                        method="POST" class="inline">
+                                                        <input type="hidden" name="notificationId"
+                                                            value="<%= notification._id %>">
+                                                        <button
+                                                            onclick="dismissNotification(event, '<%= notification._id %>')"
+                                                            class="mt-2 inline-block rounded-lg bg-stone-300 px-5 py-3 text-center text-sm font-semibold text-gray-800 sm:mt-0 sm:w-auto">Dismiss</button>
+                                                    </form>
+                            </div>
+                        </div>
+                        <div id="deletePopup"
+                            class=" hidden group select-none w-[250px] flex-col p-4 relative items-center justify-center bg-purple border border-gray-800 shadow-lg rounded-2xl">
+                            <div class="">
+                                <div class="text-center p-3 flex-auto justify-center">
+                                    <svg fill="currentColor" viewBox="0 0 20 20"
+                                        class="animate-bounce w-12 h-12 flex items-center text-white fill-red-500 mx-auto"
+                                        xmlns="http://www.w3.org/2000/svg">
+                                        <path clip-rule="evenodd"
+                                            d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
+                                            fill-rule="evenodd"></path>
+                                    </svg>
+                                    <h2 class="text-xl font-bold py-4 text-gray-200">Are you sure?</h2>
+                                    <p class="font-bold text-sm text-white px-2">
+                                        Do you really want to continue ? This process cannot be undone
+                                    </p>
+                                </div>
+                                <div class="p-2 mt-2 text-center space-x-1 md:block">
+                                    <button onclick="deleteAllNotifications()"
+                                        class="bg-rose-500 hover:bg-transparent px-5 py-2 text-sm shadow-sm hover:shadow-lg font-medium tracking-wider border-2 border-rose-500 hover:border-rose-500 text-white hover:text-rose-500 rounded-full transition ease-in duration-300 mb-2">
+                                        Delete
+                                    </button>
+                                    <button onclick="closeDeletePopup()"
+                                        class="mb-2 md:mb-0 bg-gray-700 px-5 py-2 text-sm shadow-sm font-medium tracking-wider border-2 border-gray-600 hover:border-gray-700 text-gray-300 rounded-full hover:shadow-lg hover:bg-gray-800 transition ease-in duration-300">
+                                        Cancel
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <% }); %>
+                            <% } %>
+                                <div id="bottom"></div>
+        </div>
+        <div class="h-[80px]" onLoad=""></div>
+    </div>
+    </div>
+    <% if (notifications.length > 0) { %>
+    <div class="group left-[5%] h-[120px] lg:h-[110px] fixed w-full bottom-0 ">
+        <button onclick="toggleTooltip(this)">
+            <img src="/images/notification-marker.svg" class="h-8 lg:h-10" alt="Marker">
+        </button>
+        <span class="tooltip absolute -top-16 left-[-2%] -translate-x-[-50%] 
+    z-20 origin-left scale-0 px-3 
+    py-2 text-sm font-bold
+     transition-all duration-300 ease-in-out">
+            <button onclick="markAllAsRead()"
+                class="bg-purple hover:bg-purple-700 text-white font-bold py-2 px-4 rounded mb-4">
+                Mark All as Read
+            </button>
+            <button onclick="openDeletePopup()"
+                class="bg-rose-500 hover:bg-rose-700 text-white font-bold py-2 px-4 rounded mb-4">
+                Delete All Notifications
+            </button>
+            <span>
+            </span></span>
+    </div>
+    <% } %>
+
+    <script>
+
+        function openDeletePopup() {
+            document.getElementById('deletePopup').classList.remove('hidden');
+        }
+
+        function closeDeletePopup() {
+            document.getElementById('deletePopup').classList.add('hidden');
+        }
+
+        function dismissNotification(event, notificationId) {
+            event.preventDefault();
+            const notificationDiv = document.getElementById(notificationId);
+            const form = event.target.closest('form');
+            notificationDiv.classList.add('fade-out');
+            setTimeout(() => {
+                notificationDiv.remove();
+            }, 400);
+            form.submit();
+        }
+
+        function markAllAsRead() {
+            fetch('/mark_all_as_read', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ userId: '<%= userId %>' })
+            }).then(response => {
+                if (response.ok) {
+                    location.reload();
+                } else {
+                    console.error('Failed to mark all notifications as read');
+                }
+            });
+        }
+
+        function deleteAllNotifications() {
+            fetch('/delete_all_notifications', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ userId: '<%= userId %>' })
+            }).then(response => {
+                if (response.ok) {
+                    location.reload();
+                } else {
+                    console.error('Failed to delete all notifications');
+                }
+            });
+        }
+
+        function toggleTooltip(button) {
+            const tooltip = button.nextElementSibling;
+            const scale = getComputedStyle(tooltip).getPropertyValue('transform');
+
+            if (scale.includes('matrix(1')) {
+                tooltip.style.transform = 'scale(0)';
+            } else {
+                tooltip.style.transform = 'scale(1)';
+            }
+        }
+    </script>
+
+    <%- include('templates/footer', { user: user }) %>

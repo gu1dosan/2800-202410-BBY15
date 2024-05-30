@@ -8,7 +8,7 @@
             This week's activity: 
         </h2>
         <div class="text-lg font-semibold flex items-center ml-1">
-            <span class="overflow-x-auto whitespace-nowrap w-32 inline-block align-middle">
+            <span class="<%= selectedEvent ? 'overflow-x-auto whitespace-nowrap w-24' : 'w-24' %> inline-block align-middle">
                 <%= selectedEvent ? selectedEvent.title : "TBD" %>
             </span>
             <button

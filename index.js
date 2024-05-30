@@ -573,7 +573,7 @@ app.get("/activities", sessionValidation, async (req, res) => {
     // Extract the selected events from each group
     const selectedEvents = groups.map((group) => group.selectedEvent);
 
-    res.render("activities", { selectedEvents, user });
+    res.render("activities", { selectedEvents, user, formatDateTime });
   } catch (error) {
     console.error("Error fetching user details:", error);
     res
@@ -1303,6 +1303,7 @@ app.post("/selectEvent", sessionValidation, async (req, res) => {
     return res.status(400).send("Invalid group ID format.");
   }
 
+  if (selectedTime) {
   await groupCollection.updateOne(
     { _id: new ObjectId(groupId) },
     { $set: {
@@ -1313,6 +1314,7 @@ app.post("/selectEvent", sessionValidation, async (req, res) => {
         arrayFilters: [{ "elem._id": new ObjectId(selectedEvent._id) }]
     }
 );
+  }
 
 
   if (selectedTime) {
@@ -1497,6 +1499,22 @@ app.post("/delete_notification", sessionValidation, async (req, res) => {
   res.redirect("/notifications?userId=" + userId);
 });
 
+app.post("/delete_all_notifications", sessionValidation, async (req, res) => {
+    const userId = req.body.userId;
+  
+    await userCollection.updateOne(
+      { _id: new ObjectId(userId) },
+      { 
+        $set: { 
+          notifications: [],
+          unreadNotificationCount: 0
+        } 
+      }
+    );
+  
+    res.sendStatus(200);
+  });
+
 app.get(
   "/event_submission",
   checkDeadline,
@@ -1635,13 +1653,100 @@ app.post("/deleteEvent", sessionValidation, async (req, res) => {
   const groupId = req.query.groupId;
   const eventId = req.query.eventId;
 
+  const groupBeforeUpdate = await groupCollection.findOne({ _id: new ObjectId(groupId) });
+  const title = groupBeforeUpdate.selectedEvent.title;
+
   await groupCollection.updateOne(
     { _id: new ObjectId(groupId) },
-    { $pull: { events: { _id: new ObjectId(eventId) } } }
+    { 
+      $pull: { 
+        events: { _id: new ObjectId(eventId) }
+      },
+      $unset: { selectedEvent: "" }
+    }
   );
+
+  const groupAfterUpdate = await groupCollection.findOne({ _id: new ObjectId(groupId) });
+
+
+if (groupBeforeUpdate.selectedEvent && !groupAfterUpdate.selectedEvent) {
+    for (let userEmail of groupBeforeUpdate.members) {
+        const user = await userCollection.findOne({ email: userEmail });
+    
+        const notification = {
+          _id: new ObjectId(),
+          message: `The chosen activity '${title}' has been removed in ${groupBeforeUpdate.name}.`,
+          groupId: groupId,
+          read: false,
+          type: "randomizer",
+        };
+
+        const existingNotification = user.notifications.find(
+            (notification) =>
+              notification.groupId === groupId && notification.type === "randomizer"
+          );
+      
+          if (existingNotification && !existingNotification.read) {
+            await userCollection.updateOne(
+              { _id: new ObjectId(user._id) },
+              { $inc: { unreadNotificationCount: -1 } }
+            );
+          }
+      
+          if (existingNotification) {
+            await userCollection.updateOne(
+              { _id: new ObjectId(user._id) },
+              {
+                $pull: { notifications: { groupId: groupId, type: "randomizer" } },
+              }
+            );
+          }
+    
+        await userCollection.updateOne(
+          { _id: new ObjectId(user._id) },
+          {
+            $push: { notifications: notification },
+            $inc: { unreadNotificationCount: 1 },
+          }
+        );
+      }
+    
+  }
 
   res.redirect("/submitted_event" + "?groupId=" + groupId);
 });
+
+app.get("/deleteAllEventsExceptSelected", async (req, res) => {
+    const groupId = req.query.groupId;
+    const group = await groupCollection.findOne({ _id: new ObjectId(groupId) });
+  
+    if (group) {
+      const selectedEventId = group.selectedEvent ? group.selectedEvent._id : null;
+      await groupCollection.updateOne(
+        { _id: new ObjectId(groupId) },
+        { 
+          $pull: { 
+            events: { _id: { $ne: new ObjectId(selectedEventId) } }
+          }
+        }
+      );
+    }
+  
+    res.redirect('/submitted_event' + "?groupId=" + groupId); 
+  });
+
+app.post("/mark_all_as_read", async (req, res) => {
+    const userId = req.body.userId;
+    
+    await userCollection.updateMany(
+      { _id: new ObjectId(userId), 'notifications.read': false },
+      { $set: { 'notifications.$[].read': true, 'unreadNotificationCount': 0 } }
+    );
+  
+    res.sendStatus(200);
+  });
+
+  
 
 app.post("/event_submission", sessionValidation, async (req, res) => {
   const groupId = req.query.groupId;
