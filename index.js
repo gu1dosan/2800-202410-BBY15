@@ -1612,6 +1612,7 @@ app.get("/submitted_event", sessionValidation, async (req, res) => {
     events,
     convertTo12Hour,
     user,
+    groupId,
     formatDateTime,
   });
 });

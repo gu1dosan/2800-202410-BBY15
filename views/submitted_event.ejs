@@ -11,11 +11,17 @@
         </div>
         <% } else { %>
             <div style="display: flex; justify-content: center;">
+                <button onclick=" window.location.href = `/group/<%= groupId %>`;"
+                        class="bg-purple hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
+                  Return to group
+                </button>
+              </div>
+            <!-- <div style="display: flex; justify-content: center;">
                 <button onclick="openDeleteAllPopup()"
                         class="bg-rose-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
                   Delete All Events
                 </button>
-              </div>
+              </div> -->
             <% for(let event of events.reverse()) { %>
                 <div class="bg-white flex mt-5 items-center justify-center">
 
@@ -117,11 +123,22 @@
                                     </div>
                                 </div>
                             </div>
-
                     </div>
                 </div>
                 <% } %>
                     <% } %>
+                              <div style="display: flex; justify-content: center;">
+                <button onclick="openDeleteAllPopup()"
+                        class="bg-rose-500 hover:bg-red-700 text-white font-bold py-2 px-4 mt-4 rounded">
+                  Delete All Events
+                </button>
+              </div>
+                    <!-- <div style="display: flex; justify-content: center;">
+                        <button onclick=" window.location.href = `/group/<%= groupId %>`;"
+                                class="bg-purple mt-4 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
+                          Return to Group
+                        </button>
+                      </div> -->
                         <div id="bottom"></div>
                         </div>
                         <div class="h-[80px]" onLoad=""></div>
