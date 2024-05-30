@@ -9,9 +9,14 @@
         <% selectedEvents.forEach(event => { %>
             <div class="border rounded-lg p-4 shadow-lg">
                 <p class="font-bold text-xl mb-2"><%= event.title %></p>
-                <p class="mb-1"><strong>Description:</strong> <%= event.description %></p>
+                <p class="mb-1">
+                    <strong>Description:</strong> 
+                    <span class="block" style="overflow-y: auto; max-height: 30px;">
+                        <%= event.description %>
+                    </span>
+                </p>
                 <p class="mb-1"><strong>Location:</strong> <%= event.location %></p>
-                <p class="mb-1"><strong>Time:</strong> <%= event.time %></p>
+                <p class="mb-1"><strong>Time:</strong> <%= formatDateTime(event.time) %></p>
             </div>
         <% }); %>
     </div>

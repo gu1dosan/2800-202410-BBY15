@@ -46,9 +46,18 @@
     <script>
     document.addEventListener('DOMContentLoaded', function() {
         var selectedTimestamps = [];
+        var initialTimes = <%- JSON.stringify(group.calendar || []) %>;
+        var fixedTimes = initialTimes.map(time => ({
+            start: new Date(time.start).getTime(),
+            end: new Date(time.end).getTime()
+        }));
+        var initialTimestamps = initialTimes.map(time => ({
+            start: time.start,
+            end: time.end
+        }));
+
         setTimeout(function() {
             var calendarEl = document.getElementById('calendar');
-            var initialTimes = <%- JSON.stringify(group.calendar || []) %>;
 
             var calendar = new FullCalendar.Calendar(calendarEl, {
                 initialView: 'timeGridWeek',
@@ -59,13 +68,21 @@
                     center: 'title',
                     right: 'prev,next'
                 },
-                
                 select: function(info) {
                     var selectedEvent = calendar.getEvents().find(event => 
                         event.start.getTime() === info.start.getTime() && 
                         event.end.getTime() === info.end.getTime()
                     );
                     if (selectedEvent) {
+                        // Check if the selected event is part of initial times
+                        var isInitialTime = initialTimestamps.some(ts => 
+                            new Date(ts.start).getTime() === info.start.getTime() && new Date(ts.end).getTime() === info.end.getTime()
+                        );
+                        if (isInitialTime) {
+                            initialTimestamps = initialTimestamps.filter(ts => 
+                                !(new Date(ts.start).getTime() === info.start.getTime() && new Date(ts.end).getTime() === info.end.getTime())
+                            );
+                        }
                         selectedEvent.remove();
                         console.log("unadded", { start: info.start.toISOString(), end: info.end.toISOString() });
                         selectedTimestamps = selectedTimestamps.filter(ts => 
@@ -82,6 +99,7 @@
                         });
                     }
                     console.log("Selected timestamps:", selectedTimestamps);
+                    console.log("Initial timestamps:", initialTimestamps);
                     calendar.unselect();
                 }
             });
@@ -93,7 +111,7 @@
                         display: 'background',
                         start: time.start,
                         end: time.end,
-                        backgroundColor: '#blue'
+                        backgroundColor: 'blue'
                     });
                 });
             }
@@ -103,24 +121,27 @@
 
         document.getElementById('submit-btn').addEventListener('click', function() {
             var groupId = "<%= group._id %>";
-            console.log("Selected timestamps before sending:", selectedTimestamps);
+            
+            // Combine initialTimestamps with selectedTimestamps for submission
+            var combinedTimestamps = selectedTimestamps.concat(initialTimestamps.map(ts => ({ start: new Date(ts.start).toISOString(), end: new Date(ts.end).toISOString() })));
+
+            console.log("Selected timestamps before sending:", combinedTimestamps);
             $.ajax({
                 url: `/save-timestamps?id=${groupId}`,
                 type: 'POST',
-                data: JSON.stringify({ timestamps: selectedTimestamps }),
+                data: JSON.stringify({ timestamps: combinedTimestamps }),
                 contentType: 'application/json',
                 success: function(response) {
                     alert('Timestamps saved successfully!');
                     window.location.href = `/group/${groupId}`; // Redirect to /groups after successful save
                 },
                 error: function(error) {
-                    console.error('Error saving timestamps:', error);
-                    alert('An error occurred while saving the timestamps.');
+                    alert('Please select or unselect a time');
                 }
             });
         });
 
-      });
+    });
     </script>
     <title><%= locals.pageTitle ? locals.pageTitle + ' | ' : '' %>NextUp</title>
     <link rel="icon" type="image" href="/public/images/favicon.png" />

@@ -4,46 +4,51 @@
   <!-- New div for this week's activity -->
   <div class="mb-4 flex items-center justify-between">
     <div class="flex items-center">
-      <h2 class="text-lg font-semibold">
-        This week's activity: <%= selectedEvent ? selectedEvent.title : "TBD" %>
-      <button
-        onclick="openEventDetailsPopup()"
-        class="ml-1 bg-purple text-white rounded-full px-[10px]"
-
-      >
-        ?
-      </button>
-    </h2>
+        <h2 class="text-lg font-semibold flex-shrink-0">
+            This week's activity: 
+        </h2>
+        <div class="text-lg font-semibold flex items-center ml-1">
+            <span class="<%= selectedEvent ? 'overflow-x-auto whitespace-nowrap w-24' : 'w-24' %> inline-block align-middle">
+                <%= selectedEvent ? selectedEvent.title : "TBD" %>
+            </span>
+            <button
+                onclick="openEventDetailsPopup()"
+                class="ml-1 bg-purple text-white rounded-full px-[10px] align-middle"
+            >
+                ?
+            </button>
+            </div>
+     
     </div>
     <div class="flex flex-col items-center">
-      <button
-        id="submitActivityButton"
-        onclick="submitActivity()"
-        class="group cursor-pointer outline-none hover:rotate-90 duration-300 p-0 border-none bg-transparent"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="33px"
-          height="33px"
-          viewBox="0 0 24 24"
-          class="stroke-purple fill-none group-hover:fill-light-purple group-active:duration-0 duration-300"
+        <button
+          id="submitActivityButton"
+          onclick="submitActivity()"
+          class="group cursor-pointer outline-none hover:rotate-90 duration-300 p-0 border-none bg-transparent"
         >
-          <path
-            d="M12 22C17.5 22 22 17.5 22 12C22 6.5 17.5 2 12 2C6.5 2 2 6.5 2 12C2 17.5 6.5 22 12 22Z"
-            stroke-width="1.5"
-          ></path>
-          <path d="M8 12H16" stroke-width="1.5"></path>
-          <path d="M12 16V8" stroke-width="1.5"></path>
-        </svg>
-      </button>
-      <div
-        id="popover"
-        class="hidden absolute z-10 w-48 p-2 bg-white rounded-lg shadow-lg"
-      >
-        <p class="text-sm text-center">The submission deadline has passed.</p>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="33px"
+            height="33px"
+            viewBox="0 0 24 24"
+            class="stroke-purple fill-none group-hover:fill-light-purple group-active:duration-0 duration-300"
+          >
+            <path
+              d="M12 22C17.5 22 22 17.5 22 12C22 6.5 17.5 2 12 2C6.5 2 2 6.5 2 12C2 17.5 6.5 22 12 22Z"
+              stroke-width="1.5"
+            ></path>
+            <path d="M8 12H16" stroke-width="1.5"></path>
+            <path d="M12 16V8" stroke-width="1.5"></path>
+          </svg>
+        </button>
+        <div
+          id="popover"
+          class="hidden absolute z-10 w-48 p-2 bg-light-purple bg-opacity-80 rounded-lg shadow-lg"
+        >
+          <p class="text-white text-sm text-center">The submission deadline has passed.</p>
+        </div>
       </div>
-    </div>
-  </div>
+      </div>
   <!-- Flex container for the green buttons -->
   <div class="flex justify-center items-center relative">
     <!-- View Members button -->
@@ -83,7 +88,7 @@
       <% } %>
     <button
       onclick="closeEventDetailsPopup()"
-      class="bg-rose-500 hover:bg-rose-700 text-white font-bold py-2 px-4 rounded mt-2"
+      class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded mt-2"
     >
       Close
     </button>
