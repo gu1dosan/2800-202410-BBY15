@@ -1373,7 +1373,7 @@ app.post("/selectEvent", sessionValidation, async (req, res) => {
       type: "randomizer",
     };
 
-    const existingNotification = user.notifications.find(
+    const existingNotification = user.notifications && user.notifications.find(
       (n) => n.groupId === groupId && n.type === "randomizer"
     );
 
