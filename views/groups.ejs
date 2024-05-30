@@ -23,7 +23,7 @@
           %>
         </p>
         <p><strong>Info:</strong> <%= group.selectedEvent.info || 'tbd' %></p>
-        <p><strong>Time:</strong> <%= group.time || 'tbd' %></p>
+        <p><strong>Time:</strong> <%= formatDateTime(group.selectedEvent.time) || 'tbd' %></p>
         <% } else { %>
         <p>No event selected yet</p>
         <% } %>

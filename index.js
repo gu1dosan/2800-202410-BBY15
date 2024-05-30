@@ -577,7 +577,7 @@ app.get("/activities", sessionValidation, async (req, res) => {
     // Extract the selected events from each group
     const selectedEvents = groups.map((group) => group.selectedEvent);
 
-    res.render("activities", { selectedEvents, user });
+    res.render("activities", { selectedEvents, user, formatDateTime });
   } catch (error) {
     console.error("Error fetching user details:", error);
     res
@@ -623,7 +623,7 @@ app.get("/groups", sessionValidation, async (req, res) => {
     });
 
     // Render groups page and pass the groups data to the template
-    res.render("groups", { session: req.session, groups: groups, user });
+    res.render("groups", { session: req.session, groups: groups, user, formatDateTime });
   } catch (error) {
     console.error("Error fetching groups:", error);
     res.status(500).send("Error fetching groups.");
@@ -1368,6 +1368,24 @@ app.post("/selectEvent", sessionValidation, async (req, res) => {
       .render("errorMessage", { msg: "Invalid group ID format." });
   }
 
+  if (selectedTime) {
+  await groupCollection.updateOne(
+    { _id: new ObjectId(groupId) },
+    { $set: {
+        "events.$[elem].time": new Date(selectedTime.start)
+    },
+    },
+    {
+        arrayFilters: [{ "elem._id": new ObjectId(selectedEvent._id) }]
+    }
+);
+  }
+
+
+  if (selectedTime) {
+    selectedEvent.time = new Date(selectedTime.start);
+  }
+
   try {
     const updateResult = await groupCollection.updateOne(
       { _id: new ObjectId(groupId) },
@@ -1452,6 +1470,8 @@ app.post("/selectEvent", sessionValidation, async (req, res) => {
       }
     );
   }
+
+
 });
 
 app.get("/notifications", sessionValidation, async (req, res) => {
@@ -1481,6 +1501,13 @@ app.post("/mark_as_read", sessionValidation, async (req, res) => {
   const notificationId = req.body.notificationId;
   const groupId = req.body.notificationgroup;
   const notificationType = req.body.notificationtype;
+  const userEmail = req.session.email;
+
+  const group = await groupCollection.findOne({ _id: new ObjectId(groupId) });
+
+  const isPartOfGroup = group.members.includes(userEmail);
+
+if (isPartOfGroup) {
 
   await userCollection.updateOne(
     {
@@ -1500,6 +1527,19 @@ app.post("/mark_as_read", sessionValidation, async (req, res) => {
   } else {
     res.redirect("/submitted_event?groupId=" + groupId);
   }
+} else {
+    await userCollection.updateOne(
+        { _id: new ObjectId(userId) },
+        { $pull: { notifications: { _id: new ObjectId(notificationId) } } }
+      );
+
+    await userCollection.updateOne(
+        { _id: new ObjectId(userId) },
+        { $inc: { unreadNotificationCount: -1 } }
+      );
+      res.redirect("/notifications?userId=" + userId);
+    }
+
 });
 
 app.post("/delete_notification", sessionValidation, async (req, res) => {
@@ -1525,6 +1565,22 @@ app.post("/delete_notification", sessionValidation, async (req, res) => {
 
   res.redirect("/notifications?userId=" + userId);
 });
+
+app.post("/delete_all_notifications", sessionValidation, async (req, res) => {
+    const userId = req.body.userId;
+  
+    await userCollection.updateOne(
+      { _id: new ObjectId(userId) },
+      { 
+        $set: { 
+          notifications: [],
+          unreadNotificationCount: 0
+        } 
+      }
+    );
+  
+    res.sendStatus(200);
+  });
 
 app.get(
   "/event_submission",
@@ -1554,6 +1610,7 @@ app.get("/submitted_event", sessionValidation, async (req, res) => {
     events,
     convertTo12Hour,
     user,
+    formatDateTime,
   });
 });
 
@@ -1628,21 +1685,138 @@ app.post("/editEvent", sessionValidation, async (req, res) => {
   );
   //console.log('event in edit:', new ObjectId(eventId));
 
+  if (group.selectedEvent && group.selectedEvent._id.toString() === eventId) {
+    await groupCollection.updateOne(
+        { _id: new ObjectId(groupId) },
+        { $set: { selectedEvent: updatedEvent } }
+        );
+    };
+
+    for (let userEmail of group.members) {
+        const user = await userCollection.findOne({ email: userEmail });
+    
+        const notification = {
+          _id: new ObjectId(),
+          message: `The selected activity '${updatedTitle}' has been updated in ${group.name}.`,
+          groupId: groupId,
+          read: false,
+          type: "editEvent",
+        };
+    
+        await userCollection.updateOne(
+          { _id: new ObjectId(user._id) },
+          {
+            $push: { notifications: notification },
+            $inc: { unreadNotificationCount: 1 },
+          }
+        );
+      }
+
   console.log("Event updated");
-  res.redirect("/group/" + groupId);
+  res.redirect("/submitted_event?groupId=" + groupId);
 });
 
 app.post("/deleteEvent", sessionValidation, async (req, res) => {
   const groupId = req.query.groupId;
   const eventId = req.query.eventId;
 
+  const groupBeforeUpdate = await groupCollection.findOne({ _id: new ObjectId(groupId) });
+
+  if (groupBeforeUpdate.selectedEvent) {
+  const title = groupBeforeUpdate.selectedEvent.title;
+  }
+
   await groupCollection.updateOne(
     { _id: new ObjectId(groupId) },
-    { $pull: { events: { _id: new ObjectId(eventId) } } }
+    { 
+      $pull: { 
+        events: { _id: new ObjectId(eventId) }
+      },
+      $unset: { selectedEvent: "" }
+    }
   );
+
+  const groupAfterUpdate = await groupCollection.findOne({ _id: new ObjectId(groupId) });
+
+
+if (groupBeforeUpdate.selectedEvent && !groupAfterUpdate.selectedEvent) {
+    for (let userEmail of groupBeforeUpdate.members) {
+        const user = await userCollection.findOne({ email: userEmail });
+    
+        const notification = {
+          _id: new ObjectId(),
+          message: `The chosen activity '${title}' has been removed in ${groupBeforeUpdate.name}.`,
+          groupId: groupId,
+          read: false,
+          type: "randomizer",
+        };
+
+        const existingNotification = user.notifications.find(
+            (notification) =>
+              notification.groupId === groupId && notification.type === "randomizer"
+          );
+      
+          if (existingNotification && !existingNotification.read) {
+            await userCollection.updateOne(
+              { _id: new ObjectId(user._id) },
+              { $inc: { unreadNotificationCount: -1 } }
+            );
+          }
+      
+          if (existingNotification) {
+            await userCollection.updateOne(
+              { _id: new ObjectId(user._id) },
+              {
+                $pull: { notifications: { groupId: groupId, type: "randomizer" } },
+              }
+            );
+          }
+    
+        await userCollection.updateOne(
+          { _id: new ObjectId(user._id) },
+          {
+            $push: { notifications: notification },
+            $inc: { unreadNotificationCount: 1 },
+          }
+        );
+      }
+    
+  }
 
   res.redirect("/submitted_event" + "?groupId=" + groupId);
 });
+
+app.get("/deleteAllEventsExceptSelected", async (req, res) => {
+    const groupId = req.query.groupId;
+    const group = await groupCollection.findOne({ _id: new ObjectId(groupId) });
+  
+    if (group) {
+      const selectedEventId = group.selectedEvent ? group.selectedEvent._id : null;
+      await groupCollection.updateOne(
+        { _id: new ObjectId(groupId) },
+        { 
+          $pull: { 
+            events: { _id: { $ne: new ObjectId(selectedEventId) } }
+          }
+        }
+      );
+    }
+  
+    res.redirect('/submitted_event' + "?groupId=" + groupId); 
+  });
+
+app.post("/mark_all_as_read", async (req, res) => {
+    const userId = req.body.userId;
+    
+    await userCollection.updateMany(
+      { _id: new ObjectId(userId), 'notifications.read': false },
+      { $set: { 'notifications.$[].read': true, 'unreadNotificationCount': 0 } }
+    );
+  
+    res.sendStatus(200);
+  });
+
+  
 
 app.post("/event_submission", sessionValidation, async (req, res) => {
   const groupId = req.query.groupId;
@@ -1722,7 +1896,7 @@ app.post("/event_submission", sessionValidation, async (req, res) => {
   }
 
   console.log("Event added");
-  res.redirect("/group/" + groupId);
+  res.redirect('/submitted_event' + "?groupId=" + groupId); 
 });
 
 app.post("/addDeadline", sessionValidation, async (req, res) => {
@@ -1813,6 +1987,30 @@ async function checkDeadline(req, res, next) {
   } else {
     next();
   }
+}
+
+function formatDateTime(dateTime) {
+let eventTime = dateTime;
+let date;
+let formattedDate = '';
+if (typeof eventTime === 'string') {
+  eventTime = convertTo12Hour(eventTime);
+} else {
+  date = new Date(eventTime);
+  if (Object.prototype.toString.call(date) === "[object Date]") {
+    eventTime = date.toLocaleString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+    formattedDate = date.toLocaleString("en-US", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  }
+}
+return `${eventTime}${formattedDate ? ', ' + formattedDate : ''}`;
 }
 
 // app.get("/admin", sessionValidation, adminAuthorization, async (req, res) => {

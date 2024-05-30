@@ -1,6 +1,6 @@
 <%- include("templates/headerV2") %>
 
-<div class="flex justify-center items-center mt-8">
+<div class="flex justify-center items-center">
     <div class="bg-white rounded-lg p-6">
         <div class="flex justify-between items-center mb-4">
             <h2 class="text-xl font-semibold">Group Details</h2>
@@ -20,7 +20,12 @@
                 <h2 class="text-lg font-semibold">Selected Activity</h2>
                 <div class="mt-4">
                     <% if (group.selectedEvent) { %>
-                        <p class="text-base text-gray-700"><strong>Title:</strong> <%= group.selectedEvent.title %></p>
+                        <div class="flex items-center">
+                            <p class="text-base text-gray-700"><strong>Title:</strong></p>
+                            <span class="overflow-x-auto whitespace-nowrap w-48 inline-block ml-2">
+                                <%= group.selectedEvent ? group.selectedEvent.title : "TBD" %>
+                            </span>
+                        </div>
                         <p class="text-base text-gray-700"><strong>Location:</strong> <%= group.selectedEvent.location %></p>
                         <p class="text-base text-gray-700"><strong>Info:</strong> <%= group.selectedEvent.info %></p>
                         <p class="text-base text-gray-700"><strong>Category:</strong> <%= group.selectedEvent.category %></p>
@@ -70,13 +75,15 @@
             <div id="deadlinePopup" class="hidden fixed top-0 left-0 w-full h-full bg-gray-800 bg-opacity-75 flex justify-center items-center">
                 <div class="bg-white rounded-lg p-6 w-80">
                     <h2 class="text-xl font-semibold mb-4">Add Deadline</h2>
-                    <button onclick="closeDeadlinePopup()" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-1 px-2 rounded text-sm">Close</button>
                     <form id="deadlineForm" action="/addDeadline?groupId=<%= group._id %>" method="post">
-                        <label for="deadline">Deadline:</label>
-                        <input type="datetime-local" id="deadline" name="deadline" required>
-                        <input type="submit" value="Add Deadline">
+                      <label for="deadline">Deadline:</label>
+                      <input type="datetime-local" id="deadline" name="deadline" required>
+                      <div class="flex justify-start space-x-2 mt-2">
+                        <button class="bg-purple hover:bg-darkPurple text-white font-bold py-1 px-2 rounded text-sm" type="submit" value="Add Deadline">Submit</button>
+                        <button onclick="closeDeadlinePopup()" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-1 px-2 rounded text-sm">Close</button>
+                      </div>
                     </form>
-                </div>
+                  </div>
             </div>
 
             <div id="membersPopup" class="hidden fixed top-0 left-0 w-full h-full bg-gray-800 bg-opacity-75 flex justify-center items-center">
@@ -178,6 +185,10 @@
         </div>
     </div>
 </div>
+
+<div id="bottom"></div>
+</div>
+<div class="h-[80px]" onLoad=""></div>
 
 <%- include("templates/footer") %>
 
