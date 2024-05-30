@@ -194,7 +194,7 @@ app.post("/signup", async (req, res) => {
     });
   } else {
     const schema = Joi.object({
-      name: Joi.string().alphanum().max(20).required(),
+      name: Joi.string().required(),
       email: Joi.string().email().required(),
       password: Joi.string().max(20).required(),
       confirmPassword: Joi.ref("password"),
