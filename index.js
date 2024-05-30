@@ -594,15 +594,39 @@ app.get("/groups", sessionValidation, async (req, res) => {
     const user = await userCollection.findOne({ email: currentUserEmail });
 
     // Find all groups where the current user is a member
-    const groups = await groupCollection
+    var groups = await groupCollection
       .find({ members: currentUserEmail })
       .toArray();
+
+    const formatTime = (timeObject) => {
+      if (!timeObject || !timeObject.start) {
+        return "No time(s) chosen.";
+      }
+
+      const startDate = new Date(timeObject.start);
+      const formattedStartTime = startDate.toLocaleString("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+      const formattedStartDate = startDate.toLocaleString("en-US", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+
+      return `${formattedStartTime}, ${formattedStartDate}`;
+    };
+
+    groups.forEach((group) => {
+      group.time = formatTime(group.time);
+    });
 
     // Render groups page and pass the groups data to the template
     res.render("groups", { session: req.session, groups: groups, user });
   } catch (error) {
     console.error("Error fetching groups:", error);
-    res.status(500).render("errorMessage", { msg: "Error fetching groups." });
+    res.status(500).send("Error fetching groups.");
   }
 });
 
