@@ -607,6 +607,11 @@ app.post("/createGroup", sessionValidation, async (req, res) => {
     // Extract group name and user emails from the request body
     const { name, emails } = req.body;
 
+    // Check if the name field is empty
+    if (!name || name.trim() === "") {
+      return res.render("errorMessage", { msg: "Group name is required." });
+    }
+
     // Initialize arrays for valid and invalid emails
     const invalidEmails = [];
     const validEmails = [];
@@ -1780,7 +1785,7 @@ app.get("/logout", sessionValidation, (req, res) => {
 
 app.get("403", (req, res) => {
   res.status(403);
-  res.render("errorMessage", { message: message });
+  res.render("errorMessage", { msg: message });
 });
 
 app.use("/", express.static("public"));
