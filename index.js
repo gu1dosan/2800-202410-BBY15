@@ -534,14 +534,16 @@ app.get("/userProfile", sessionValidation, async (req, res) => {
   var profilePicture = req.session.profilePicture; // Ensure this is passed
 
   if (!userEmail) {
-    return res.status(400).send("Email query parameter is required.");
+    return res
+      .status(500)
+      .render("errorMessage", { msg: "Email query parameter is required." });
   }
 
   try {
     const user = await userCollection.findOne({ email: userEmail });
 
     if (!user) {
-      return res.status(404).send("User not found.");
+      return res.status(500).render("errorMessage", { msg: "User not found." });
     }
 
     res.render("userProfile", { user });
@@ -724,7 +726,8 @@ app.get("/group/:groupId", sessionValidation, async (req, res) => {
 
     if (!group[0]) {
       // Group not found
-      res.status(404).send("Group not found.");
+      // res.status(404).send("Group not found.");
+      res.render("errorMessage", { msg: "Group not found." });
       return;
     }
 
@@ -802,7 +805,9 @@ app.post(
       return res.status(204).json({ success: true });
     } catch (error) {
       console.error("Error sending message:", error);
-      return res.status(500).send("Error sending message.");
+      return res
+        .status(500)
+        .render("errorMessage", { msg: "Error sending message." });
     }
   }
 );
@@ -826,7 +831,7 @@ app.get("/group-details/:groupId", sessionValidation, async (req, res) => {
 
     if (!group) {
       // Group not found
-      res.status(404).send("Group not found.");
+      res.status(404).render("errorMessage", { msg: "Group not found." });
       return;
     }
 
@@ -930,7 +935,7 @@ app.delete("/remove-member", sessionValidation, async (req, res) => {
 
     if (!user) {
       console.error("User not found");
-      return res.status(404).send("User not found");
+      return res.status(404).render("errorMessage", { msg: "User not found" });
     }
 
     const userEmail = user.email;
@@ -943,7 +948,9 @@ app.delete("/remove-member", sessionValidation, async (req, res) => {
 
     if (result.modifiedCount === 0) {
       console.error("User not removed from group");
-      return res.status(500).send("Failed to remove user from group");
+      return res
+        .status(500)
+        .render("errorMessage", { msg: "Failed to remove user from group" });
     }
 
     console.log(`User ${userEmail} removed from group with ID ${groupId}`);
@@ -969,7 +976,9 @@ app.get("/calendar", sessionValidation, async (req, res) => {
   const user = await userCollection.findOne({ email: currentUserEmail });
 
   if (!ObjectId.isValid(groupId)) {
-    return res.status(400).send("Invalid group ID format.");
+    return res
+      .status(400)
+      .render("errorMessage", { msg: "Invalid group ID format." });
   }
 
   try {
@@ -1005,12 +1014,16 @@ app.post("/save-timestamps", sessionValidation, async (req, res) => {
 
   if (!Array.isArray(timestamps)) {
     console.error("Invalid timestamps data:", timestamps);
-    return res.status(400).send("Invalid timestamps data.");
+    return res
+      .status(400)
+      .render("errorMessage", { msg: "Invalid timestamps data." });
   }
 
   if (!ObjectId.isValid(groupId)) {
     console.error("Invalid group ID format:", groupId);
-    return res.status(400).send("Invalid group ID format.");
+    return res
+      .status(400)
+      .render("errorMessage", { msg: "Invalid group ID format." });
   }
 
   try {
@@ -1018,7 +1031,9 @@ app.post("/save-timestamps", sessionValidation, async (req, res) => {
 
     if (!group) {
       console.error("Group not found.");
-      return res.status(404).send("Group not found.");
+      return res
+        .status(404)
+        .render("errorMessage", { msg: "Group not found." });
     }
 
     // Update the calendar with the new list of timestamps
@@ -1031,7 +1046,9 @@ app.post("/save-timestamps", sessionValidation, async (req, res) => {
 
     if (result.modifiedCount === 0) {
       console.error("No documents were updated.");
-      return res.status(500).send("Failed to save timestamps.");
+      return res
+        .status(500)
+        .render("errorMessage", { msg: "Failed to save timestamps." });
     }
 
     console.log("Timestamps saved successfully!");
@@ -1053,7 +1070,9 @@ app.post("/toggle-admin-status", sessionValidation, async (req, res) => {
     const group = await groupCollection.findOne({ _id: new ObjectId(groupId) });
 
     if (!group) {
-      return res.status(404).send("Group not found.");
+      return res
+        .status(404)
+        .render("errorMessage", { msg: "Group not found." });
     }
 
     const isAdmin = group.admin.includes(userEmail);
@@ -1144,8 +1163,9 @@ app.post("/invite", sessionValidation, async (req, res) => {
     // Render the InviteConfirmation page with the appropriate message
     res.render("InviteConfirmation", { inviteMessage, user });
   } catch (error) {
-    console.error("Error inviting users to group:", error);
-    res.status(500).json({ success: false, message: "Internal server error." });
+    // console.error("Error inviting users to group:", error);
+    // res.status(500).json({ success: false, message: "Internal server error." });
+    res.status(500).render("ErrorMessage", { msg: "Internal server error." });
   }
 });
 
@@ -1210,7 +1230,8 @@ app.get("/accept-group-invite", sessionValidation, async (req, res) => {
     res.redirect("/group/" + groupId);
   } catch (error) {
     console.error("Error inviting users to group:", error);
-    res.status(500).json({ success: false, message: "Internal server error." });
+    // res.status(500).json({ success: false, message: "Internal server error." });
+    res.status(500).render("errorMessage", { msg: "Internal server error." });
   }
 });
 
@@ -1318,7 +1339,9 @@ app.post("/selectEvent", sessionValidation, async (req, res) => {
   var time = selectedTime;
 
   if (!ObjectId.isValid(groupId)) {
-    return res.status(400).send("Invalid group ID format.");
+    return res
+      .status(400)
+      .render("errorMessage", { msg: "Invalid group ID format." });
   }
 
   try {
@@ -1335,7 +1358,7 @@ app.post("/selectEvent", sessionValidation, async (req, res) => {
     }
   } catch (error) {
     console.error("Error updating selected event:", error);
-    res.status(500).send("Error updating selected event.");
+    res.status(500).render("errorMessage", { msg: "updating selected event." });
   }
 
   const group = await groupCollection.findOne({ _id: new ObjectId(groupId) });
@@ -1375,9 +1398,11 @@ app.post("/selectEvent", sessionValidation, async (req, res) => {
       type: "randomizer",
     };
 
-    const existingNotification = user.notifications && user.notifications.find(
-      (n) => n.groupId === groupId && n.type === "randomizer"
-    );
+    const existingNotification =
+      user.notifications &&
+      user.notifications.find(
+        (n) => n.groupId === groupId && n.type === "randomizer"
+      );
 
     if (existingNotification) {
       await userCollection.updateOne(
