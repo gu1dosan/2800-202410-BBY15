@@ -595,7 +595,7 @@ app.get("/groups", sessionValidation, async (req, res) => {
       .toArray();
 
     // Render groups page and pass the groups data to the template
-    res.render("groups", { session: req.session, groups: groups, user });
+    res.render("groups", { session: req.session, groups: groups, user, formatDateTime });
   } catch (error) {
     console.error("Error fetching groups:", error);
     res.status(500).render("errorMessage", { msg: "Error fetching groups." });
@@ -1303,6 +1303,22 @@ app.post("/selectEvent", sessionValidation, async (req, res) => {
     return res.status(400).send("Invalid group ID format.");
   }
 
+  await groupCollection.updateOne(
+    { _id: new ObjectId(groupId) },
+    { $set: {
+        "events.$[elem].time": new Date(selectedTime.start)
+    },
+    },
+    {
+        arrayFilters: [{ "elem._id": new ObjectId(selectedEvent._id) }]
+    }
+);
+
+
+  if (selectedTime) {
+    selectedEvent.time = new Date(selectedTime.start);
+  }
+
   try {
     const updateResult = await groupCollection.updateOne(
       { _id: new ObjectId(groupId) },
@@ -1385,6 +1401,8 @@ app.post("/selectEvent", sessionValidation, async (req, res) => {
       }
     );
   }
+
+
 });
 
 app.get("/notifications", sessionValidation, async (req, res) => {
@@ -1507,6 +1525,7 @@ app.get("/submitted_event", sessionValidation, async (req, res) => {
     events,
     convertTo12Hour,
     user,
+    formatDateTime,
   });
 });
 
@@ -1793,6 +1812,30 @@ async function checkDeadline(req, res, next) {
 } else {
     next();
 }
+}
+
+function formatDateTime(dateTime) {
+let eventTime = dateTime;
+let date;
+let formattedDate = '';
+if (typeof eventTime === 'string') {
+  eventTime = convertTo12Hour(eventTime);
+} else {
+  date = new Date(eventTime);
+  if (Object.prototype.toString.call(date) === "[object Date]") {
+    eventTime = date.toLocaleString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+    formattedDate = date.toLocaleString("en-US", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  }
+}
+return `${eventTime}${formattedDate ? ', ' + formattedDate : ''}`;
 }
 
 // app.get("/admin", sessionValidation, adminAuthorization, async (req, res) => {

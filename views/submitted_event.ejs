@@ -32,7 +32,7 @@
                         <% if(event.time) { %>
                             <div class="flex items-center mb-4">
                                 <img src="/images/clock.svg" alt="clock" class="h-5 w-5 mr-2">
-                                <%= convertTo12Hour(event.time) %>
+                                <%= formatDateTime(event.time) %>
                             </div>
                             <% } %>
                                 <div class="flex items-center mb-4">
@@ -95,6 +95,7 @@
                         <%- include("templates/footer") %>
 
                             <script>
+                                
 
                                 function openDeletePopup() {
                                     document.getElementById('deletePopup').classList.remove('hidden');
