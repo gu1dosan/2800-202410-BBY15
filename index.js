@@ -1286,7 +1286,8 @@ app.get("/randomizer", sessionValidation, async (req, res) => {
   const user = await userCollection.findOne({ email: currentUserEmail });
 
   if (!ObjectId.isValid(groupId)) {
-    return res.status(400).send("Invalid group ID format.");
+    res.render("errorMessage", { msg: "Invalid group ID format." });
+    return;
   }
 
   try {
@@ -1294,7 +1295,8 @@ app.get("/randomizer", sessionValidation, async (req, res) => {
     const cal = group.calendar;
 
     if (!group || !group.events || group.events.length === 0) {
-      return res.status(404).send("No events found for this group.");
+      res.render("errorMessage", { msg: "No events found for this group." });
+      return;
     }
 
     res.render("randomizer", {
@@ -1305,9 +1307,7 @@ app.get("/randomizer", sessionValidation, async (req, res) => {
     });
   } catch (error) {
     console.error("Error fetching group details:", error);
-    res
-      .status(500)
-      .render("errorMessage", { msg: "Error fetching group details" });
+    res.render("errorMessage", { msg: "Error fetching group details" });
   }
 });
 
