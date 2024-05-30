@@ -53,11 +53,13 @@
             var calendar = new FullCalendar.Calendar(calendarEl, {
                 initialView: 'timeGridWeek',
                 selectable: true,
+                longPressDelay: 1,
                 headerToolbar: {
                     left: 'today',
                     center: 'title',
                     right: 'prev,next'
                 },
+                
                 select: function(info) {
                     var selectedEvent = calendar.getEvents().find(event => 
                         event.start.getTime() === info.start.getTime() && 
