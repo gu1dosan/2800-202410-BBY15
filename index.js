@@ -892,7 +892,12 @@ app.get("/leave-group", sessionValidation, async (req, res) => {
       { _id: new ObjectId(groupId) },
       { $pull: { members: userEmail } }
     );
-    console.log(`User ${userEmail} removed from group with ID ${groupId}`);
+    // console.log(`User ${userEmail} removed from group with ID ${groupId}`);
+
+    const group = await groupCollection.findOne({ _id: new ObjectId(groupId) });
+    if (group.members.length === 0) {
+      await groupCollection.deleteOne({ _id: new ObjectId(groupId) });
+    }
 
     // Redirect to the groups page
     res.redirect("/groups");
@@ -1742,10 +1747,10 @@ async function checkDeadline(req, res, next) {
   const group = await groupCollection.findOne({ _id: new ObjectId(groupId) });
 
   if (group && nowPST > group.deadline) {
-    res.sendStatus(204); 
-} else {
+    res.sendStatus(204);
+  } else {
     next();
-}
+  }
 }
 
 // app.get("/admin", sessionValidation, adminAuthorization, async (req, res) => {
