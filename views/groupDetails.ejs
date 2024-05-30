@@ -29,6 +29,7 @@
                         <p class="text-base text-gray-700"><strong>Location:</strong> <%= group.selectedEvent.location %></p>
                         <p class="text-base text-gray-700"><strong>Info:</strong> <%= group.selectedEvent.info %></p>
                         <p class="text-base text-gray-700"><strong>Category:</strong> <%= group.selectedEvent.category %></p>
+                        <p class="text-base text-gray-700"><strong>Time:</strong>  <%= formatDateTime(group.selectedEvent.time) %></p>
                     <% } else { %>
                         <p class="text-base text-gray-700 font-semibold">No activity has been selected yet!</p>
                     <% } %>
