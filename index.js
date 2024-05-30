@@ -566,7 +566,8 @@ app.get("/activities", sessionValidation, async (req, res) => {
 
     // If no groups found, return a 404 status
     if (!groups.length) {
-      return res.status(404).send("No selected events found for the user.");
+      res.render("errorMessage", { msg: "No activities exist for the group" });
+      return;
     }
 
     // Extract the selected events from each group
