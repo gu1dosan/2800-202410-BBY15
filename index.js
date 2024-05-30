@@ -1654,7 +1654,10 @@ app.post("/deleteEvent", sessionValidation, async (req, res) => {
   const eventId = req.query.eventId;
 
   const groupBeforeUpdate = await groupCollection.findOne({ _id: new ObjectId(groupId) });
+
+  if (groupBeforeUpdate.selectedEvent) {
   const title = groupBeforeUpdate.selectedEvent.title;
+  }
 
   await groupCollection.updateOne(
     { _id: new ObjectId(groupId) },
@@ -1826,7 +1829,7 @@ app.post("/event_submission", sessionValidation, async (req, res) => {
   }
 
   console.log("Event added");
-  res.redirect("/group/" + groupId);
+  res.redirect('/submitted_event' + "?groupId=" + groupId); 
 });
 
 app.post("/addDeadline", sessionValidation, async (req, res) => {
