@@ -1,6 +1,6 @@
 <%- include("templates/headerV2") %>
 
-<h1 class="text-3xl font-bold mb-2 text-center mt-4">Submitted Activities</h1>
+    <h1 class="text-3xl font-bold mb-2 text-center mt-4">Submitted Activities</h1>
 
     <% if(events.length===0) { %>
         <div class="flex flex-col items-center justify-center">
@@ -22,11 +22,11 @@
                                     <%= event.location %>
                                 </span>
                                 <% } %>
-                                    <span class="bg-red-200 text-red-800 text-xs font-semibold px-2.5 py-0.5 rounded">
+                                    <span class="bg-blue-200 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded">
                                         <%= event.category %>
                                     </span>
                         </div>
-                        <div class="text-3xl font-bold mb-2">
+                        <div class="text-3xl font-bold mb-2 overflow-x-auto whitespace-nowrap w-48">
                             <%= event.title %>
                         </div>
                         <% if(event.time) { %>
@@ -36,11 +36,6 @@
                             </div>
                             <% } %>
                                 <div class="flex items-center mb-4">
-                                    <div>
-                                        <div class="text-sm">2024</div>
-                                        <div class="text-2xl font-bold">17</div>
-                                        <div class="text-sm">MAY</div>
-                                    </div>
                                     <% if(event.description) { %>
                                         <div class="flex items-center justify-center">
                                             <%= event.description %>
@@ -83,9 +78,9 @@
                                                 </button>
                                             </form>
                                             <button onclick="closeDeletePopup()"
-                                            class="mb-2 md:mb-0 bg-gray-700 px-5 py-2 text-sm shadow-sm font-medium tracking-wider border-2 border-gray-600 hover:border-gray-700 text-gray-300 rounded-full hover:shadow-lg hover:bg-gray-800 transition ease-in duration-300">
-                                            Cancel
-                                        </button>
+                                                class="mb-2 md:mb-0 bg-gray-700 px-5 py-2 text-sm shadow-sm font-medium tracking-wider border-2 border-gray-600 hover:border-gray-700 text-gray-300 rounded-full hover:shadow-lg hover:bg-gray-800 transition ease-in duration-300">
+                                                Cancel
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
@@ -94,9 +89,9 @@
                 </div>
                 <% } %>
                     <% } %>
-                    <div id="bottom"></div>
-                </div>
-                <div class="h-[80px]" onLoad=""></div>
+                        <div id="bottom"></div>
+                        </div>
+                        <div class="h-[80px]" onLoad=""></div>
                         <%- include("templates/footer") %>
 
                             <script>

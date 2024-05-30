@@ -4,16 +4,21 @@
   <!-- New div for this week's activity -->
   <div class="mb-4 flex items-center justify-between">
     <div class="flex items-center">
-      <h2 class="text-lg font-semibold">
-        This week's activity: <%= selectedEvent ? selectedEvent.title : "TBD" %>
-      <button
-        onclick="openEventDetailsPopup()"
-        class="ml-1 bg-purple text-white rounded-full px-[10px]"
-
-      >
-        ?
-      </button>
-    </h2>
+        <h2 class="text-lg font-semibold flex-shrink-0">
+            This week's activity: 
+        </h2>
+        <div class="text-lg font-semibold flex items-center ml-1">
+            <span class="overflow-x-auto whitespace-nowrap w-32 inline-block align-middle">
+                <%= selectedEvent ? selectedEvent.title : "TBD" %>
+            </span>
+            <button
+                onclick="openEventDetailsPopup()"
+                class="ml-1 bg-purple text-white rounded-full px-[10px] align-middle"
+            >
+                ?
+            </button>
+            </div>
+     
     </div>
     <div class="flex flex-col items-center">
         <button
@@ -83,7 +88,7 @@
       <% } %>
     <button
       onclick="closeEventDetailsPopup()"
-      class="bg-rose-500 hover:bg-rose-700 text-white font-bold py-2 px-4 rounded mt-2"
+      class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded mt-2"
     >
       Close
     </button>

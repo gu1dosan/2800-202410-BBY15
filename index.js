@@ -1581,8 +1581,35 @@ app.post("/editEvent", sessionValidation, async (req, res) => {
   );
   //console.log('event in edit:', new ObjectId(eventId));
 
+  if (group.selectedEvent && group.selectedEvent._id.toString() === eventId) {
+    await groupCollection.updateOne(
+        { _id: new ObjectId(groupId) },
+        { $set: { selectedEvent: updatedEvent } }
+        );
+    };
+
+    for (let userEmail of group.members) {
+        const user = await userCollection.findOne({ email: userEmail });
+    
+        const notification = {
+          _id: new ObjectId(),
+          message: `The selected activity '${updatedTitle}' has been updated in ${group.name}.`,
+          groupId: groupId,
+          read: false,
+          type: "editEvent",
+        };
+    
+        await userCollection.updateOne(
+          { _id: new ObjectId(user._id) },
+          {
+            $push: { notifications: notification },
+            $inc: { unreadNotificationCount: 1 },
+          }
+        );
+      }
+
   console.log("Event updated");
-  res.redirect("/group/" + groupId);
+  res.redirect("/submitted_event?groupId=" + groupId);
 });
 
 app.post("/deleteEvent", sessionValidation, async (req, res) => {

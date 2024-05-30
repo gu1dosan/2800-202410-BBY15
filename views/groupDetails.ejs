@@ -20,7 +20,12 @@
                 <h2 class="text-lg font-semibold">Selected Activity</h2>
                 <div class="mt-4">
                     <% if (group.selectedEvent) { %>
-                        <p class="text-base text-gray-700"><strong>Title:</strong> <%= group.selectedEvent.title %></p>
+                        <div class="flex items-center">
+                            <p class="text-base text-gray-700"><strong>Title:</strong></p>
+                            <span class="overflow-x-auto whitespace-nowrap w-48 inline-block ml-2">
+                                <%= group.selectedEvent ? group.selectedEvent.title : "TBD" %>
+                            </span>
+                        </div>
                         <p class="text-base text-gray-700"><strong>Location:</strong> <%= group.selectedEvent.location %></p>
                         <p class="text-base text-gray-700"><strong>Info:</strong> <%= group.selectedEvent.info %></p>
                         <p class="text-base text-gray-700"><strong>Category:</strong> <%= group.selectedEvent.category %></p>
