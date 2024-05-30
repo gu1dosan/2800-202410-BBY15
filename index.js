@@ -1634,10 +1634,10 @@ app.get("/editEvent", sessionValidation, async (req, res) => {
 app.post("/editEvent", sessionValidation, async (req, res) => {
   const groupId = req.query.groupId;
   const eventId = req.query.eventId;
-  const newTitle = req.body.eventTitle;
-  const newDescription = req.body.description;
-  const newLocation = req.body.location;
-  const newInfo = req.body.contactInfo;
+  const newTitle = req.body.eventTitle.trim();
+  const newDescription = req.body.description.trim();
+  const newLocation = req.body.location.trim();
+  const newInfo = req.body.contactInfo.trim();
   const newCategory = req.body.category;
   const newTime = req.body.eventTime;
 
@@ -1830,10 +1830,10 @@ app.post("/event_submission", sessionValidation, async (req, res) => {
   //console.log('groupId:', new ObjectId(groupId))
   var userId = req.session.user_ID;
 
-  var title = req.body.eventTitle;
-  var description = req.body.description;
-  var location = req.body.location;
-  var info = req.body.contactInfo;
+  var title = req.body.eventTitle.trim();
+  var description = req.body.description.trim();
+  var location = req.body.location.trim();
+  var info = req.body.contactInfo.trim();
   var category = req.body.category;
   var time = req.body.eventTime;
 
