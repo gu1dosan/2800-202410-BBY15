@@ -609,7 +609,8 @@ app.post("/createGroup", sessionValidation, async (req, res) => {
 
     // Check if the name field is empty
     if (!name || name.trim() === "") {
-      return res.render("errorMessage", { msg: "Group name is required." });
+      res.render("errorMessage", { msg: "Group name is required." });
+      return;
     }
 
     // Initialize arrays for valid and invalid emails
@@ -851,6 +852,11 @@ app.post("/edit-group-name", sessionValidation, async (req, res) => {
   try {
     const groupId = req.query.groupId;
     const newName = req.body.newName;
+
+    if (!newName || newName.trim() === "") {
+      res.render("errorMessage", { msg: "Group name is required." });
+      return;
+    }
 
     // Update the group name in the MongoDB collection
     await groupCollection.updateOne(
