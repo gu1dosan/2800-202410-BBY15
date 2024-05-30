@@ -1,29 +1,18 @@
 <%- include("templates/headerV2") %>
 
-<div class="flex justify-center items-center mt-8">
-    <div class="bg-white rounded-lg p-6">
+<div class="flex justify-center items-center mt-4">
+    <div class="bg-white rounded-lg p-4">
         <h2 class="text-xl font-semibold mb-4"><%=session.name%>, you've been invited to join this group</h2>
-        <div class="border border-gray-300 p-4 rounded-md">
+        <div class="border p-4 bg-purple rounded-2xl mb-4 overflow-hidden">
             <!-- Flex container for group name, Edit button, and Leave button -->
-            <div class="flex items-center space-x-2 mb-2">
-                <h3 class="text-lg font-semibold"><%= group.name %></h3>
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-xl text-white font-semibold"><%= group.name %></h3><button onclick="openMembersPopup()" class="bg-white text-purple font-bold py-2 px-4 rounded">View Members</button>
             </div>
-            <!-- Flex container for the green buttons -->
-            <div class="flex justify-center items-center mb-8">
-                <!-- View Members button -->
-                <button onclick="openMembersPopup()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">View Members</button>
-                <!-- Invite new member button -->
-                <!-- <button onclick="openInvitePopup()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-2">Invite new members</button> -->
+            <div class="flex justify-end -mx-4 -mb-4">
+                <a href="/" class="w-full bg-red hover:bg-rose-600 text-white font-bold py-4 px-4 text-center">Decline</a>
+                <a href="/accept-group-invite?id=<%= group._id %>" class="w-full bg-green-500 hover:bg-green-700 text-white font-bold py-4 px-4 text-center">Accept</a>
             </div>
-            <!-- View Submitted Activities button -->
-            <div class="flex justify-center items-center mb-8">
-                <button onclick="viewSubmittedActivities()" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">View Submitted Activities</button>
-            </div>
-            <div class="flex justify-center items-center mb-8">
-                <a href="/accept-group-invite?id=<%= group._id %>" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">Accept</a>
-                <a href="/" class="bg-red hover:bg-rose-600 text-white font-bold py-2 px-4 rounded ml-2">Decline</a>
-            </div>
-
+        </div>
         <!-- Members List Popup -->
         <div id="membersPopup" class="hidden fixed top-0 left-0 w-full h-full bg-gray-800 bg-opacity-75 flex justify-center items-center">
             <div class="bg-white rounded-lg p-6 w-80">
@@ -44,17 +33,16 @@
         </div>
 
 
-            <!-- Invite New Member Popup -->
-            <div id="invitePopup" class="hidden fixed top-0 left-0 w-full h-full bg-gray-800 bg-opacity-75 flex justify-center items-center">
-                <div class="bg-white rounded-lg p-6">
-                    <h2 class="text-xl font-semibold mb-4">Invite New Members</h2>
-                    <form id="inviteForm" action="/invite?groupId=<%= group._id %>" method="post">
-                        <label for="emails" class="block mb-2">Enter email addresses (separated by commas):</label>
-                        <textarea id="emails" name="emails" rows="4" class="border border-gray-300 rounded-md p-2 mb-4 w-full"></textarea>
-                        <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Invite</button>
-                    </form>
-                    <button onclick="closeInvitePopup()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-2">Cancel</button>
-                </div>
+        <!-- Invite New Member Popup -->
+        <div id="invitePopup" class="hidden fixed top-0 left-0 w-full h-full bg-gray-800 bg-opacity-75 flex justify-center items-center">
+            <div class="bg-white rounded-lg p-6">
+                <h2 class="text-xl font-semibold mb-4">Invite New Members</h2>
+                <form id="inviteForm" action="/invite?groupId=<%= group._id %>" method="post">
+                    <label for="emails" class="block mb-2">Enter email addresses (separated by commas):</label>
+                    <textarea id="emails" name="emails" rows="4" class="border border-gray-300 rounded-md p-2 mb-4 w-full"></textarea>
+                    <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Invite</button>
+                </form>
+                <button onclick="closeInvitePopup()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-2">Cancel</button>
             </div>
         </div>
     </div>

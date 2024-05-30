@@ -10,19 +10,27 @@
 <div class="p-4 mb-20">
   <% groups.forEach(group => { %>
   <a href="/group/<%= group._id %>" class="block mb-4">
-    <div class="bg-white rounded-lg shadow-md p-4">
-      <h2 class="text-xl font-semibold mb-2"><%= group.name %></h2>
-      <p class="text-gray-600 font-semibold">Current Activity:</p>
-      <% if (group.selectedEvent) { %>
-      <p><strong>Title:</strong> <%= group.selectedEvent.title || 'tbd' %></p>
-      <p>
-        <strong>Location:</strong> <%= group.selectedEvent.location || 'tbd' %>
-      </p>
-      <p><strong>Info:</strong> <%= group.selectedEvent.info || 'tbd' %></p>
-      <p><strong>Time:</strong> <%= group.time || 'tbd' %></p>
-      <% } else { %>
-      <p>No event selected yet</p>
-      <% } %>
+    <div
+      class="bg-white rounded-2xl shadow-md flex items-center justify-between overflow-hidden"
+    >
+      <div class="p-4 w-full">
+        <h2 class="text-xl font-semibold mb-2"><%= group.name %></h2>
+        <p class="text-gray-600 font-semibold">Current Activity:</p>
+        <% if (group.selectedEvent) { %>
+        <p><strong>Title:</strong> <%= group.selectedEvent.title || 'tbd' %></p>
+        <p>
+          <strong>Location:</strong> <%= group.selectedEvent.location || 'tbd'
+          %>
+        </p>
+        <p><strong>Info:</strong> <%= group.selectedEvent.info || 'tbd' %></p>
+        <p><strong>Time:</strong> <%= group.time || 'tbd' %></p>
+        <% } else { %>
+        <p>No event selected yet</p>
+        <% } %>
+      </div>
+      <span class="material-symbols-rounded m-4 text-purple">
+        arrow_forward_ios
+      </span>
     </div>
   </a>
   <% }); %>
@@ -32,7 +40,7 @@
 <div class="flex justify-center items-center mt-8 mb-8">
   <button
     onclick="openPopup()"
-    class="h-14 w-14 shadow-lg rounded-[50%] text-xl fixed bottom-[100px] right-[16px] rounded"
+    class="h-14 w-14 shadow-lg rounded-[50%] text-xl fixed bottom-[100px] right-[16px]"
   >
     ➕
   </button>
