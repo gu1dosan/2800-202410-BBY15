@@ -5,7 +5,7 @@ html {
 .notification-count {
     position: absolute;
     top: -8px; 
-    right: -5px;
+    right: -9px;
     font-size: 1.3em;
     font-weight: bold;
 }
