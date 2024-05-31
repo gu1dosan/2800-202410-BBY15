@@ -234,6 +234,7 @@ app.post("/signup", async (req, res) => {
       name: name,
       email: email,
       password: hashedPassword,
+      notifications: [],
     });
     req.session.id = insertedId;
     req.session.authenticated = true;
@@ -941,12 +942,20 @@ app.get("/leave-group", sessionValidation, async (req, res) => {
   const userEmail = req.session.email; // Assuming the user's email is stored in the session
 
   try {
+    const user = await userCollection.findOne({ email: userEmail });
+
+    const notificationsToPull = user.notifications.filter(notification => notification.groupId === groupId).length;
     // Remove the user's email from the group's members array
     await groupCollection.updateOne(
       { _id: new ObjectId(groupId) },
       { $pull: { members: userEmail } }
     );
     // console.log(`User ${userEmail} removed from group with ID ${groupId}`);
+    await userCollection.updateOne(
+      { email: userEmail },
+      { $pull: { notifications: { groupId: groupId } },
+        $inc: { unreadNotificationCount: -notificationsToPull } }
+    );
 
     const group = await groupCollection.findOne({ _id: new ObjectId(groupId) });
     if (group.members.length === 0) {
@@ -969,6 +978,8 @@ app.delete("/remove-member", sessionValidation, async (req, res) => {
     // Find the user by userId to get the email
     const user = await userCollection.findOne({ _id: new ObjectId(userId) });
 
+    const notificationsToPull = user.notifications.filter(notification => notification.groupId === groupId).length;
+
     if (!user) {
       console.error("User not found");
       return res.status(404).render("errorMessage", { msg: "User not found" });
@@ -981,6 +992,13 @@ app.delete("/remove-member", sessionValidation, async (req, res) => {
       { _id: new ObjectId(groupId) },
       { $pull: { members: userEmail } }
     );
+
+    await userCollection.updateOne(
+      { email: userEmail },
+      { $pull: { notifications: { groupId: groupId } },
+        $inc: { unreadNotificationCount: -notificationsToPull } }
+    );
+
 
     if (result.modifiedCount === 0) {
       console.error("User not removed from group");
@@ -1485,6 +1503,14 @@ app.post("/selectEvent", sessionValidation, async (req, res) => {
 });
 
 app.get("/notifications", sessionValidation, async (req, res) => {
+
+  if (!user.notifications) {
+    return res
+      .status(400)
+      .render("errorMessage", { msg: "You currently have no notifications." });
+  }
+
+
   const currentUserEmail = req.session.email;
 
   const user = await userCollection.findOne({ email: currentUserEmail });
