@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -10,55 +11,70 @@
         .fc-timegrid-slot {
             cursor: pointer;
         }
-        body, html {
+
+        body,
+        html {
             height: 100%;
             margin: 0;
-            overflow: hidden; 
+            overflow: hidden;
         }
+
         .calendar-container {
-            height: calc(100vh - 10vh - 50px); 
+            height: calc(100vh - 10vh - 50px);
             padding: 10px;
-            overflow-y: auto; /* Enable vertical scrolling */
-            touch-action: pan-y; /* Allow vertical panning */
+            overflow-y: auto;
+            /* Enable vertical scrolling */
+            touch-action: pan-y;
+            /* Allow vertical panning */
         }
+
         #calendar {
             height: 100%;
         }
+
         .button-container {
-            text-align: right; 
+            text-align: right;
             padding: 10px;
         }
 
         .fc .fc-toolbar-title {
             color: black;
         }
+
         .fc .fc-button {
             color: black;
             border-color: black;
         }
+
         .fc .fc-button-primary {
             background-color: black;
             color: white;
         }
+
         .fc .fc-button-primary:disabled {
             background-color: white;
             color: black;
         }
+
         @media (max-width: 768px) {
             .calendar-container {
-                height: calc(100vh - 20vh - 50px); 
+                height: calc(100vh - 20vh - 50px);
                 padding: 5px;
             }
-            .fc .fc-timegrid-slot-label, 
+
+            .fc .fc-timegrid-slot-label,
             .fc .fc-timegrid-slot-lane {
                 font-size: 0.8rem;
             }
+
             .fc .fc-toolbar {
                 flex-wrap: wrap;
             }
+
             .fc .fc-toolbar-title {
                 font-size: 1rem;
             }
+
             .fc .fc-button {
                 font-size: 0.8rem;
                 padding: 5px;
@@ -66,134 +82,141 @@
         }
     </style>
     <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        var selectedTimestamps = [];
-        var initialTimes = <%- JSON.stringify(group.calendar || []) %>;
-        var fixedTimes = initialTimes.map(time => ({
-            start: new Date(time.start).getTime(),
-            end: new Date(time.end).getTime()
-        }));
-        var initialTimestamps = initialTimes.map(time => ({
-            start: time.start,
-            end: time.end
-        }));
+        document.addEventListener('DOMContentLoaded', function () {
+            var selectedTimestamps = [];
+            var initialTimes = <% - JSON.stringify(group.calendar || []) %>;
+            var fixedTimes = initialTimes.map(time => ({
+                start: new Date(time.start).getTime(),
+                end: new Date(time.end).getTime()
+            }));
+            var initialTimestamps = initialTimes.map(time => ({
+                start: time.start,
+                end: time.end
+            }));
 
-        setTimeout(function() {
-            var calendarEl = document.getElementById('calendar');
+            setTimeout(function () {
+                var calendarEl = document.getElementById('calendar');
 
-            var calendar = new FullCalendar.Calendar(calendarEl, {
-                initialView: 'timeGridWeek',
-                selectable: true,
-                longPressDelay: 150, 
-                headerToolbar: {
-                    left: 'today',
-                    center: 'title',
-                    right: 'prev,next'
-                },
-                select: function(info) {
-                    var selectedEvent = calendar.getEvents().find(event => 
-                        event.start.getTime() === info.start.getTime() && 
-                        event.end.getTime() === info.end.getTime()
-                    );
-                    if (selectedEvent) {
-                        var isInitialTime = initialTimestamps.some(ts => 
-                            new Date(ts.start).getTime() === info.start.getTime() && new Date(ts.end).getTime() === info.end.getTime()
+                var calendar = new FullCalendar.Calendar(calendarEl, {
+                    initialView: 'timeGridWeek',
+                    selectable: true,
+                    longPressDelay: 150,
+                    headerToolbar: {
+                        left: 'today',
+                        center: 'title',
+                        right: 'prev,next'
+                    },
+                    select: function (info) {
+                        var selectedEvent = calendar.getEvents().find(event =>
+                            event.start.getTime() === info.start.getTime() &&
+                            event.end.getTime() === info.end.getTime()
                         );
-                        if (isInitialTime) {
-                            initialTimestamps = initialTimestamps.filter(ts => 
+                        if (selectedEvent) {
+                            var isInitialTime = initialTimestamps.some(ts =>
+                                new Date(ts.start).getTime() === info.start.getTime() && new Date(ts.end).getTime() === info.end.getTime()
+                            );
+                            if (isInitialTime) {
+                                initialTimestamps = initialTimestamps.filter(ts =>
+                                    !(new Date(ts.start).getTime() === info.start.getTime() && new Date(ts.end).getTime() === info.end.getTime())
+                                );
+                            }
+                            selectedEvent.remove();
+                            console.log("unadded", { start: info.start.toISOString(), end: info.end.toISOString() });
+                            selectedTimestamps = selectedTimestamps.filter(ts =>
                                 !(new Date(ts.start).getTime() === info.start.getTime() && new Date(ts.end).getTime() === info.end.getTime())
                             );
+                        } else {
+                            selectedTimestamps.push({ start: info.start.toISOString(), end: info.end.toISOString() });
+                            console.log("added", { start: info.start.toISOString(), end: info.end.toISOString() });
+                            calendar.addEvent({
+                                display: 'background',
+                                start: info.start,
+                                end: info.end,
+                                backgroundColor: '#808080'
+                            });
                         }
-                        selectedEvent.remove();
-                        console.log("unadded", { start: info.start.toISOString(), end: info.end.toISOString() });
-                        selectedTimestamps = selectedTimestamps.filter(ts => 
-                            !(new Date(ts.start).getTime() === info.start.getTime() && new Date(ts.end).getTime() === info.end.getTime())
-                        );
-                    } else {
-                        selectedTimestamps.push({ start: info.start.toISOString(), end: info.end.toISOString() });
-                        console.log("added", { start: info.start.toISOString(), end: info.end.toISOString() });
+                        console.log("Selected timestamps:", selectedTimestamps);
+                        console.log("Initial timestamps:", initialTimestamps);
+                        calendar.unselect();
+                    }
+                });
+
+                if (initialTimes.length > 0) {
+                    initialTimes.forEach(function (time) {
+                        console.log("Initial time:", time);
                         calendar.addEvent({
                             display: 'background',
-                            start: info.start,
-                            end: info.end,
-                            backgroundColor: '#808080'
+                            start: time.start,
+                            end: time.end,
+                            backgroundColor: 'blue'
                         });
-                    }
-                    console.log("Selected timestamps:", selectedTimestamps);
-                    console.log("Initial timestamps:", initialTimestamps);
-                    calendar.unselect();
-                }
-            });
-
-            if (initialTimes.length > 0) {
-                initialTimes.forEach(function(time) {
-                    console.log("Initial time:", time);
-                    calendar.addEvent({
-                        display: 'background',
-                        start: time.start,
-                        end: time.end,
-                        backgroundColor: 'blue'
                     });
-                });
-            }
-
-            calendar.render();
-        }, 400); // make sure everything is loaded
-
-        document.getElementById('submit-btn').addEventListener('click', function() {
-            var groupId = "<%= group._id %>";
-            
-            var combinedTimestamps = selectedTimestamps.concat(initialTimestamps.map(ts => ({ start: new Date(ts.start).toISOString(), end: new Date(ts.end).toISOString() })));
-
-            console.log("Selected timestamps before sending:", combinedTimestamps);
-            $.ajax({
-                url: `/save-timestamps?id=${groupId}`,
-                type: 'POST',
-                data: JSON.stringify({ timestamps: combinedTimestamps }),
-                contentType: 'application/json',
-                success: function(response) {
-                    alert('Timestamps saved successfully!');
-                    window.location.href = `/group/${groupId}`; 
-                },
-                error: function(error) {
-                    alert('Please select or unselect a time');
                 }
-            });
-        });
 
-    });
+                calendar.render();
+            }, 400); // make sure everything is loaded
+
+            document.getElementById('submit-btn').addEventListener('click', function () {
+                var groupId = "<%= group._id %>";
+
+                var combinedTimestamps = selectedTimestamps.concat(initialTimestamps.map(ts => ({ start: new Date(ts.start).toISOString(), end: new Date(ts.end).toISOString() })));
+
+                console.log("Selected timestamps before sending:", combinedTimestamps);
+                $.ajax({
+                    url: `/save-timestamps?id=${groupId}`,
+                    type: 'POST',
+                    data: JSON.stringify({ timestamps: combinedTimestamps }),
+                    contentType: 'application/json',
+                    success: function (response) {
+                        alert('Timestamps saved successfully!');
+                        window.location.href = `/group/${groupId}`;
+                    },
+                    error: function (error) {
+                        alert('Please select or unselect a time');
+                    }
+                });
+            });
+
+        });
     </script>
-    <title><%= locals.pageTitle ? locals.pageTitle + ' | ' : '' %>NextUp</title>
+    <title>
+        <%= locals.pageTitle ? locals.pageTitle + ' | ' : '' %>NextUp
+    </title>
     <link rel="icon" type="image" href="/public/images/favicon.png" />
     <link href="/styles/output.css" rel="stylesheet">
     <link href="/styles/styles.css" rel="stylesheet">
     <script type="text/javascript">
         document.querySelector('html').classList.add("hidden");
         window.addEventListener('load', (e) => {
-          document.querySelector('html').classList.remove("hidden"); 
+            document.querySelector('html').classList.remove("hidden");
         });
     </script>
 </head>
+
 <body>
     <header class="bg-purple sticky top-0 w-full h-[10vh] flex flex-row items-center justify-between">
-        <a href="#" onclick=<%= locals.backButton ? 'location.href=\"'+backButton+'\"' : 'window.history.back()' %>>
+        <a href="#" onclick=<%=locals.backButton ? 'location.href=\"' +backButton+'\"' : 'window.history.back()' %>>
             <img src="/images/backButton.png" alt="BackButton" class="m-2 h-[32px]">
         </a>
         <% if (locals.pageTitle) { %>
             <% if (locals.group) { %>
                 <a href="/group-details/<%= group._id %>" class="text-center">
-                    <h1 class="text-white text-xl"><%= pageTitle %></h1>
+                    <h1 class="text-white text-xl">
+                        <%= pageTitle %>
+                    </h1>
                     <p class="text-white text-xs">View group details</p>
                 </a>
-            <% } else { %>
-                <h1 class="text-white text-xl"><%= locals.pageTitle %></h1>
-            <% } %>
-        <% } else { %>
-            <a href="#" id="eggLink" class="flex items-center">
-                <img src="/images/clearLogo.png" alt="Logo" class="max-w-24 max-h-24 h-[64px]">
-            </a>
-        <% } %>
-        <div class="w-[48px]"></div>
+                <% } else { %>
+                    <h1 class="text-white text-xl">
+                        <%= locals.pageTitle %>
+                    </h1>
+                    <% } %>
+                        <% } else { %>
+                            <a href="#" id="eggLink" class="flex items-center">
+                                <img src="/images/clearLogo.png" alt="Logo" class="max-w-24 max-h-24 h-[64px]">
+                            </a>
+                            <% } %>
+                                <div class="w-[48px]"></div>
     </header>
     <div class="calendar-container">
         <div id='calendar'></div>
@@ -202,4 +225,5 @@
         <button id="submit-btn" class="bg-purple text-white py-1 px-4 rounded">Submit</button>
     </div>
 </body>
+
 </html>

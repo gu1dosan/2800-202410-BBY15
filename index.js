@@ -142,16 +142,6 @@ async function getUserDetails(emails, groupId) {
   }
 }
 
-// function adminAuthorization(req, res, next) {
-//     if (!isAdmin(req)) {
-//         res.status(403);
-//         res.render("errorMessage", { error: "403 - Not Authorized" });
-//         return;
-//     } else {
-//         next();
-//     }
-// }
-
 app.use((req, res, next) => {
   res.locals.session = req.session;
   res.locals.pathname = req.url;
@@ -259,12 +249,6 @@ app.get("/login", async (req, res) => {
   if (req.session.authenticated) {
     return res.redirect("/");
   } else {
-    // if(req.query.error == 'noemailorpw') {
-    //     return res.render('login',{error: 'You must enter an email and password'});
-    // }
-    // if(req.query.error == 'invaliddetails') {
-    //     return res.render('login',{error: 'Invalid email or password'});
-    // }
     res.render("login", { groupInvite, group });
   }
 });
@@ -294,7 +278,6 @@ app.post("/login", async (req, res) => {
   const validationResult = schema.validate(email);
   if (validationResult.error != null) {
     //    console.log(validationResult.error);
-    //    return res.redirect('/login?error=noemailorpw');
     return res.render("login", {
       error: "Invalid email or password",
       formData: { email: email, password: password },
@@ -319,7 +302,6 @@ app.post("/login", async (req, res) => {
   // console.log(result);
   if (result.length != 1) {
     // console.log("user not found");
-    // return res.redirect('/login?error=invaliddetails');
     return res.render("login", {
       error: "Invalid email or password",
       formData: { email: email, password: password },
@@ -704,7 +686,7 @@ app.post("/createGroup", sessionValidation, async (req, res) => {
     console.error("Error creating group:", error);
     res.redirect(
       "/groupConfirmation?error=true&message=" +
-        encodeURIComponent("Error creating group.")
+      encodeURIComponent("Error creating group.")
     );
   }
 });
@@ -761,8 +743,6 @@ app.get("/group/:groupId", sessionValidation, async (req, res) => {
       .toArray();
 
     if (!group[0]) {
-      // Group not found
-      // res.status(404).send("Group not found.");
       res.render("errorMessage", { msg: "Group not found." });
       return;
     }
@@ -932,7 +912,7 @@ app.get("/delete-group", sessionValidation, async (req, res) => {
     console.error("Error deleting group:", error);
     res.redirect(
       "/groups?error=true&message=" +
-        encodeURIComponent("Error deleting group.")
+      encodeURIComponent("Error deleting group.")
     );
   }
 });
@@ -953,8 +933,10 @@ app.get("/leave-group", sessionValidation, async (req, res) => {
     // console.log(`User ${userEmail} removed from group with ID ${groupId}`);
     await userCollection.updateOne(
       { email: userEmail },
-      { $pull: { notifications: { groupId: groupId } },
-        $inc: { unreadNotificationCount: -notificationsToPull } }
+      {
+        $pull: { notifications: { groupId: groupId } },
+        $inc: { unreadNotificationCount: -notificationsToPull }
+      }
     );
 
     const group = await groupCollection.findOne({ _id: new ObjectId(groupId) });
@@ -995,8 +977,10 @@ app.delete("/remove-member", sessionValidation, async (req, res) => {
 
     await userCollection.updateOne(
       { email: userEmail },
-      { $pull: { notifications: { groupId: groupId } },
-        $inc: { unreadNotificationCount: -notificationsToPull } }
+      {
+        $pull: { notifications: { groupId: groupId } },
+        $inc: { unreadNotificationCount: -notificationsToPull }
+      }
     );
 
 
@@ -1218,7 +1202,6 @@ app.post("/invite", sessionValidation, async (req, res) => {
     res.render("InviteConfirmation", { inviteMessage, user });
   } catch (error) {
     // console.error("Error inviting users to group:", error);
-    // res.status(500).json({ success: false, message: "Internal server error." });
     res.status(500).render("ErrorMessage", { msg: "Internal server error." });
   }
 });
@@ -2046,24 +2029,6 @@ function formatDateTime(dateTime) {
   }
   return `${eventTime}${formattedDate ? ", " + formattedDate : ""}`;
 }
-
-// app.get("/admin", sessionValidation, adminAuthorization, async (req, res) => {
-//   const result = await userCollection.find().toArray();
-//   // console.log(result)
-//   res.render("admin", { users: result });
-// });
-
-// app.post('/promoteToAdmin', sessionValidation, adminAuthorization, jsonParser, async (req, res) => {
-//     // console.log(req.body)
-//     // console.log("promoting " + req.body.id + " to admin")
-//     const result = await userCollection.updateOne({ _id: new ObjectId(req.body.id) }, { $set: { user_type: 'admin' } });
-//     // console.log(result)
-//     res.send({ success: true });
-// });
-// app.post('/demoteToUser', sessionValidation, adminAuthorization, jsonParser, async (req, res) => {
-//     await userCollection.updateOne({ _id: new ObjectId(req.body.id) }, { $set: { user_type: 'user' } });
-//     res.send({ success: true });
-// });
 
 app.get("/logout", sessionValidation, (req, res) => {
   if (req.session.authenticated) {

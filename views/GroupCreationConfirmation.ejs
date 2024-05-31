@@ -1,25 +1,29 @@
 <%- include("templates/header") %>
 
-<div class="flex flex-col items-center mt-8">
-    <% if (error) { %>
-        <p class="text-red-600">There was an error creating the group!</p>
-    <% } else { %>
-        <p class="text-green-600">The group was created successfully!</p>
-    <% } %>
+    <div class="flex flex-col items-center mt-8">
+        <% if (error) { %>
+            <p class="text-red-600">There was an error creating the group!</p>
+            <% } else { %>
+                <p class="text-green-600">The group was created successfully!</p>
+                <% } %>
 
-    <% if (invalidEmails && invalidEmails.length > 0) { %>
-        <div class="mt-4 text-center">
-            <h3 class="text-red-600 mb-2">Warning:</h3>
-            <p class="text-black mb-4">The following emails were not found in the database and were not added to the group:</p>
-            <ul>
-                <% invalidEmails.forEach(email => { %>
-                    <li class="text-black"><%= email %></li>
-                <% }); %>
-            </ul>
-        </div>
-    <% } %>
+                    <% if (invalidEmails && invalidEmails.length> 0) { %>
+                        <div class="mt-4 text-center">
+                            <h3 class="text-red-600 mb-2">Warning:</h3>
+                            <p class="text-black mb-4">The following emails were not found in the database and were not
+                                added to the group:</p>
+                            <ul>
+                                <% invalidEmails.forEach(email=> { %>
+                                    <li class="text-black">
+                                        <%= email %>
+                                    </li>
+                                    <% }); %>
+                            </ul>
+                        </div>
+                        <% } %>
 
-    <a href="/groups" class="mt-8 bg-purple text-white font-bold py-2 px-4 rounded">Back to Groups</a>
-</div>
+                            <a href="/groups" class="mt-8 bg-purple text-white font-bold py-2 px-4 rounded">Back to
+                                Groups</a>
+    </div>
 
-<%- include("templates/footer") %>
+    <%- include("templates/footer") %>

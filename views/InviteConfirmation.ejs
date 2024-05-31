@@ -1,36 +1,43 @@
 <%- include("templates/headerV2") %>
 
-<div class="container mt-32 flex justify-center"> <!-- Adjust the margin-top value as needed -->
-    <div class="card mt-8 w-4/5 border border-gray-300 p-4"> <!-- Adjust the width as needed -->
-        <% if (inviteMessage.success) { %>
-            <div class="alert alert-success text-center"><%= inviteMessage.success %></div>
-        <% } %>
-        <% if (inviteMessage.existingMembers && inviteMessage.existingMembers.length > 0) { %>
-            <div class="alert alert-info ml-6">
-                <h3 class="text-lg font-bold text-blue-500">Already Members:</h3>
-                <ul class="list-none pl-0">
-                    <% inviteMessage.existingMembers.forEach(member => { %>
-                        <li><%= member %></li>
-                    <% }); %>
-                </ul>
-            </div>
-        <% } %>
-        <% if (inviteMessage.invalidEmails && inviteMessage.invalidEmails.length > 0) { %>
-            <div class="alert alert-danger ml-6">
-                <h3 class="text-lg font-bold text-red-500">Warning:</h3>
-                <p>The following users could not be added:</p>
-                <ul class="list-none pl-0">
-                    <% inviteMessage.invalidEmails.forEach(email => { %>
-                        <li><%= email %></li>
-                    <% }); %>
-                </ul>
-            </div>
-        <% } %>
+    <div class="container mt-32 flex justify-center"> <!-- Adjust the margin-top value as needed -->
+        <div class="card mt-8 w-4/5 border border-gray-300 p-4"> <!-- Adjust the width as needed -->
+            <% if (inviteMessage.success) { %>
+                <div class="alert alert-success text-center">
+                    <%= inviteMessage.success %>
+                </div>
+                <% } %>
+                    <% if (inviteMessage.existingMembers && inviteMessage.existingMembers.length> 0) { %>
+                        <div class="alert alert-info ml-6">
+                            <h3 class="text-lg font-bold text-blue-500">Already Members:</h3>
+                            <ul class="list-none pl-0">
+                                <% inviteMessage.existingMembers.forEach(member=> { %>
+                                    <li>
+                                        <%= member %>
+                                    </li>
+                                    <% }); %>
+                            </ul>
+                        </div>
+                        <% } %>
+                            <% if (inviteMessage.invalidEmails && inviteMessage.invalidEmails.length> 0) { %>
+                                <div class="alert alert-danger ml-6">
+                                    <h3 class="text-lg font-bold text-red-500">Warning:</h3>
+                                    <p>The following users could not be added:</p>
+                                    <ul class="list-none pl-0">
+                                        <% inviteMessage.invalidEmails.forEach(email=> { %>
+                                            <li>
+                                                <%= email %>
+                                            </li>
+                                            <% }); %>
+                                    </ul>
+                                </div>
+                                <% } %>
+        </div>
     </div>
-</div>
 
-<div class="container text-center mt-3">
-    <a href="/group-details/<%= inviteMessage.groupID %>" class="mt-8 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Back to Group</a>
-</div>
+    <div class="container text-center mt-3">
+        <a href="/group-details/<%= inviteMessage.groupID %>"
+            class="mt-8 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Back to Group</a>
+    </div>
 
-<%- include("templates/footer") %>
+    <%- include("templates/footer") %>

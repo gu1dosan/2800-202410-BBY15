@@ -1,52 +1,54 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NextUp</title>
-    <link rel="icon" type="image" href="/public/images/favicon.png" />
-    <link href="/styles/output.css" rel="stylesheet">
-    <link href="/styles/styles.css" rel="stylesheet">
-    <script type="text/javascript">
-        document.querySelector('html').classList.add("hidden");
-        window.addEventListener('load', (e) => {
-          document.querySelector('html').classList.remove("hidden"); 
-         });
-    </script>
-</head>
-<body class="overflow-auto bg-purple">
-    <header class=" bg-purple sticky top-0 w-full h-[10vh] flex flex-row items-center justify-between">
-        <a href="#" onclick="window.history.back()">
-            <img src="/images/backButton.png" alt="BackButton" class="m-2 h-[32px]">
-        </a>
-        <!-- add onclick for logo -->
-        <a href="#" onclick="">
-            <img src="/images/clearLogo.png" alt="Logo" class="max-w-24 max-h-24 h-[64px]">
-        </a>
-        <div class="w-[48px]">
 
-        </div>
-    </header>
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NextUp</title>
+  <link rel="icon" type="image" href="/public/images/favicon.png" />
+  <link href="/styles/output.css" rel="stylesheet">
+  <link href="/styles/styles.css" rel="stylesheet">
+  <script type="text/javascript">
+    document.querySelector('html').classList.add("hidden");
+    window.addEventListener('load', (e) => {
+      document.querySelector('html').classList.remove("hidden");
+    });
+  </script>
+</head>
+
+<body class="overflow-auto bg-purple">
+  <header class=" bg-purple sticky top-0 w-full h-[10vh] flex flex-row items-center justify-between">
+    <a href="#" onclick="window.history.back()">
+      <img src="/images/backButton.png" alt="BackButton" class="m-2 h-[32px]">
+    </a>
+    <!-- add onclick for logo -->
+    <a href="#" onclick="">
+      <img src="/images/clearLogo.png" alt="Logo" class="max-w-24 max-h-24 h-[64px]">
+    </a>
+    <div class="w-[48px]">
+
+    </div>
+  </header>
   <p class="bg-purple flex justify-center text-white border-none">
     Tap the screen to start!
   </p>
-    <div class="flex justify-center bg-purple">
-      <canvas width="400" height="750" class="flex justify-center  bg-black" id="game">
-     </div>
-    </canvas>
-    <div class="flex fixed bottom-0 bg-black h-[10vh] w-full">
-      <button class="h-full flex-1 flex items-center justify-center bg-purple" id="leftButton">
-        <p class="text-5xl text-white">L</p>
-      </button> 
-        <button class="h-full flex-1 flex items-center justify-center bg-purple" id="rightButton">
-          <p class="text-5xl text-white">R</p>
-        </button>
-    </div>
-    <script>
+  <div class="flex justify-center bg-purple">
+    <canvas width="400" height="750" class="flex justify-center  bg-black" id="game">
+  </div>
+  </canvas>
+  <div class="flex fixed bottom-0 bg-black h-[10vh] w-full">
+    <button class="h-full flex-1 flex items-center justify-center bg-purple" id="leftButton">
+      <p class="text-5xl text-white">L</p>
+    </button>
+    <button class="h-full flex-1 flex items-center justify-center bg-purple" id="rightButton">
+      <p class="text-5xl text-white">R</p>
+    </button>
+  </div>
+  <script>
     const canvas = document.getElementById('game');
     const context = canvas.getContext('2d');
-    
+
     // each row is 14 bricks long. the level consists of 6 blank rows then 8 rows
     // of 4 colors: red, orange, green, and yellow
     const level1 = [
@@ -59,16 +61,16 @@
       [],
       [],
       [],
-      ['R','R','R','R','R','R','R','R','R','R','R','R','R','R'],
-      ['R','R','R','R','R','R','R','R','R','R','R','R','R','R'],
-      ['O','O','O','O','O','O','O','O','O','O','O','O','O','O'],
-      ['O','O','O','O','O','O','O','O','O','O','O','O','O','O'],
-      ['G','G','G','G','G','G','G','G','G','G','G','G','G','G'],
-      ['G','G','G','G','G','G','G','G','G','G','G','G','G','G'],
-      ['Y','Y','Y','Y','Y','Y','Y','Y','Y','Y','Y','Y','Y','Y'],
-      ['Y','Y','Y','Y','Y','Y','Y','Y','Y','Y','Y','Y','Y','Y']
+      ['R', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R'],
+      ['R', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R'],
+      ['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O'],
+      ['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O'],
+      ['G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G'],
+      ['G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G'],
+      ['Y', 'Y', 'Y', 'Y', 'Y', 'Y', 'Y', 'Y', 'Y', 'Y', 'Y', 'Y', 'Y', 'Y'],
+      ['Y', 'Y', 'Y', 'Y', 'Y', 'Y', 'Y', 'Y', 'Y', 'Y', 'Y', 'Y', 'Y', 'Y']
     ];
-    
+
     // create a mapping between color short code (R, O, G, Y) and color name
     const colorMap = {
       'R': 'red',
@@ -76,24 +78,24 @@
       'G': 'green',
       'Y': 'yellow'
     };
-    
+
     // use a 2px gap between each brick
     const brickGap = 2;
     const brickWidth = 25;
     const brickHeight = 12;
-    
+
     // the wall width takes up the remaining space of the canvas width. with 14 bricks
     // and 13 2px gaps between them, thats: 400 - (14 * 25 + 2 * 13) = 24px. so each
     // wall will be 12px
     const wallSize = 12;
     const bricks = [];
-    
+
     // create the level by looping over each row and column in the level1 array
     // and creating an object with the bricks position (x, y) and color
     for (let row = 0; row < level1.length; row++) {
       for (let col = 0; col < level1[row].length; col++) {
         const colorCode = level1[row][col];
-    
+
         bricks.push({
           x: wallSize + (brickWidth + brickGap) * col,
           y: wallSize + (brickHeight + brickGap) * row,
@@ -103,49 +105,49 @@
         });
       }
     }
-    
+
     const paddle = {
       // place the paddle horizontally in the middle of the screen
       x: canvas.width / 2 - (brickWidth * 2) / 2,
       y: 600,
       width: (brickWidth * 2),
       height: brickHeight,
-    
+
       // paddle x velocity
       dx: 0
     };
-    
+
     const ball = {
       x: 130,
       y: 260,
       width: 7,
       height: 7,
-    
+
       // how fast the ball should go in either the x or y direction
       speed: 2,
-    
+
       // ball velocity
       dx: 0,
       dy: 0
     };
-    
+
     // check for collision between two objects using axis-aligned bounding box (AABB)
     // @see https://developer.mozilla.org/en-US/docs/Games/Techniques/2D_collision_detection
     function collides(obj1, obj2) {
       return obj1.x < obj2.x + obj2.width &&
-             obj1.x + obj1.width > obj2.x &&
-             obj1.y < obj2.y + obj2.height &&
-             obj1.y + obj1.height > obj2.y;
+        obj1.x + obj1.width > obj2.x &&
+        obj1.y < obj2.y + obj2.height &&
+        obj1.y + obj1.height > obj2.y;
     }
-    
+
     // game loop
     function loop() {
       requestAnimationFrame(loop);
-      context.clearRect(0,0,canvas.width,canvas.height);
-    
+      context.clearRect(0, 0, canvas.width, canvas.height);
+
       // move paddle by it's velocity
       paddle.x += paddle.dx;
-    
+
       // prevent paddle from going through walls
       if (paddle.x < wallSize) {
         paddle.x = wallSize
@@ -153,11 +155,11 @@
       else if (paddle.x + (brickWidth * 2) > canvas.width - wallSize) {
         paddle.x = canvas.width - wallSize - (brickWidth * 2);
       }
-    
+
       // move ball by it's velocity
       ball.x += ball.dx;
       ball.y += ball.dy;
-    
+
       // prevent ball from going through walls by changing its velocity
       // left & right walls
       if (ball.x < wallSize) {
@@ -173,7 +175,7 @@
         ball.y = wallSize;
         ball.dy *= -1;
       }
-    
+
       // reset ball if it goes below the screen
       if (ball.y > canvas.height) {
         ball.x = 130;
@@ -181,41 +183,41 @@
         ball.dx = 0;
         ball.dy = 0;
       }
-    
+
       // check to see if ball collides with paddle. if they do change y velocity
       if (collides(ball, paddle)) {
         ball.dy *= -1;
-    
+
         // move ball above the paddle otherwise the collision will happen again
         // in the next frame
         ball.y = paddle.y - ball.height;
       }
-    
+
       // check to see if ball collides with a brick. if it does, remove the brick
       // and change the ball velocity based on the side the brick was hit on
       for (let i = 0; i < bricks.length; i++) {
         const brick = bricks[i];
-    
+
         if (collides(ball, brick)) {
           // remove brick from the bricks array
           bricks.splice(i, 1);
-    
+
           // ball is above or below the brick, change y velocity
           // account for the balls speed since it will be inside the brick when it
           // collides
           if (ball.y + ball.height - ball.speed <= brick.y ||
-              ball.y >= brick.y + brick.height - ball.speed) {
+            ball.y >= brick.y + brick.height - ball.speed) {
             ball.dy *= -1;
           }
           // ball is on either side of the brick, change x velocity
           else {
             ball.dx *= -1;
           }
-    
+
           break;
         }
       }
-    
+
       // draw walls
       context.fillStyle = '#6a0dad';
       context.fillRect(0, 0, canvas.width, wallSize);
@@ -225,85 +227,86 @@
 
       // ball color
       context.fillStyle = 'white';
-  if (ball.dx || ball.dy) {
-    context.fillRect(ball.x, ball.y, ball.width, ball.height);
-  }
+      if (ball.dx || ball.dy) {
+        context.fillRect(ball.x, ball.y, ball.width, ball.height);
+      }
 
-  // draw bricks
-  bricks.forEach(function(brick) {
-    context.fillStyle = brick.color;
-    context.fillRect(brick.x, brick.y, brick.width, brick.height);
-  });
+      // draw bricks
+      bricks.forEach(function (brick) {
+        context.fillStyle = brick.color;
+        context.fillRect(brick.x, brick.y, brick.width, brick.height);
+      });
 
-  // draw paddle
-  context.fillStyle = 'cyan';
-  context.fillRect(paddle.x, paddle.y, paddle.width, paddle.height);
-}
+      // draw paddle
+      context.fillStyle = 'cyan';
+      context.fillRect(paddle.x, paddle.y, paddle.width, paddle.height);
+    }
 
-// listen to keyboard events to move the paddle
-document.addEventListener('keydown', function(e) {
-  // left arrow key
-  if (e.which === 37) {
-    paddle.dx = -3;
-  }
-  // right arrow key
-  else if (e.which === 39) {
-    paddle.dx = 3;
-  }
+    // listen to keyboard events to move the paddle
+    document.addEventListener('keydown', function (e) {
+      // left arrow key
+      if (e.which === 37) {
+        paddle.dx = -3;
+      }
+      // right arrow key
+      else if (e.which === 39) {
+        paddle.dx = 3;
+      }
 
-  // space key
-  // if the ball is not moving, we can launch the ball using the space key. ball
-  // will move towards the bottom right to start
-  if (ball.dx === 0 && ball.dy === 0 && e.which === 32) {
-    ball.dx = ball.speed;
-    ball.dy = ball.speed;
-  }
-});
+      // space key
+      // if the ball is not moving, we can launch the ball using the space key. ball
+      // will move towards the bottom right to start
+      if (ball.dx === 0 && ball.dy === 0 && e.which === 32) {
+        ball.dx = ball.speed;
+        ball.dy = ball.speed;
+      }
+    });
 
-// listen to keyboard events to stop the paddle if key is released
-document.addEventListener('keyup', function(e) {
-  if (e.which === 37 || e.which === 39) {
-    paddle.dx = 0;
-  }
-});
+    // listen to keyboard events to stop the paddle if key is released
+    document.addEventListener('keyup', function (e) {
+      if (e.which === 37 || e.which === 39) {
+        paddle.dx = 0;
+      }
+    });
 
-// handle touch events for mobile controls
-const leftButton = document.getElementById('leftButton');
-const rightButton = document.getElementById('rightButton');
+    // handle touch events for mobile controls
+    const leftButton = document.getElementById('leftButton');
+    const rightButton = document.getElementById('rightButton');
 
-const Gamecanvas = document.getElementById('game');
-Gamecanvas.addEventListener('click', function(e) {
-  if (ball.dx === 0 && ball.dy === 0) {
-    ball.dx = ball.speed;
-    ball.dy = ball.speed;
-  }
-});
+    const Gamecanvas = document.getElementById('game');
+    Gamecanvas.addEventListener('click', function (e) {
+      if (ball.dx === 0 && ball.dy === 0) {
+        ball.dx = ball.speed;
+        ball.dy = ball.speed;
+      }
+    });
 
-Gamecanvas.addEventListener('touchstart', function(e) {
-  if (ball.dx === 0 && ball.dy === 0) {
-    ball.dx = ball.speed;
-    ball.dy = ball.speed;
-  }
-});
+    Gamecanvas.addEventListener('touchstart', function (e) {
+      if (ball.dx === 0 && ball.dy === 0) {
+        ball.dx = ball.speed;
+        ball.dy = ball.speed;
+      }
+    });
 
-leftButton.addEventListener('touchstart', function() {
-  paddle.dx = -3;
-});
-leftButton.addEventListener('touchend', function() {
-  paddle.dx = 0;
-});
+    leftButton.addEventListener('touchstart', function () {
+      paddle.dx = -3;
+    });
+    leftButton.addEventListener('touchend', function () {
+      paddle.dx = 0;
+    });
 
-rightButton.addEventListener('touchstart', function() {
-  paddle.dx = 3;
-});
-rightButton.addEventListener('touchend', function() {
-  paddle.dx = 0;
-});
+    rightButton.addEventListener('touchstart', function () {
+      paddle.dx = 3;
+    });
+    rightButton.addEventListener('touchend', function () {
+      paddle.dx = 0;
+    });
 
 
 
-// start the game
-requestAnimationFrame(loop);
-</script>
+    // start the game
+    requestAnimationFrame(loop);
+  </script>
 </body>
+
 </html>

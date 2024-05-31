@@ -1,8 +1,10 @@
-<li class="mt-2"> 
+<li class="mt-2">
     <%= user.name %> (<%= user.user_type %>)
-    <% if(user.user_type=='user'){ %>
-        <button type="button" class="btn btn-danger" onclick="promoteToAdmin('<%= user._id %>')">Promote to admin</button>
-    <% } else { %> 
-        <button type="button" class="btn btn-success" onclick="demoteToUser('<%= user._id %>')">Demote to user</button>
-    <% } %>
-</li> 
+            <% if(user.user_type=='user' ){ %>
+                <button type="button" class="btn btn-danger" onclick="promoteToAdmin('<%= user._id %>')">Promote to
+                    admin</button>
+                <% } else { %>
+                    <button type="button" class="btn btn-success" onclick="demoteToUser('<%= user._id %>')">Demote to
+                        user</button>
+                    <% } %>
+</li>
