@@ -148,8 +148,8 @@ We took some design inspiration from other social messaging apps like FB Messeng
 
 ## Contact Information
 
-ghe16@my.bcit.ca
-victor_wong444@hotmail.com
-henrytann00@gmail.com
-liam.jaenicke@gmail.com
-steven.ly236@gmail.com
+ghe16@my.bcit.ca  
+victor_wong444@hotmail.com  
+henrytann00@gmail.com  
+liam.jaenicke@gmail.com  
+steven.ly236@gmail.com  
