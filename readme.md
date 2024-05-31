@@ -128,6 +128,7 @@ NextUP is an event planning app that helps groups of students and young working 
 ## How did you use AI? Tell us exactly what AI services and products you used and how you used them. Be very specific:
 1. Did you use AI to help create your app? If so, how? Be specific.
    - We leveraged AI to help us create some images and graphics for the logo and for some error pages to make our app more friendly.
+   - ChatGPT was also used for debugging purposes
 2. Did you use AI to create data sets or clean data sets? If so, how? Be specific.
    - We did not.
 3. Does your app use AI? If so, how? Be specific.
