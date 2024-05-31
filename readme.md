@@ -117,13 +117,23 @@ NextUP is an event planning app that helps groups of students and young working 
 3. run ```npm install```
 5. Project is ready to go, to run it: ```npm run start:dev```
 
-## How to use the product (Features)
+## How to use the product (Core Features)
 
+**Group Creation**  
+![image](https://github.com/gu1dosan/2800-202410-BBY15/assets/30122825/0f453da5-9931-46c8-88d8-d7f42a3e3f5f)
+![image](https://github.com/gu1dosan/2800-202410-BBY15/assets/30122825/fd8f1765-c95a-439a-b3f5-da35bcddb750)
 
+**Activity submission and random picker**  
+![image](https://github.com/gu1dosan/2800-202410-BBY15/assets/30122825/86152f35-c09c-4d17-82bd-523d37e7d138)
+![image](https://github.com/gu1dosan/2800-202410-BBY15/assets/30122825/10fcc2fe-1edf-49be-9984-e694ff41b282)
+![image](https://github.com/gu1dosan/2800-202410-BBY15/assets/30122825/d8d9e52b-3b5e-47db-936d-664ddbd1ac83)\
+
+**Real-time group chat**  
+![image](https://github.com/gu1dosan/2800-202410-BBY15/assets/30122825/849bd9c7-7185-4bf4-9e34-fb5003d8ddce)
 
 ## Credits, References, and Licenses
 
-
+We took some design inspiration from other social messaging apps like FB Messenger and Whatsapp.
 
 ## How did you use AI? Tell us exactly what AI services and products you used and how you used them. Be very specific:
 1. Did you use AI to help create your app? If so, how? Be specific.
@@ -139,3 +149,7 @@ NextUP is an event planning app that helps groups of students and young working 
 ## Contact Information
 
 ghe16@my.bcit.ca
+victor_wong444@hotmail.com
+henrytann00@gmail.com
+liam.jaenicke@gmail.com
+steven.ly236@gmail.com
