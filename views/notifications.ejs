@@ -106,91 +106,91 @@
         <div class="h-[80px]" onLoad=""></div>
     </div>
     </div>
-    <% if (notifications.length > 0) { %>
-    <div class="group left-[5%] h-[120px] lg:h-[110px] fixed w-full bottom-0 ">
-        <button onclick="toggleTooltip(this)">
-            <img src="/images/notification-marker.svg" class="h-8 lg:h-10" alt="Marker">
-        </button>
-        <span class="tooltip absolute -top-16 left-[-2%] -translate-x-[-50%] 
+    <% if (notifications.length> 0) { %>
+        <div class="group left-[5%] h-[120px] lg:h-[110px] fixed w-full bottom-0 ">
+            <button onclick="toggleTooltip(this)">
+                <img src="/images/notification-marker.svg" class="h-8 lg:h-10" alt="Marker">
+            </button>
+            <span class="tooltip absolute -top-16 left-[-2%] -translate-x-[-50%] 
     z-20 origin-left scale-0 px-3 
     py-2 text-sm font-bold
      transition-all duration-300 ease-in-out">
-            <button onclick="markAllAsRead()"
-                class="bg-purple hover:bg-purple-700 text-white font-bold py-2 px-4 rounded mb-4">
-                Mark All as Read
-            </button>
-            <button onclick="openDeletePopup()"
-                class="bg-rose-500 hover:bg-rose-700 text-white font-bold py-2 px-4 rounded mb-4">
-                Delete All Notifications
-            </button>
-            <span>
-            </span></span>
-    </div>
-    <% } %>
+                <button onclick="markAllAsRead()"
+                    class="bg-purple hover:bg-purple-700 text-white font-bold py-2 px-4 rounded mb-4">
+                    Mark All as Read
+                </button>
+                <button onclick="openDeletePopup()"
+                    class="bg-rose-500 hover:bg-rose-700 text-white font-bold py-2 px-4 rounded mb-4">
+                    Delete All Notifications
+                </button>
+                <span>
+                </span></span>
+        </div>
+        <% } %>
 
-    <script>
+            <script>
 
-        function openDeletePopup() {
-            document.getElementById('deletePopup').classList.remove('hidden');
-        }
-
-        function closeDeletePopup() {
-            document.getElementById('deletePopup').classList.add('hidden');
-        }
-
-        function dismissNotification(event, notificationId) {
-            event.preventDefault();
-            const notificationDiv = document.getElementById(notificationId);
-            const form = event.target.closest('form');
-            notificationDiv.classList.add('fade-out');
-            setTimeout(() => {
-                notificationDiv.remove();
-            }, 400);
-            form.submit();
-        }
-
-        function markAllAsRead() {
-            fetch('/mark_all_as_read', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ userId: '<%= userId %>' })
-            }).then(response => {
-                if (response.ok) {
-                    location.reload();
-                } else {
-                    console.error('Failed to mark all notifications as read');
+                function openDeletePopup() {
+                    document.getElementById('deletePopup').classList.remove('hidden');
                 }
-            });
-        }
 
-        function deleteAllNotifications() {
-            fetch('/delete_all_notifications', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ userId: '<%= userId %>' })
-            }).then(response => {
-                if (response.ok) {
-                    location.reload();
-                } else {
-                    console.error('Failed to delete all notifications');
+                function closeDeletePopup() {
+                    document.getElementById('deletePopup').classList.add('hidden');
                 }
-            });
-        }
 
-        function toggleTooltip(button) {
-            const tooltip = button.nextElementSibling;
-            const scale = getComputedStyle(tooltip).getPropertyValue('transform');
+                function dismissNotification(event, notificationId) {
+                    event.preventDefault();
+                    const notificationDiv = document.getElementById(notificationId);
+                    const form = event.target.closest('form');
+                    notificationDiv.classList.add('fade-out');
+                    setTimeout(() => {
+                        notificationDiv.remove();
+                    }, 400);
+                    form.submit();
+                }
 
-            if (scale.includes('matrix(1')) {
-                tooltip.style.transform = 'scale(0)';
-            } else {
-                tooltip.style.transform = 'scale(1)';
-            }
-        }
-    </script>
+                function markAllAsRead() {
+                    fetch('/mark_all_as_read', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ userId: '<%= userId %>' })
+                    }).then(response => {
+                        if (response.ok) {
+                            location.reload();
+                        } else {
+                            console.error('Failed to mark all notifications as read');
+                        }
+                    });
+                }
 
-    <%- include('templates/footer', { user: user }) %>
+                function deleteAllNotifications() {
+                    fetch('/delete_all_notifications', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ userId: '<%= userId %>' })
+                    }).then(response => {
+                        if (response.ok) {
+                            location.reload();
+                        } else {
+                            console.error('Failed to delete all notifications');
+                        }
+                    });
+                }
+
+                function toggleTooltip(button) {
+                    const tooltip = button.nextElementSibling;
+                    const scale = getComputedStyle(tooltip).getPropertyValue('transform');
+
+                    if (scale.includes('matrix(1')) {
+                        tooltip.style.transform = 'scale(0)';
+                    } else {
+                        tooltip.style.transform = 'scale(1)';
+                    }
+                }
+            </script>
+
+            <%- include('templates/footer', { user: user }) %>

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -8,62 +9,59 @@
     <link rel="icon" type="image" href="public/images/favicon.png" />
     <link href="/styles/output.css" rel="stylesheet">
     <link href="/styles/styles.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" />
     <script type="text/javascript">
         document.querySelector('html').classList.add("hidden");
         window.addEventListener('load', (e) => {
-          document.querySelector('html').classList.remove("hidden"); 
+            document.querySelector('html').classList.remove("hidden");
         });
     </script>
 </head>
+
 <body class="overflow-auto">
     <header class="bg-purple sticky top-0 w-full h-[10vh] flex flex-row items-center justify-between">
         <div></div>
         <a href="#" id="eggLink" class="flex items-center">
             <img src="/images/clearLogo.png" alt="Logo" class="max-w-24 max-h-24 h-[64px]">
-            <!-- <h1 class="text-white -ml-2 font-semibold">nextup</h1> -->
         </a>
-        <!-- <div class="flex grow justify-end items-center pr-[5vw]">
-            <a href="#" onclick="">
-                <img src="./images/add.png" alt="Add" class="max-w-12 max-h-12 h-[10vh]">
-            </a>
-        </div> -->
         <div>
-            <!-- <img src="./images/account-filled.svg" alt="profile-picture" class="h-[32px]"> -->
+
         </div>
     </header>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const eggLink = document.getElementById('eggLink');
             let holdTimer;
 
-            eggLink.addEventListener('mousedown', function() {
-                holdTimer = setTimeout(function() {
+            eggLink.addEventListener('mousedown', function () {
+                holdTimer = setTimeout(function () {
                     window.location.href = '/egg';
                 }, 3000); // 3000 milliseconds = 3 seconds
             });
 
-            eggLink.addEventListener('mouseup', function() {
+            eggLink.addEventListener('mouseup', function () {
                 clearTimeout(holdTimer);
             });
 
-            eggLink.addEventListener('mouseleave', function() {
+            eggLink.addEventListener('mouseleave', function () {
                 clearTimeout(holdTimer);
             });
 
-            eggLink.addEventListener('touchstart', function() {
-                holdTimer = setTimeout(function() {
+            eggLink.addEventListener('touchstart', function () {
+                holdTimer = setTimeout(function () {
                     window.location.href = '/egg';
                 }, 3000); // 3000 milliseconds = 3 seconds
             });
 
-            eggLink.addEventListener('touchend', function() {
+            eggLink.addEventListener('touchend', function () {
                 clearTimeout(holdTimer);
             });
 
-            eggLink.addEventListener('touchcancel', function() {
+            eggLink.addEventListener('touchcancel', function () {
                 clearTimeout(holdTimer);
             });
         });
     </script>
+
 </html>

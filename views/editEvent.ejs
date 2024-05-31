@@ -1,48 +1,57 @@
 <%- include("templates/headerV2") %>
-<div class="container mx-auto bg-gray text-center">
-    <div class="bg-white p-8">
-    <h1 class="text-3xl font-bold mb-4">Edit Your Activity Idea</h1>
-    <form action="/editEvent?groupId=<%= group._id %>&eventId=<%= event._id %>" method="POST" class="bg-lavender p-6 rounded shadow-inner">
-        <div class="form-group mb-4">
-            <label for="eventTitle" class="block text-gray-700">Activity Title</label>
-            <textarea  id="eventTitle" name="eventTitle" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-light-purple focus:border-transparent transition duration-200 p-2"><%= event.title %></textarea>
+    <div class="container mx-auto bg-gray text-center">
+        <div class="bg-white p-8">
+            <h1 class="text-3xl font-bold mb-4">Edit Your Activity Idea</h1>
+            <form action="/editEvent?groupId=<%= group._id %>&eventId=<%= event._id %>" method="POST"
+                class="bg-lavender p-6 rounded shadow-inner">
+                <div class="form-group mb-4">
+                    <label for="eventTitle" class="block text-gray-700">Activity Title</label>
+                    <textarea id="eventTitle" name="eventTitle"
+                        class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-light-purple focus:border-transparent transition duration-200 p-2"><%= event.title %></textarea>
 
-        </div>
-        <div class="form-group mb-4">
-            <label for="description" class="block text-gray-700">Description</label>
-            <textarea id="description" name="description" rows="4" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-light-purple focus:border-transparent transition duration-200 p-2"><%= event.description %></textarea>
-        </div>
-        <div class="form-group mb-4 flex">
-            <div class="w-32 mr-2">
-                <label for="location" class="block text-gray-700">Location</label>
-                <textarea id="location" name="location" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-light-purple focus:border-transparent transition duration-200 p-2"><%= event.location %></textarea>
-            </div>
-            <div class="w-32 ml-2">
-                <label for="eventTime" class="block text-gray-700">Activity Time</label>
-                <input type="time" id="eventTime" name="eventTime" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-light-purple focus:border-transparent transition duration-200 p-2">
-            </div>
-        </div>
-        <div class="form-group mb-4">
-            <label for="contactInfo" class="block text-gray-700">Contact Information</label>
-            <textarea type="text" id="contactInfo" name="contactInfo"  class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-light-purple focus:border-transparent transition duration-200 p-2"><%= event.info %></textarea>
-        </div>
-        <div class="form-group mb-4">
-            <label for="category" class="block text-sm font-medium text-gray-700">Activity Category</label>
-            <select id="category" name="category" class="w-full p-2 mt-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent transition duration-300" required>
-                <option value="" disabled <%= !event.category ? 'selected' : '' %>>Select</option>
-                <option value="Social" <%= event.category === 'Social' ? 'selected' : '' %>>Social</option>
-                <option value="Workshop" <%= event.category === 'Workshop' ? 'selected' : '' %>>Workshop</option>
-                <option value="Meeting" <%= event.category === 'Meeting' ? 'selected' : '' %>>Meeting</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <button type="submit" class="bg-purple hover:bg-purple focus:outline-none focus:ring focus:ring-violet-300 active:bg-violet-700 px-6 py-2 text-base leading-5 rounded-full font-semibold text-white">Save</button>
-        </div>
+                </div>
+                <div class="form-group mb-4">
+                    <label for="description" class="block text-gray-700">Description</label>
+                    <textarea id="description" name="description" rows="4"
+                        class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-light-purple focus:border-transparent transition duration-200 p-2"><%= event.description %></textarea>
+                </div>
+                <div class="form-group mb-4 flex">
+                    <div class="w-32 mr-2">
+                        <label for="location" class="block text-gray-700">Location</label>
+                        <textarea id="location" name="location"
+                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-light-purple focus:border-transparent transition duration-200 p-2"><%= event.location %></textarea>
+                    </div>
+                    <div class="w-32 ml-2">
+                        <label for="eventTime" class="block text-gray-700">Activity Time</label>
+                        <input type="time" id="eventTime" name="eventTime"
+                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-light-purple focus:border-transparent transition duration-200 p-2">
+                    </div>
+                </div>
+                <div class="form-group mb-4">
+                    <label for="contactInfo" class="block text-gray-700">Contact Information</label>
+                    <textarea type="text" id="contactInfo" name="contactInfo"
+                        class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-light-purple focus:border-transparent transition duration-200 p-2"><%= event.info %></textarea>
+                </div>
+                <div class="form-group mb-4">
+                    <label for="category" class="block text-sm font-medium text-gray-700">Activity Category</label>
+                    <select id="category" name="category"
+                        class="w-full p-2 mt-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent transition duration-300"
+                        required>
+                        <option value="" disabled <%=!event.category ? 'selected' : '' %>>Select</option>
+                        <option value="Social" <%=event.category==='Social' ? 'selected' : '' %>>Social</option>
+                        <option value="Workshop" <%=event.category==='Workshop' ? 'selected' : '' %>>Workshop</option>
+                        <option value="Meeting" <%=event.category==='Meeting' ? 'selected' : '' %>>Meeting</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <button type="submit"
+                        class="bg-purple hover:bg-purple focus:outline-none focus:ring focus:ring-violet-300 active:bg-violet-700 px-6 py-2 text-base leading-5 rounded-full font-semibold text-white">Save</button>
+                </div>
 
-    </form>
+            </form>
+        </div>
     </div>
-</div>
-<div id="bottom"></div>
-</div>
-<div class="h-[80px]" onLoad=""></div>
-<%- include("templates/footer") %>
+    <div id="bottom"></div>
+    </div>
+    <div class="h-[80px]" onLoad=""></div>
+    <%- include("templates/footer") %>

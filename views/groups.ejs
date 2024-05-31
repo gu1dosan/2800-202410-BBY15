@@ -1,99 +1,88 @@
-<%- include("templates/header") %> <% if (groups.length === 0) { %>
-<div class="bg-white rounded-lg shadow-md p-4 mb-4 border border-gray-300">
-  <h2 class="text-xl font-semibold mb-2">
-    You are currently not part of any groups.
-  </h2>
-  <p class="text-gray-600">Get started by creating a group!</p>
-</div>
-<% } else { %>
-<!-- Existing group cards -->
-<div class="p-4 mb-20">
-  <% groups.forEach(group => { %>
-  <a href="/group/<%= group._id %>" class="block mb-4">
-    <div
-      class="bg-white rounded-2xl shadow-md flex items-center justify-between overflow-hidden"
-    >
-      <div class="p-4 w-full">
-        <h2 class="text-xl font-semibold mb-2"><%= group.name %></h2>
-        <p class="text-gray-600 font-semibold">Current Activity:</p>
-        <% if (group.selectedEvent) { %>
-        <p><strong>Title:</strong> <%= group.selectedEvent.title || 'tbd' %></p>
-        <p>
-          <strong>Location:</strong> <%= group.selectedEvent.location || 'TBD'
-          %>
-        </p>
-        <% if (group.selectedEvent.info) { %>
-        <p>
-          <strong>Contact Info:</strong> <%= group.selectedEvent.info || 'TBD'
-          %>
-        </p>
-        <% } %> <% if (group.selectedEvent.time) { %>
-        <p><strong>Time:</strong> <%= group.time %></p>
-        <% } else { %>
-        <p><strong>Time:</strong> TBD</p>
-        <% } %> <% } else { %>
-        <p>No event selected yet</p>
-        <% } %>
-      </div>
-      <span class="material-symbols-rounded m-4 text-purple">
-        arrow_forward_ios
-      </span>
+<%- include("templates/header") %>
+  <% if (groups.length===0) { %>
+    <div class="bg-white rounded-lg shadow-md p-4 mb-4 border border-gray-300">
+      <h2 class="text-xl font-semibold mb-2">
+        You are currently not part of any groups.
+      </h2>
+      <p class="text-gray-600">Get started by creating a group!</p>
     </div>
-  </a>
-  <% }); %>
-</div>
-<% } %>
+    <% } else { %>
+      <!-- Existing group cards -->
+      <div class="p-4 mb-20">
+        <% groups.forEach(group=> { %>
+          <a href="/group/<%= group._id %>" class="block mb-4">
+            <div class="bg-white rounded-2xl shadow-md flex items-center justify-between overflow-hidden">
+              <div class="p-4 w-full">
+                <h2 class="text-xl font-semibold mb-2">
+                  <%= group.name %>
+                </h2>
+                <p class="text-gray-600 font-semibold">Current Activity:</p>
+                <% if (group.selectedEvent) { %>
+                  <p><strong>Title:</strong>
+                    <%= group.selectedEvent.title || 'tbd' %>
+                  </p>
+                  <p>
+                    <strong>Location:</strong>
+                    <%= group.selectedEvent.location || 'TBD' %>
+                  </p>
+                  <% if (group.selectedEvent.info) { %>
+                    <p>
+                      <strong>Contact Info:</strong>
+                      <%= group.selectedEvent.info || 'TBD' %>
+                    </p>
+                    <% } %>
+                      <% if (group.selectedEvent.time) { %>
+                        <p><strong>Time:</strong>
+                          <%= group.time %>
+                        </p>
+                        <% } else { %>
+                          <p><strong>Time:</strong> TBD</p>
+                          <% } %>
+                            <% } else { %>
+                              <p>No event selected yet</p>
+                              <% } %>
+              </div>
+              <span class="material-symbols-rounded m-4 text-purple">
+                arrow_forward_ios
+              </span>
+            </div>
+          </a>
+          <% }); %>
+      </div>
+      <% } %>
 
-<div class="flex justify-center items-center mt-8 mb-8">
-  <button
-    onclick="openPopup()"
-    class="h-14 w-14 shadow-lg rounded-[50%] text-xl fixed bottom-[100px] right-[16px]"
-  >
-    ➕
-  </button>
-</div>
-<div
-  id="popup"
-  class="hidden fixed top-0 left-0 w-full h-full bg-gray-800 bg-opacity-75 flex justify-center items-center"
->
-  <div class="bg-white rounded-lg p-6 relative ml-6 mr-6">
-    <h2 class="text-2xl font-bold mb-4">Create new group</h2>
-    <form id="groupForm" action="/createGroup" method="post">
-      <input
-        type="text"
-        name="name"
-        placeholder="Group Name"
-        class="border border-gray-300 p-2 mb-4 w-full"
-      />
-      <textarea
-        name="emails"
-        placeholder="Enter members separated by commas or semicolons"
-        class="border border-gray-300 p-2 mb-4 w-full"
-      ></textarea>
-      <button
-        type="submit"
-        class="bg-purple hover:bg-purple text-white font-bold py-2 px-4 rounded"
-      >
-        Submit
-      </button>
-    </form>
-    <button
-      onclick="closePopup()"
-      class="absolute top-0 right-0 mt-4 mr-4 text-gray-500 hover:text-gray-700"
-    >
-      &#10005;
-    </button>
-  </div>
-</div>
+        <div class="flex justify-center items-center mt-8 mb-8">
+          <button onclick="openPopup()"
+            class="h-14 w-14 shadow-lg rounded-[50%] text-xl fixed bottom-[100px] right-[16px]">
+            ➕
+          </button>
+        </div>
+        <div id="popup"
+          class="hidden fixed top-0 left-0 w-full h-full bg-gray-800 bg-opacity-75 flex justify-center items-center">
+          <div class="bg-white rounded-lg p-6 relative ml-6 mr-6">
+            <h2 class="text-2xl font-bold mb-4">Create new group</h2>
+            <form id="groupForm" action="/createGroup" method="post">
+              <input type="text" name="name" placeholder="Group Name" class="border border-gray-300 p-2 mb-4 w-full" />
+              <textarea name="emails" placeholder="Enter members separated by commas or semicolons"
+                class="border border-gray-300 p-2 mb-4 w-full"></textarea>
+              <button type="submit" class="bg-purple hover:bg-purple text-white font-bold py-2 px-4 rounded">
+                Submit
+              </button>
+            </form>
+            <button onclick="closePopup()" class="absolute top-0 right-0 mt-4 mr-4 text-gray-500 hover:text-gray-700">
+              &#10005;
+            </button>
+          </div>
+        </div>
 
-<script>
-  function openPopup() {
-    document.getElementById("popup").classList.remove("hidden");
-  }
+        <script>
+          function openPopup() {
+            document.getElementById("popup").classList.remove("hidden");
+          }
 
-  function closePopup() {
-    document.getElementById("popup").classList.add("hidden");
-  }
-</script>
+          function closePopup() {
+            document.getElementById("popup").classList.add("hidden");
+          }
+        </script>
 
-<%- include("templates/footer", {user: user}) %>
+        <%- include("templates/footer", {user: user}) %>
