@@ -1,0 +1,44 @@
+<%- include('templates/headerV2') %>
+
+<!-- Main Content Wrapper with Padding to Accommodate Button Section -->
+<div class="container mx-auto pt-5 pb-20 overflow-y-auto text-center">
+    <h1 class="mb-4 text-3xl font-bold text-center">Upcoming Activities</h1>
+    
+    <!-- Activities Grid Section -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <% selectedEvents.forEach(event => { %>
+            <div class="mx-3 max-w-lg rounded-lg border border-stone bg-white p-4 shadow-lg sm:p-6 lg:p-8 mb-4 transition-opacity text-center relative">
+                <span class="ml-4 shrink-0 rounded-full bg-purple p-2 text-white absolute left-0">
+                    <img src="/images/celebrationunfill.svg" class="h-4 lg:h-6" alt="Calendar">
+                </span>
+                <p class="font-bold text-xl text-purple mb-3"><%= event.title %></p>
+
+                <% if (event.description) { %>
+                    <p class="mb-3">
+                        <span class="block" style="overflow-y: auto; max-height: px;">
+                            <%= event.description %>
+                        </span>
+                    </p>
+                <% } %>
+                <% if (event.location) { %>
+                    <div class="flex items-center justify-center mb-3 mr-5">
+                        <img src="/images/location.svg" class="h-6 lg:h-8" alt="Marker">
+                        <span><%= event.location %></span>
+                    </div>
+                <% } %>
+                <% if (event.time) { %>
+                    <div class="flex items-center justify-center mb-3 mr-5">
+                        <img src="/images/time.svg" class="h-5 lg:h-7 mr-1" alt="Marker">
+                        <span><%= formatDateTime(event.time) %></span>
+                    </div>
+                <% } %>
+            </div>
+        <% }); %>
+    </div>
+</div>
+<div id="bottom"></div>
+</div>
+<div class="h-[50px]" onLoad=""></div>
+</div>
+
+<%- include('templates/footer') %>

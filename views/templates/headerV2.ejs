@@ -8,6 +8,7 @@
     <link rel="icon" type="image" href="/public/images/favicon.png" />
     <link href="/styles/output.css" rel="stylesheet">
     <link href="/styles/styles.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" />
     <script type="text/javascript">
         document.querySelector('html').classList.add("hidden");
         window.addEventListener('load', (e) => {
@@ -17,7 +18,7 @@
 </head>
 <body class="overflow-auto">
     <header class=" bg-purple sticky top-0 w-full h-[10vh] flex flex-row items-center justify-between">
-        <a href="#" onclick=<%= locals.backButton ? 'location.href=\"'+backButton+'\"' : 'window.history.back()'%>>
+        <a onclick=<%= locals.backButton ? 'location.href=\"'+backButton+'\"' : 'window.history.back()'%>>
             <img src="/images/backButton.png" alt="BackButton" class="m-2 h-[32px]">
         </a>
         <!-- add onclick for logo -->
@@ -45,32 +46,35 @@
             const eggLink = document.getElementById('eggLink');
             let holdTimer;
 
-            eggLink.addEventListener('mousedown', function() {
-                holdTimer = setTimeout(function() {
-                    window.location.href = '/egg';
-                }, 1000); // 1000 milliseconds = 1 seconds
-            });
+            if(eggLink){
+                eggLink.addEventListener('mousedown', function() {
+                    holdTimer = setTimeout(function() {
+                        window.location.href = '/egg';
+                    }, 1000); // 1000 milliseconds = 1 seconds
+                });
 
-            eggLink.addEventListener('mouseup', function() {
-                clearTimeout(holdTimer);
-            });
+                eggLink.addEventListener('mouseup', function() {
+                    clearTimeout(holdTimer);
+                });
 
-            eggLink.addEventListener('mouseleave', function() {
-                clearTimeout(holdTimer);
-            });
+                eggLink.addEventListener('mouseleave', function() {
+                    clearTimeout(holdTimer);
+                });
 
-            eggLink.addEventListener('touchstart', function() {
-                holdTimer = setTimeout(function() {
-                    window.location.href = '/egg';
-                }, 1000); // 1000 milliseconds = 1 seconds
-            });
+                eggLink.addEventListener('touchstart', function() {
+                    holdTimer = setTimeout(function() {
+                        window.location.href = '/egg';
+                    }, 1000); // 1000 milliseconds = 1 seconds
+                });
 
-            eggLink.addEventListener('touchend', function() {
-                clearTimeout(holdTimer);
-            });
+                eggLink.addEventListener('touchend', function() {
+                    clearTimeout(holdTimer);
+                });
 
-            eggLink.addEventListener('touchcancel', function() {
-                clearTimeout(holdTimer);
-            });
+                eggLink.addEventListener('touchcancel', function() {
+                    clearTimeout(holdTimer);
+                });
+            }
+            
         });
     </script>
