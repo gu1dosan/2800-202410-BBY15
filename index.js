@@ -1634,23 +1634,19 @@ app.get("/editEvent", sessionValidation, async (req, res) => {
 app.post("/editEvent", sessionValidation, async (req, res) => {
   const groupId = req.query.groupId;
   const eventId = req.query.eventId;
-  const newTitle = req.body.eventTitle.trim();
-  const newDescription = req.body.description.trim();
+  const updatedTitle = req.body.eventTitle.trim();
+  const updatedDescription = req.body.description.trim();
   const newLocation = req.body.location.trim();
-  const newInfo = req.body.contactInfo.trim();
+  const updatedInfo = req.body.contactInfo.trim();
   const newCategory = req.body.category;
   const newTime = req.body.eventTime;
 
   const group = await groupCollection.findOne({ _id: new ObjectId(groupId) });
   const event = group.events.find((event) => event._id.toString() === eventId);
-
-  const updatedTitle = newTitle === "" ? event.title : newTitle;
-  const updatedDescription =
-    newDescription === "" ? event.description : newDescription;
-  const updatedLocation = newLocation === "" ? event.location : newLocation;
-  const updatedInfo = newInfo === "" ? event.info : newInfo;
-  const updatedCategory = newCategory === "" ? event.category : newCategory;
-  const updatedTime = newTime === "" ? event.time : newTime;
+  
+  const updatedLocation = newLocation;
+  const updatedCategory = newCategory;
+  const updatedTime = newTime;
 
   const schema = Joi.object({
     title: Joi.string().max(50).allow(""),

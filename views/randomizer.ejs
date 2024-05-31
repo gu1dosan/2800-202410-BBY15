@@ -9,9 +9,9 @@
         <h2 class="text-center text-2xl mb-4">Selected Event</h2>
         <div class="text-center">
             <p><strong>Title:</strong> <span id="eventTitle"></span></p>
-            <p><strong>Description:</strong> <span id="eventDescription"></span></p>
-            <p><strong>Location:</strong> <span id="eventLocation"></span></p>
-            <p><strong>Contact Info:</strong> <span id="eventInfo"></span></p>
+            <p id="descriptionParagraph"><strong>Description:</strong> <span id="eventDescription"></span></p>
+            <p id="locationParagraph"><strong>Location:</strong> <span id="eventLocation"></span></p>
+            <p id="infoParagraph"><strong>Contact Info:</strong> <span id="eventInfo"></span></p>
             <p><strong>Category:</strong> <span id="eventCategory"></span></p>
             <p><strong>Time:</strong> <span id="eventTime" id="eventTimeDisplay"></span></p>
         </div>
@@ -94,6 +94,22 @@
 
     function goBack() {
         window.location.href = `/group/<%= groupId %>`;
+    }
+
+    window.onload = function() {
+        var description = document.getElementById('eventDescription');
+        var location = document.getElementById('eventLocation');
+        var info = document.getElementById('eventInfo');
+
+        if (!description.textContent.trim()) {
+            document.getElementById('descriptionParagraph').style.display = 'none';
+        }
+        if (!location.textContent.trim()) {
+            document.getElementById('locationParagraph').style.display = 'none';
+        }
+        if (!info.textContent.trim()) {
+            document.getElementById('infoParagraph').style.display = 'none';
+        }
     }
 </script>
 

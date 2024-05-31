@@ -19,11 +19,13 @@
         <% if (group.selectedEvent) { %>
         <p><strong>Title:</strong> <%= group.selectedEvent.title || 'tbd' %></p>
         <p>
-          <strong>Location:</strong> <%= group.selectedEvent.location || 'tbd'
+          <strong>Location:</strong> <%= group.selectedEvent.location || 'TBD'
           %>
         </p>
-        <p><strong>Info:</strong> <%= group.selectedEvent.info || 'tbd' %></p>
-        <p><strong>Time:</strong> <%= formatDateTime(group.selectedEvent.time) || 'tbd' %></p>
+        <% if (group.selectedEvent.info) { %>
+        <p><strong>Contact Info:</strong> <%= group.selectedEvent.info || 'TBD' %></p>
+        <% } %>
+        <p><strong>Time:</strong> <%= formatDateTime(group.selectedEvent.time) || 'TBD' %></p>
         <% } else { %>
         <p>No event selected yet</p>
         <% } %>

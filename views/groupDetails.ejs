@@ -26,8 +26,10 @@
                                 <%= group.selectedEvent ? group.selectedEvent.title : "TBD" %>
                             </span>
                         </div>
-                        <p class="text-base text-gray-700"><strong>Location:</strong> <%= group.selectedEvent.location %></p>
-                        <p class="text-base text-gray-700"><strong>Info:</strong> <%= group.selectedEvent.info %></p>
+                            <p class="text-base text-gray-700"><strong>Location:</strong> <%= group.selectedEvent.location || 'TBD' %></p>
+                        <% if (group.selectedEvent.info) { %>
+                            <p class="text-base text-gray-700"><strong>Contact Info:</strong> <%= group.selectedEvent.info %></p>
+                        <% } %>
                         <p class="text-base text-gray-700"><strong>Category:</strong> <%= group.selectedEvent.category %></p>
                         <p class="text-base text-gray-700"><strong>Time:</strong>  <%= formatDateTime(group.selectedEvent.time) %></p>
                     <% } else { %>
