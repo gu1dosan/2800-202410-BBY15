@@ -1779,7 +1779,7 @@ app.post("/deleteEvent", sessionValidation, async (req, res) => {
 
       const notification = {
         _id: new ObjectId(),
-        message: `The chosen activity '${title}' has been removed in ${groupBeforeUpdate.name}.`,
+        message: `The chosen activity has been removed in ${groupBeforeUpdate.name}.`,
         groupId: groupId,
         read: false,
         type: "randomizer",
