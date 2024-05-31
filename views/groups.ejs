@@ -23,14 +23,15 @@
           %>
         </p>
         <% if (group.selectedEvent.info) { %>
-        <p><strong>Contact Info:</strong> <%= group.selectedEvent.info || 'TBD' %></p>
-        <% } %>
-        <% if (group.selectedEvent.time) { %>
-          <p><strong>Time:</strong> <%= formatDateTime(group.selectedEvent.time) %></p>
-      <% } else { %>
-          <p><strong>Time:</strong> TBD</p>
-      <% } %>
+        <p>
+          <strong>Contact Info:</strong> <%= group.selectedEvent.info || 'TBD'
+          %>
+        </p>
+        <% } %> <% if (group.selectedEvent.time) { %>
+        <p><strong>Time:</strong> <%= group.time %></p>
         <% } else { %>
+        <p><strong>Time:</strong> TBD</p>
+        <% } %> <% } else { %>
         <p>No event selected yet</p>
         <% } %>
       </div>

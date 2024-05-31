@@ -599,35 +599,40 @@ app.get("/groups", sessionValidation, async (req, res) => {
       .toArray();
 
     const formatTime = (timeObject) => {
-      if (!timeObject || !timeObject.start) {
+      // using method from selectEvent
+      if (
+        typeof timeObject === "undefined" ||
+        timeObject === "" ||
+        timeObject === null
+      ) {
         return "No time(s) chosen.";
+      } else if (timeObject && timeObject.start) {
+        const date = new Date(timeObject.start);
+        const formattedTime = date.toLocaleString("en-US", {
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+        const formattedDate = date.toLocaleString("en-US", {
+          weekday: "long",
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        });
+        return `${formattedTime}, ${formattedDate}`;
+      } else {
+        return null;
       }
-
-      const startDate = new Date(timeObject.start);
-      const formattedStartTime = startDate.toLocaleString("en-US", {
-        hour: "2-digit",
-        minute: "2-digit",
-      });
-      const formattedStartDate = startDate.toLocaleString("en-US", {
-        weekday: "long",
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      });
-
-      return `${formattedStartTime}, ${formattedStartDate}`;
     };
 
-    // groups.forEach((group) => {
-    //   group.time = formatTime(group.time);
-    // });
+    groups.forEach((group) => {
+      group.time = formatTime(group.time);
+    });
 
     // Render groups page and pass the groups data to the template
     res.render("groups", {
       session: req.session,
       groups: groups,
       user,
-      formatDateTime,
     });
   } catch (error) {
     console.error("Error fetching groups:", error);
