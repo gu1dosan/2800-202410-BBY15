@@ -1503,17 +1503,15 @@ app.post("/selectEvent", sessionValidation, async (req, res) => {
 });
 
 app.get("/notifications", sessionValidation, async (req, res) => {
+  const currentUserEmail = req.session.email;
+
+  const user = await userCollection.findOne({ email: currentUserEmail });
 
   if (!user.notifications) {
     return res
       .status(400)
       .render("errorMessage", { msg: "You currently have no notifications." });
   }
-
-
-  const currentUserEmail = req.session.email;
-
-  const user = await userCollection.findOne({ email: currentUserEmail });
 
   const userId = user._id;
 
