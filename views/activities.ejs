@@ -13,26 +13,32 @@
                 </span>
                 <p class="font-bold text-xl text-purple mb-3"><%= event.title %></p>
 
-                <p class="mb-3">
-                    <span class="block" style="overflow-y: auto; max-height: px;">
-                        <%= event.description %>
-                    </span>
-                </p>
-                <div class="flex items-center justify-center mb-3">
-                    <img src="/images/location.svg" class="h-6 lg:h-8" alt="Marker">
-                    <span><%= event.location %></span>
-                </div>
-                <div class="flex items-center justify-center mb-3">
-                    <img src="/images/time.svg" class="h-5 lg:h-7" alt="Marker">
-                    <span><%= formatDateTime(event.time) %></span>
-                </div>
+                <% if (event.description) { %>
+                    <p class="mb-3">
+                        <span class="block" style="overflow-y: auto; max-height: px;">
+                            <%= event.description %>
+                        </span>
+                    </p>
+                <% } %>
+                <% if (event.location) { %>
+                    <div class="flex items-center justify-center mb-3 mr-5">
+                        <img src="/images/location.svg" class="h-6 lg:h-8" alt="Marker">
+                        <span><%= event.location %></span>
+                    </div>
+                <% } %>
+                <% if (event.time) { %>
+                    <div class="flex items-center justify-center mb-3 mr-5">
+                        <img src="/images/time.svg" class="h-5 lg:h-7 mr-1" alt="Marker">
+                        <span><%= formatDateTime(event.time) %></span>
+                    </div>
+                <% } %>
             </div>
         <% }); %>
     </div>
 </div>
 <div id="bottom"></div>
 </div>
-<div class="h-[80px]" onLoad=""></div>
+<div class="h-[50px]" onLoad=""></div>
 </div>
 
 <%- include('templates/footer') %>

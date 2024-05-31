@@ -29,3 +29,7 @@ html {
 .disabled-button {
     background-color: gray !important;
 }
+
+header {
+    z-index: 1000;
+}
