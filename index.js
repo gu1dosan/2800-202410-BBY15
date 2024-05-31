@@ -618,9 +618,9 @@ app.get("/groups", sessionValidation, async (req, res) => {
       return `${formattedStartTime}, ${formattedStartDate}`;
     };
 
-    groups.forEach((group) => {
-      group.time = formatTime(group.time);
-    });
+    // groups.forEach((group) => {
+    //   group.time = formatTime(group.time);
+    // });
 
     // Render groups page and pass the groups data to the template
     res.render("groups", {
@@ -676,6 +676,7 @@ app.post("/createGroup", sessionValidation, async (req, res) => {
       activities: [], // Initialize activities as an empty array
       events: [], // Initialize events as an empty array
       messages: [], // Initialize messages as an empty array
+      calendar: [],
     };
 
     // Insert the new group document into the groups collection
@@ -1643,7 +1644,7 @@ app.post("/editEvent", sessionValidation, async (req, res) => {
 
   const group = await groupCollection.findOne({ _id: new ObjectId(groupId) });
   const event = group.events.find((event) => event._id.toString() === eventId);
-  
+
   const updatedLocation = newLocation;
   const updatedCategory = newCategory;
   const updatedTime = newTime;

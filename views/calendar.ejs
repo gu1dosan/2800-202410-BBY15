@@ -18,6 +18,8 @@
         .calendar-container {
             height: calc(100vh - 10vh - 50px); 
             padding: 10px;
+            overflow-y: auto; /* Enable vertical scrolling */
+            touch-action: pan-y; /* Allow vertical panning */
         }
         #calendar {
             height: 100%;
@@ -42,6 +44,26 @@
             background-color: white;
             color: black;
         }
+        @media (max-width: 768px) {
+            .calendar-container {
+                height: calc(100vh - 20vh - 50px); 
+                padding: 5px;
+            }
+            .fc .fc-timegrid-slot-label, 
+            .fc .fc-timegrid-slot-lane {
+                font-size: 0.8rem;
+            }
+            .fc .fc-toolbar {
+                flex-wrap: wrap;
+            }
+            .fc .fc-toolbar-title {
+                font-size: 1rem;
+            }
+            .fc .fc-button {
+                font-size: 0.8rem;
+                padding: 5px;
+            }
+        }
     </style>
     <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -62,7 +84,7 @@
             var calendar = new FullCalendar.Calendar(calendarEl, {
                 initialView: 'timeGridWeek',
                 selectable: true,
-                longPressDelay: 1,
+                longPressDelay: 300, 
                 headerToolbar: {
                     left: 'today',
                     center: 'title',
@@ -74,7 +96,6 @@
                         event.end.getTime() === info.end.getTime()
                     );
                     if (selectedEvent) {
-                        // Check if the selected event is part of initial times
                         var isInitialTime = initialTimestamps.some(ts => 
                             new Date(ts.start).getTime() === info.start.getTime() && new Date(ts.end).getTime() === info.end.getTime()
                         );
@@ -122,7 +143,6 @@
         document.getElementById('submit-btn').addEventListener('click', function() {
             var groupId = "<%= group._id %>";
             
-            // Combine initialTimestamps with selectedTimestamps for submission
             var combinedTimestamps = selectedTimestamps.concat(initialTimestamps.map(ts => ({ start: new Date(ts.start).toISOString(), end: new Date(ts.end).toISOString() })));
 
             console.log("Selected timestamps before sending:", combinedTimestamps);
@@ -133,7 +153,7 @@
                 contentType: 'application/json',
                 success: function(response) {
                     alert('Timestamps saved successfully!');
-                    window.location.href = `/group/${groupId}`; // Redirect to /groups after successful save
+                    window.location.href = `/group/${groupId}`; 
                 },
                 error: function(error) {
                     alert('Please select or unselect a time');
